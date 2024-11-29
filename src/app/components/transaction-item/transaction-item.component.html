@@ -1,0 +1,23 @@
+<div class="transaction-item">
+  <div class="transaction-header">
+    <span class="transaction-date">{{ item.date }}</span>
+    <span
+      class="transaction-type"
+      [ngClass]="{
+        income: item.transactionType === 'income',
+        expense: item.transactionType === 'expense'
+      }"
+    >
+      {{ item.transactionType | titlecase }}
+    </span>
+  </div>
+  <div class="transaction-details">
+    <h3 class="transaction-description">{{ item.description }}</h3>
+    <div class="transaction-info">
+      <span class="transaction-category">{{ item.category }}</span>
+      <span class="transaction-amount">
+        {{ item.amount | currency : "USD" : "symbol" : "1.2-2" }}
+      </span>
+    </div>
+  </div>
+</div>

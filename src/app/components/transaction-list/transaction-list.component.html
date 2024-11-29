@@ -1,0 +1,5 @@
+<div class="flex flex-col">
+  @for (item of transactions; track $index) {
+    <app-transaction-item [item]="item" />
+  }
+</div>

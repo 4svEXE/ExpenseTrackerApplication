@@ -1,5 +1,6 @@
 import { Categories } from '../db/Categories';
 import { TransactionCategory } from '../types/TransactionCategory';
+import { TransactionType } from '../types/TransactionType';
 import { LocalStorageService } from './local-storage.service';
 import { Injectable } from '@angular/core';
 
@@ -8,7 +9,6 @@ import { Injectable } from '@angular/core';
 })
 export class CategoryService {
   private readonly StorageKey = 'Categories';
-  categories: TransactionCategory[] = Categories as TransactionCategory[];
 
   constructor(private localStorageService: LocalStorageService) {}
 
@@ -20,8 +20,20 @@ export class CategoryService {
     return this.initCategories();
   }
 
+
   initCategories(): TransactionCategory[] {
-    this.localStorageService.set(this.StorageKey, this.categories);
+    const categories: TransactionCategory[] = Categories as TransactionCategory[];
+
+    this.localStorageService.set(this.StorageKey, categories);
     return this.localStorageService.get(this.StorageKey);
+  }
+
+
+  getCategoryByType(type: TransactionType): TransactionCategory[] {
+    const categories: TransactionCategory[] = this.getCategories();
+
+    return categories.filter(
+      (category) => category.transactionType === type
+    );
   }
 }

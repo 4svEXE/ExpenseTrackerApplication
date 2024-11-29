@@ -1,0 +1,33 @@
+<form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+  <div *ngIf="transactionForm.get('description')?.touched" class="error">
+    <p class="error-message" *ngIf="transactionForm.get('description')?.errors">
+      Check inputs
+    </p>
+  </div>
+
+  <div class="form-group">
+    <label for="amount">Amount</label>
+    <input
+      id="amount"
+      type="number"
+      formControlName="amount"
+      class="form-control"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <input
+      id="description"
+      type="text"
+      formControlName="description"
+      class="form-control"
+    />
+  </div>
+
+  <div class="keypad">
+    <button (click)="clearAmount()">C</button>
+    <button (click)="deleteLast()">←</button>
+    <button type="submit" [disabled]="transactionForm.invalid">OK</button>
+  </div>
+</form>

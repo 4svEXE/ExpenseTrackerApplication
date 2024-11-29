@@ -1,1 +1,12 @@
-<p>categories works!</p>
+<div class="flex flex-row p-2 gap-4">
+  @for (category of categories; track $index) {
+  <div
+    class="category-item"
+    (click)="onSelectCategory(category)"
+    [class.selected]="isSelectedCategory(category)"
+  >
+    <img [src]="category.image" [alt]="category.name" />
+    <span>{{ category.name }}</span>
+  </div>
+  }
+</div>

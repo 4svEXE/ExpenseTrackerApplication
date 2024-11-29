@@ -19,7 +19,7 @@ export const routes: Routes = [
   {
     path: 'new-transaction/categories/:type',
     loadComponent: () =>
-      import('./components/categories/categories.component').then((m) => m.CategoriesComponent),
+      import('./pages/new-transaction/new-transaction.component').then((m) => m.NewTransactionComponent),
   },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },

@@ -1,4 +1,4 @@
-import { TransactionType } from "./transactionType";
+import { TransactionType } from "./TransactionType";
 
 export interface TransactionCategory {
   name: string;
