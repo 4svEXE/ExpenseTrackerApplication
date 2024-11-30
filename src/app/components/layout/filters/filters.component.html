@@ -1,0 +1,37 @@
+<section class="flex justify-between items-center p-2">
+  <!-- випадаючий список фільтр за категоріями  -->
+  <div class="flex items-center">
+    <div class="mr-2">
+      <select
+        class="select select-bordered w-full max-w-xs"
+        (change)="onCategoryChange($event)"
+      >
+        <option selected value="">all</option>
+        @for (category of categories; track $index) {
+        <option [value]="category.name">
+          {{ category.name }}
+        </option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- випадаючий список фільтер за типом транзакції -->
+  <div class="flex items-center">
+    <div class="mr-2">
+      <select
+        class="select select-bordered w-full max-w-xs"
+        (change)="onTypeChange($event)"
+      >
+        @for (type of transactionTypes; track $index) {
+        <option
+          [selected]="type.value === transactionType"
+          [value]="type.value"
+        >
+          {{ type.label }}
+        </option>
+        }
+      </select>
+    </div>
+  </div>
+</section>

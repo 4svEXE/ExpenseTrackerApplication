@@ -29,8 +29,12 @@ export class CategoryService {
   }
 
 
-  getCategoryByType(type: TransactionType): TransactionCategory[] {
+  getCategoryByType(type: TransactionType | ''): TransactionCategory[] {
     const categories: TransactionCategory[] = this.getCategories();
+
+    if(type === '') {
+      return categories;
+    }
 
     return categories.filter(
       (category) => category.transactionType === type

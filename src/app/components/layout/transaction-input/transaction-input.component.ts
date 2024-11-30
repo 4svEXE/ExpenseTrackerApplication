@@ -61,7 +61,7 @@ export class TransactionInputComponent implements OnInit {
 
   onSubmit(): void {
     if (this.transactionForm.valid) {
-      this.transactionService.setTransaction({
+      this.transactionService.addTransaction({
         ...this.transaction,
         ...this.transactionForm.value,
         date: new Date().toISOString()

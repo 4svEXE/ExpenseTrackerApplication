@@ -3,23 +3,22 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from './local-storage.service';
 import { Transaction } from '../types/Transaction';
 import { Transactions } from '../db/Transactions';
+import { TransactionType } from '../types/TransactionType';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TransactionService {
   private readonly StorageKey = 'Transactions';
-  private transactionsSubject: BehaviorSubject<Transaction[]> = new BehaviorSubject<Transaction[]>([]);
-  private transactionSubject = new BehaviorSubject<Transaction >(
-    {
-      amount: 0,
-      category: '',
-      date: '',
-      description: '',
-      transactionType: 'income',
-    }
-  );
-
+  private transactionsSubject: BehaviorSubject<Transaction[]> =
+    new BehaviorSubject<Transaction[]>([]);
+  private transactionSubject = new BehaviorSubject<Transaction>({
+    amount: 0,
+    category: '',
+    date: '',
+    description: '',
+    transactionType: 'income',
+  });
 
   constructor(private localStorageService: LocalStorageService) {
     // Ініціалізація транзакцій при створенні сервісу
@@ -34,6 +33,43 @@ export class TransactionService {
     }
 
     return this.initTransactions();
+  }
+
+  setTransactionsByType(type: TransactionType | '' ): void {
+    this.initTransactions();
+
+    if (type === '') {
+      this.transactionsSubject.next(this.getTransactions());
+      return;
+    }
+
+    const transactions = this.transactionsSubject.value;
+    const filteredTransactions = transactions.filter(
+      (transaction) => transaction.transactionType === type
+    );
+    this.transactionsSubject.next(filteredTransactions);
+  }
+
+  setTransactionByCategory(category: string): void {
+    this.initTransactions();
+
+    if (category === '') {
+      this.transactionsSubject.next(this.getTransactions());
+      return;
+    }
+
+    const transactions = this.transactionsSubject.value;
+    const filteredTransactions = transactions.filter(
+      (transaction) => transaction.category === category
+    );
+    this.transactionsSubject.next(filteredTransactions);
+  }
+
+  getTansactionsByCategory(category: string): Transaction[] {
+    const transactions = this.transactionsSubject.value;
+    return transactions.filter(
+      (transaction) => transaction.category === category
+    );
   }
 
   initTransactions(): Transaction[] {
@@ -53,6 +89,12 @@ export class TransactionService {
   addTransaction(newTransaction: Transaction): void {
     const currentTransactions = this.transactionsSubject.value;
     const updatedTransactions = [...currentTransactions, newTransaction];
+
+    console.log(
+      'addTransaction, currentTransactions :>> ',
+      currentTransactions
+    );
+
     this.localStorageService.set(this.StorageKey, updatedTransactions);
     this.transactionsSubject.next(updatedTransactions);
   }
@@ -60,17 +102,17 @@ export class TransactionService {
   // Метод для видалення транзакції за індексом
   deleteTransaction(index: number): void {
     const currentTransactions = this.transactionsSubject.value;
-    const updatedTransactions = currentTransactions.filter((_, i) => i !== index);
+    const updatedTransactions = currentTransactions.filter(
+      (_, i) => i !== index
+    );
     this.localStorageService.set(this.StorageKey, updatedTransactions);
     this.transactionsSubject.next(updatedTransactions);
   }
 
-
-  // Метод для отримання суб'єкту транзакції
+  // Методи суб'єкту транзакції
 
   setTransaction(transaction: Transaction): void {
     this.transactionSubject.next(transaction);
-    this.addTransaction(transaction);
   }
 
   get transaction$() {
