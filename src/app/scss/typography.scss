@@ -1,0 +1,115 @@
+@use "./variables" as *;
+
+// * {
+//   font-family: "Jura", sans-serif;
+//   position: relative;
+//   z-index: 1;
+// }
+
+// h1 {
+//   font-family: Nunito Sans;
+//   font-size: 72px;
+//   font-weight: 700;
+//   line-height: 72px;
+//   letter-spacing: -0.04em;
+//   text-align: left;
+//   color: #FFFFFF;
+
+//   @media (max-width: $media-tablet) {
+//     display: inline;
+//     font-size: 42px;
+//     line-height: 42px;
+//   }
+// }
+
+// h2 {
+//   font-family: Nunito Sans;
+//   font-size: 48px;
+//   font-weight: 700;
+//   line-height: 57.6px;
+//   letter-spacing: -0.01em;
+//   text-align: left;
+//   color: #1C1B1B;
+
+
+//   @media (max-width: $media-tablet) {
+//     display: inline;
+//     text-align: center;
+//     font-size: 38px;
+//   }
+
+//   span {
+//     font-family: Nunito Sans;
+//     // font-size: 48px;
+//     font-weight: 700;
+//     line-height: 57.6px;
+//     letter-spacing: -0.01em;
+//     text-align: left;
+//     color: #FF6A00;
+//   }
+// }
+
+// h3 {
+//   font-family: Nunito Sans;
+//   font-size: 24px;
+//   font-weight: 600;
+//   line-height: 36px;
+//   text-align: left;
+//   color: #FFFFFF;
+
+//   @media (max-width: $media-tablet) {
+//     width: 100%;
+//     text-align: center;
+//     font-size: 32px;
+//   }
+// }
+
+// h4 {
+//   font-family: Nunito Sans;
+//   font-size: 32px;
+//   font-weight: 600;
+//   line-height: 36px;
+//   text-align: left;
+//   color: #FFFFFF;
+
+//   @media (max-width: $media-tablet) {
+//     font-size: 28px;
+//     width: 100%;
+//     text-align: center;
+//   }
+// }
+
+// h6 {
+//   font-weight: 600;
+//   font-size: 20px;
+//   line-height: 1.1;
+// }
+
+// p {
+//   font-family: Nunito Sans;
+//   font-size: 24px;
+//   font-weight: 400;
+//   line-height: 36px;
+//   letter-spacing: -0.02em;
+//   text-align: left;
+
+//   @media (max-width: $media-tablet) {
+//     font-size: 20px;
+//     line-height: 22px;
+//   }
+
+//   strong {
+//     font-family: Nunito Sans;
+//     font-size: 24px;
+//     font-weight: 400;
+//     line-height: 36px;
+//     text-align: left;
+//     color: #FF6A00;
+//   }
+// }
+
+// .error-message {
+//   color: red;
+//   font-size: 0.875em;
+//   margin-top: 0.25em;
+// }

@@ -1,26 +1,44 @@
 .category-item {
-  max-width: 50px;
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  cursor: pointer;
+  width: 72px;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  text-align: center;
+
+  &:hover {
+    background-color: #f5f5f5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
   &.selected {
-    background-color: red;
+    background-color: #ddd;
+    color: #000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid #000;
   }
 
   img {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     object-fit: cover;
     border-radius: 50%;
-    background-color: gray;
+    border: 2px solid #ddd;
+    transition: border-color 0.2s;
   }
 
   span {
+    width: 100%;
     font-size: 12px;
-    font-weight: 600;
-
+    font-weight: 500;
+    color: #333;
+    margin-top: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

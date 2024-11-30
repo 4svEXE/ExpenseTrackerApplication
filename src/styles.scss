@@ -1,5 +1,6 @@
+@use "app/scss/index" as *;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import "app/scss/forms.scss";

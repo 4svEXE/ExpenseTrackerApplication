@@ -51,6 +51,10 @@ export class TransactionInputComponent implements OnInit {
     this.transactionForm.patchValue({ amount: 0 });
   }
 
+  isValidTransactionCategory(){
+    return this.transaction.category !== ''
+  }
+
   deleteLast(): void {
     const currentAmount = this.transactionForm.get('amount')?.value.toString();
     const newValue = currentAmount.slice(0, -1);

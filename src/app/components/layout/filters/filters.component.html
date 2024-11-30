@@ -1,12 +1,13 @@
-<section class="flex justify-between items-center p-2">
-  <!-- випадаючий список фільтр за категоріями  -->
+<section class="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg shadow-md">
   <div class="flex items-center">
-    <div class="mr-2">
+    <div class="flex items-center gap-2">
+      <label class="block text-gray-700 text-sm font-medium" for="categorySelect">Category</label>
       <select
-        class="select select-bordered w-full max-w-xs"
+        id="categorySelect"
+        class="select select-bordered w-full max-w-xs bg-gray-50 border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-gray-500"
         (change)="onCategoryChange($event)"
       >
-        <option selected value="">all</option>
+        <option selected value="">All</option>
         @for (category of categories; track $index) {
         <option [value]="category.name">
           {{ category.name }}
@@ -16,11 +17,12 @@
     </div>
   </div>
 
-  <!-- випадаючий список фільтер за типом транзакції -->
   <div class="flex items-center">
-    <div class="mr-2">
+    <div class="flex items-center gap-2">
+      <label class="block text-gray-700 text-sm font-medium" for="typeSelect">Type</label>
       <select
-        class="select select-bordered w-full max-w-xs"
+        id="typeSelect"
+        class="select select-bordered w-full max-w-xs bg-gray-50 border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-gray-500"
         (change)="onTypeChange($event)"
       >
         @for (type of transactionTypes; track $index) {

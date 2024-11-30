@@ -27,15 +27,25 @@ export class TransactionService {
   }
 
   getTransactions(): Transaction[] {
-    const storedTransactions = this.localStorageService.get(this.StorageKey);
-    if (storedTransactions) {
-      return storedTransactions;
-    }
+    const storedTransactions = this.sortByDate(
+      this.localStorageService.get(this.StorageKey)
+    );
+
+    if (storedTransactions) return storedTransactions;
 
     return this.initTransactions();
   }
 
-  setTransactionsByType(type: TransactionType | '' ): void {
+  sortByDate(transactions: Transaction[]): Transaction[] {
+    const sortedTransactions = transactions.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+    return sortedTransactions;
+  }
+
+  setTransactionsByType(type: TransactionType | ''): void {
     this.initTransactions();
 
     if (type === '') {
@@ -76,7 +86,7 @@ export class TransactionService {
     const transactions: Transaction[] = Transactions as Transaction[];
 
     this.localStorageService.set(this.StorageKey, transactions);
-    this.transactionsSubject.next(transactions);
+    this.transactionsSubject.next(this.sortByDate(transactions));
     return transactions;
   }
 
@@ -88,23 +98,21 @@ export class TransactionService {
   // Метод для додавання нової транзакції
   addTransaction(newTransaction: Transaction): void {
     const currentTransactions = this.transactionsSubject.value;
-    const updatedTransactions = [...currentTransactions, newTransaction];
+    let updatedTransactions = [...currentTransactions, newTransaction];
 
-    console.log(
-      'addTransaction, currentTransactions :>> ',
-      currentTransactions
-    );
+    updatedTransactions = this.sortByDate(updatedTransactions);
 
     this.localStorageService.set(this.StorageKey, updatedTransactions);
     this.transactionsSubject.next(updatedTransactions);
   }
 
   // Метод для видалення транзакції за індексом
-  deleteTransaction(index: number): void {
+  deleteTransaction(transaction: Transaction): void {
     const currentTransactions = this.transactionsSubject.value;
     const updatedTransactions = currentTransactions.filter(
-      (_, i) => i !== index
+      (item) => item !== transaction
     );
+
     this.localStorageService.set(this.StorageKey, updatedTransactions);
     this.transactionsSubject.next(updatedTransactions);
   }

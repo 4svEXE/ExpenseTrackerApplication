@@ -1,5 +1,10 @@
-<form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
-  <div *ngIf="transactionForm.get('description')?.touched" class="error">
+<form
+  [formGroup]="transactionForm"
+  (ngSubmit)="onSubmit()"
+  class="transaction-input-container"
+  [class.active]="isValidTransactionCategory()"
+>
+  <div *ngIf="transactionForm.get('description')?.touched" class="error-container">
     <p class="error-message" *ngIf="transactionForm.get('description')?.errors">
       Check inputs
     </p>
@@ -12,6 +17,7 @@
       type="number"
       formControlName="amount"
       class="form-control"
+      placeholder="Enter amount"
     />
   </div>
 
@@ -22,12 +28,13 @@
       type="text"
       formControlName="description"
       class="form-control"
+      placeholder="Enter description"
     />
   </div>
 
   <div class="keypad">
-    <button (click)="clearAmount()">C</button>
-    <button (click)="deleteLast()">←</button>
+    <button type="button" (click)="clearAmount()">C</button>
+    <button type="button" (click)="deleteLast()">←</button>
     <button type="submit" [disabled]="transactionForm.invalid">OK</button>
   </div>
 </form>

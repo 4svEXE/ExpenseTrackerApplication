@@ -1,7 +1,8 @@
 <div class="transaction-item">
   <div class="transaction-header">
     <span class="transaction-date">{{ item.date }}</span>
-    <span
+    <div class="flex gap-2">
+      <span
       class="transaction-type"
       [ngClass]="{
         income: item.transactionType === 'income',
@@ -10,6 +11,8 @@
     >
       {{ item.transactionType | titlecase }}
     </span>
+    <button class="delete" (click)="onDelete()">×</button>
+    </div>
   </div>
   <div class="transaction-details">
     <h3 class="transaction-description">{{ item.description }}</h3>
@@ -19,5 +22,6 @@
         {{ item.amount | currency : "USD" : "symbol" : "1.2-2" }}
       </span>
     </div>
+    
   </div>
 </div>

@@ -1,21 +1,26 @@
-<div class="flex flex-col w-full">
-  <div class="flex w-full gap-4">
+<div class="transaction-type-container flex flex-col w-full">
+  <div class="transaction-type-header flex w-full gap-4">
     <a
       [routerLink]="['/new-transaction/categories/income']"
-      routerLinkActive="router-link-active"
-      >income</a
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+      class="button"
     >
-    |
+      + income
+    </a>
     <a
       [routerLink]="['/new-transaction/categories/expense']"
-      routerLinkActive="router-link-active"
-      >expense</a
+      [routerLinkActiveOptions]="{ exact: true }"
+      routerLinkActive="active"
+      class="button"
     >
+      - expense
+    </a>
   </div>
 
-  <div class="flex flex-row flex-wrap">
+  <div class="categories flex flex-row flex-wrap">
     <app-categories />
   </div>
 
-  <app-transaction-input/>
+  <app-transaction-input />
 </div>

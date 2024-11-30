@@ -13,8 +13,7 @@ export const routes: Routes = [
   },
   {
     path: 'new-transaction',
-    loadComponent: () =>
-      import('./pages/new-transaction/new-transaction.component').then((m) => m.NewTransactionComponent),
+    redirectTo: 'new-transaction/categories/income',
   },
   {
     path: 'new-transaction/categories/:type',
