@@ -1,47 +1,25 @@
-import { CategoryService } from './../../../services/category.service';
+import { Transaction } from './../../../types/Transaction';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { TransactionType } from '../../../types/TransactionType';
+import { FilterByTypeComponent } from './filter-by-type/filter-by-type.component';
+import { FilterByCategoryComponent } from './filter-by-category/filter-by-category.component';
 import { TransactionService } from '../../../services/transaction.service';
-import { TransactionCategory } from '../../../types/TransactionCategory';
 
 @Component({
   selector: 'app-filters',
-  imports: [CommonModule],
+  imports: [CommonModule, FilterByTypeComponent, FilterByCategoryComponent],
   templateUrl: './filters.component.html',
   styleUrl: './filters.component.scss',
 })
 export class FiltersComponent {
-  transactionTypes: TransactionTypeOption[] = [
-    { value: '', label: 'All' },
-    { value: 'income', label: 'Income' },
-    { value: 'expense', label: 'Expense' },
-  ];
+  isLAtest = true;
+  constructor(private transactionService: TransactionService) {}
 
-  categories!: TransactionCategory[];
+  sortByDate() {
+    this.isLAtest = !this.isLAtest;
+    let transactions: Transaction[] = this.transactionService.getTransactions();
+    transactions = this.transactionService.sortByDate(transactions, this.isLAtest);
 
-  transactionType: TransactionType | '' = '';
-
-  constructor(
-    private transactionService: TransactionService,
-    private categoryService: CategoryService
-  ) {}
-
-  ngOnInit() {
-    this.categories = this.categoryService.getCategories();
-  }
-
-  onTypeChange(event: any): void {
-    this.transactionType = event.target.value;
-    this.transactionService.setTransactionsByType(this.transactionType);
-
-    this.categories = this.categoryService.getCategoryByType(this.transactionType);
-  }
-
-  onCategoryChange(event: any): void {
-    const category = event.target.value;
-    this.transactionService.setTransactionByCategory(category);
+    this.transactionService.setTransactions(transactions);
   }
 }
-
-type TransactionTypeOption = { value: TransactionType | ''; label: string };

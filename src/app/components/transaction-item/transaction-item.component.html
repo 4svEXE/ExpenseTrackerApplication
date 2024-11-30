@@ -1,6 +1,6 @@
 <div class="transaction-item">
   <div class="transaction-header">
-    <span class="transaction-date">{{ item.date }}</span>
+    <span class="transaction-date">{{ item.date | date: 'dd.MM.yyyy HH:mm' }}</span>
     <div class="flex gap-2">
       <span
       class="transaction-type"
@@ -22,6 +22,5 @@
         {{ item.amount | currency : "USD" : "symbol" : "1.2-2" }}
       </span>
     </div>
-    
   </div>
 </div>

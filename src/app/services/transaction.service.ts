@@ -21,32 +21,39 @@ export class TransactionService {
   });
 
   constructor(private localStorageService: LocalStorageService) {
-    // Ініціалізація транзакцій при створенні сервісу
     const initialTransactions = this.getTransactions();
     this.transactionsSubject.next(initialTransactions);
   }
 
   getTransactions(): Transaction[] {
-    const storedTransactions = this.sortByDate(
-      this.localStorageService.get(this.StorageKey)
-    );
-
-    if (storedTransactions) return storedTransactions;
-
-    return this.initTransactions();
+    try {
+      const storedTransactions = this.localStorageService.get(this.StorageKey);
+      return storedTransactions || [];
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      return []
+    }
   }
 
-  sortByDate(transactions: Transaction[]): Transaction[] {
+  setTransactions(transactions: Transaction[]): void {
+    this.transactionsSubject.next(transactions);
+  }
+
+  sortByDate(transactions: Transaction[], byLatest=true): Transaction[] {
     const sortedTransactions = transactions.sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-      return dateB.getTime() - dateA.getTime();
+
+      if (byLatest) {
+        return dateB.getTime() - dateA.getTime();
+      }
+      return dateA.getTime() - dateB.getTime();
     });
     return sortedTransactions;
   }
 
   setTransactionsByType(type: TransactionType | ''): void {
-    this.initTransactions();
+    this.getTransactions();
 
     if (type === '') {
       this.transactionsSubject.next(this.getTransactions());
@@ -61,7 +68,7 @@ export class TransactionService {
   }
 
   setTransactionByCategory(category: string): void {
-    this.initTransactions();
+    this.getTransactions();
 
     if (category === '') {
       this.transactionsSubject.next(this.getTransactions());
@@ -77,6 +84,7 @@ export class TransactionService {
 
   getTansactionsByCategory(category: string): Transaction[] {
     const transactions = this.transactionsSubject.value;
+    
     return transactions.filter(
       (transaction) => transaction.category === category
     );

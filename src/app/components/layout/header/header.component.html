@@ -2,8 +2,8 @@
   <p>Logo</p>
 
   <div class="amount-box gap-1 md:gap-4">
-    <div class="amount">+ {{ totalAmount$ | async }}</div>
-    <div class="income">- {{ totalIncome$ | async }}</div>
-    <div class="expense">баланс: {{ totalExpense$ | async }}$</div>
+    <div class="expense">- {{ totalExpense$ | async }}</div>
+    <div class="income">+ {{ totalIncome$ | async }}</div>
+    <div class="amount">💸: {{ totalAmount$ | async }}</div>
   </div>
 </header>
