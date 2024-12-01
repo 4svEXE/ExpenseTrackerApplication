@@ -4,9 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --base-href=https://4svexe.github.io/ExpenseTrackerApplication/",
+    "build": "ng build --configuration production",
+    "build:dev": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
-    "deploy": "npx angular-cli-ghpages --dir=dist/expense-tracker-application/browser",
+    "deploy": "ngh --dir=dist/expense-tracker-application",
     "test": "ng test"
   },
   "private": true,

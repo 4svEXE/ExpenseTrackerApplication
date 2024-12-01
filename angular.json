@@ -17,7 +17,6 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "baseHref": "https://4svEXE.github.io/expense-tracker-application/",
             "outputPath": "dist/expense-tracker-application",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -39,6 +38,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "https://4svEXE.github.io/ExpenseTrackerApplication/",
               "budgets": [
                 {
                   "type": "initial",
@@ -54,6 +54,7 @@
               "outputHashing": "all"
             },
             "development": {
+              "baseHref": "/",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
