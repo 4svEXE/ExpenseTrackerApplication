@@ -26,7 +26,14 @@ export interface IncomePlan {
   category: string;
   planAmount: number;
   factAmount: number;
-  isRecurring?: boolean; // monthly
+  isRecurring: boolean; // monthly
+}
+
+export interface WishItem {
+  id: string;
+  name: string;
+  amount: number;
+  category?: string;
 }
 
 export interface ExpensePlan {
@@ -65,6 +72,7 @@ export class FinanceDataService {
   private readonly EXPENSE_PLANS_KEY = 'expensePlans';
   private readonly SUBS_KEY = 'subscriptions';
   private readonly NOTIFIED_GOALS_KEY = 'notifiedGoals';
+  private readonly WISHLIST_KEY = 'wishlist';
 
   private settingsService = inject(SettingsService);
   private ts = inject(TransactionService);
@@ -76,6 +84,7 @@ export class FinanceDataService {
   transactions = signal<Transaction[]>([]);
   incomePlans = signal<IncomePlan[]>([]);
   expensePlans = signal<ExpensePlan[]>([]);
+  wishlist = signal<WishItem[]>([]);
   accounts = signal<AccountBalance[]>([]);
   subscriptions = signal<Subscription[]>([]);
 
@@ -195,11 +204,12 @@ export class FinanceDataService {
     };
 
     this.incomePlans.set(load(this.INCOME_PLANS_KEY, [
-      { id: '1', category: 'Зарплата', planAmount: 80000, factAmount: 0 }
+      { id: '1', category: 'Зарплата', planAmount: 80000, factAmount: 0, isRecurring: true }
     ]));
     this.expensePlans.set(load(this.EXPENSE_PLANS_KEY, [
       { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000, isRecurring: true }
     ]));
+    this.wishlist.set(load(this.WISHLIST_KEY, []));
     this.accounts.set(load(this.ACCOUNTS_KEY, [
       { id: '1', name: 'Картка', balance: 50000, currency: 'UAH', tags: [] }
     ]));
@@ -291,6 +301,7 @@ export class FinanceDataService {
   saveIncomePlans(p: IncomePlan[]) { this.incomePlans.set(p); localStorage.setItem(this.INCOME_PLANS_KEY, JSON.stringify(p)); }
   saveExpensePlans(p: ExpensePlan[]) { this.expensePlans.set(p); localStorage.setItem(this.EXPENSE_PLANS_KEY, JSON.stringify(p)); }
   saveSubscriptions(s: Subscription[]) { this.subscriptions.set(s); localStorage.setItem(this.SUBS_KEY, JSON.stringify(s)); }
+  saveWishlist(w: WishItem[]) { this.wishlist.set(w); localStorage.setItem(this.WISHLIST_KEY, JSON.stringify(w)); }
 
   adjustAccountBalance(id: string, amt: number, type: 'income' | 'expense') {
     const accs = [...this.accounts()];
@@ -306,6 +317,32 @@ export class FinanceDataService {
     const settings = { ...this.userSettings() };
     settings.coins = (settings.coins || 0) + amount;
     this.saveSettings(settings);
+  }
+
+  showPlanPopup = signal(false);
+
+  moveWishToPlan(wish: WishItem) {
+    const currentPlans = [...this.expensePlans()];
+    const newPlan: ExpensePlan = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      category: wish.name,
+      amount: wish.amount,
+      type: 'mandatory',
+      isRecurring: false
+    };
+    this.saveExpensePlans([newPlan, ...currentPlans]);
+    this.saveWishlist(this.wishlist().filter(w => w.id !== wish.id));
+  }
+
+  movePlanToWish(plan: ExpensePlan) {
+    const currentWishes = [...this.wishlist()];
+    const newWish: WishItem = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      name: plan.category,
+      amount: plan.amount
+    };
+    this.saveWishlist([newWish, ...currentWishes]);
+    this.saveExpensePlans(this.expensePlans().filter(p => p.id !== plan.id));
   }
 
   clearAllData() { localStorage.clear(); location.reload(); }

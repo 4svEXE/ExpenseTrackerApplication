@@ -13,6 +13,7 @@ export interface UserSettings {
     notificationTime?: string; // HH:mm
     notificationText?: string;
     gamificationEnabled?: boolean;
+    showPlanPostTransaction?: boolean;
     coins?: number;
 }
 
@@ -35,6 +36,7 @@ export class SettingsService {
         notificationTime: '20:00',
         notificationText: 'Час заповнити витрати! 💸',
         gamificationEnabled: true,
+        showPlanPostTransaction: true,
         coins: 0
     });
 

@@ -138,6 +138,13 @@ export class TransactionInputComponent implements OnInit {
         this.coinService.animate(event.clientX, event.clientY);
       }
 
+      // 5. Show Plan Popup?
+      if (this.financeData.userSettings().showPlanPostTransaction) {
+        setTimeout(() => {
+          this.financeData.showPlanPopup.set(true);
+        }, event ? 1000 : 0);
+      }
+
       localStorage.setItem('lastAccountId', formValue.accountId);
 
       this.transactionForm.reset();
