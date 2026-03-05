@@ -1,0 +1,71 @@
+@use 'variables' as v;
+
+@mixin button-base {
+  display: inline-block;
+  font-family: v.$font-family;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.75;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: v.$border-radius;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@mixin button-variant($background, $hover, $disabled, $text) {
+  background-color: $background;
+  color: $text;
+
+  &:hover {
+    background-color: $hover;
+  }
+
+  &:disabled {
+    background-color: $disabled;
+    color: $text;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($background, 0.3);
+    outline: none;
+  }
+}
+
+.primary-button {
+  @include button-base;
+  @include button-variant(v.$primary-color, v.$primary-hover, v.$primary-disabled, v.$button-text-color);
+}
+
+.secondary-button {
+  @include button-base;
+  @include button-variant(v.$secondary-color, v.$secondary-hover, v.$secondary-disabled, v.$text-secondary-color);
+}
+
+.outline-button {
+  @include button-base;
+  background-color: transparent;
+  border: 1px solid v.$primary-color;
+  color: v.$dark-gray;
+
+  &:hover {
+    background-color: rgba(v.$primary-color, 0.1);
+  }
+
+  &:disabled {
+    border-color: v.$primary-disabled;
+    color: v.$primary-disabled;
+    cursor: not-allowed;
+  }
+}
+
+.active-button {
+  @include button-base;
+  @include button-variant(v.$primary-hover, v.$primary-hover, v.$primary-disabled, v.$button-text-color);
+  border: 1px solid v.$button-text-color;
+}

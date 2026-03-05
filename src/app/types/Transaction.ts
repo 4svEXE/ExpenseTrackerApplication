@@ -7,4 +7,5 @@ export type Transaction = {
   amount: number;
   category: string;
   transactionType: TransactionType;
+  accountId?: string;
 };

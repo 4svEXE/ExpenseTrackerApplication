@@ -1,9 +1,67 @@
-<section class="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg shadow-md">
-  <app-filter-by-category/>
+<!-- Fixed Floating Button for Mobile when Filters are Closed -->
+<button
+  class="md:hidden fixed z-[40] w-10 h-10 rounded-xl  flex items-center justify-center text-slate-700 transition-transform"
+  style="bottom: 50px; right: 20px;" [ngClass]="isFiltersOpen ? 'hidden' : 'flex'" (click)="toggleFilters()">
+  <i class="fa-solid fa-filter text-lg"></i>
+</button>
 
-  <app-filter-by-type/>
+<!-- Main Filters Section -->
+<!-- On desktop, it's just a regular section at the top. On mobile, it becomes a fixed overlay when open. -->
+<section
+  class="flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 p-1 py-3 md:p-6 bg-white/95 md:bg-white/80 backdrop-blur-md border border-slate-100/60 rounded-2xl md:rounded-[2rem] shadow-[0_20px_40px_rgb(0,0,0,0.1)] md:shadow-[0_8px_30px_rgb(0,0,0,0.04)] m-4 md:mt-8 transition-all"
+  [ngClass]="isFiltersOpen ? 'flex fixed inset-x-2 top-[50px] z-[60] mt-0' : 'hidden md:flex'">
 
-  <button class="flex gap-1" (click)="sortByDate()">
-    date {{isLAtest? "⬆":"⬇️"}}
-  </button>
+  <div class="flex items-center justify-between w-full md:w-auto">
+    <div class="flex items-center gap-2 md:gap-3">
+      <div
+        class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-base text-slate-500 shadow-sm border border-slate-100">
+        <i class="fa-solid fa-filter"></i>
+      </div>
+      <h3 class="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Фільтри</h3>
+    </div>
+
+    <!-- Close button for mobile -->
+    <button
+      class="md:hidden w-10 h-10 flex items-center justify-center text-slate-500 bg-slate-50 border border-slate-100 hover:bg-slate-100 rounded-xl transition-colors active:scale-95"
+      (click)="toggleFilters()">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+  </div>
+
+  <div
+    class="flex flex-col- md:flex-row flex-wrap items-stretch md:items-center gap-3 md:gap-4 mt-2 md:mt-0 w-full md:w-auto">
+    <app-filter-by-category class="" />
+    <app-filter-by-type class="" />
+
+    <!-- Month Picker -->
+    <div class="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+      <button (click)="changeMonth(-1)"
+        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm text-slate-500 transition-all">
+        <i class="fa-solid fa-chevron-left text-xs"></i>
+      </button>
+
+      <div class="px-3 min-w-[100px] text-center">
+        <p class="text-[10px] font-bold text-slate-400 uppercase leading-none">{{ currentDate | date:'yyyy' }}</p>
+        <p class="text-sm font-bold text-slate-800 leading-tight capitalize">{{ currentDate | date:'LLLL':'':'uk-UA' }}
+        </p>
+      </div>
+
+      <button (click)="changeMonth(1)"
+        class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm text-slate-500 transition-all">
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+      </button>
+    </div>
+
+    <button
+      class="flex items-center justify-center gap-2 px-2 py-1 rounded-md text-sm font-semibold transition-all active:scale-[0.98] md:mt-0"
+      [ngClass]="isLAtest ? 'bg-neutral-900 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+      (click)="sortByDate()">
+      <i class="fa-solid text-[16px] fa-calendar-day"></i>
+      <i class="fa-solid text-[10px]" [ngClass]="isLAtest ? 'fa-arrow-down' : 'fa-arrow-up'"></i>
+    </button>
+  </div>
 </section>
+
+<!-- Optional Backdrop when open on mobile -->
+<div *ngIf="isFiltersOpen" class="md:hidden fixed inset-0 " (click)="toggleFilters()">
+</div>

@@ -27,9 +27,9 @@ header {
     display: flex;
 
     div {
-      font-size: 0.9rem;
+      font-size: 0.75rem;
       font-weight: 500;
-      padding: 6px 12px;
+      padding: 2px 6px;
       border-radius: 4px;
       background-color: #ffffff;
       border: 1px solid #e0e0e0;
@@ -38,25 +38,28 @@ header {
       display: flex;
       justify-content: center;
       align-items: center;
+      white-space: nowrap;
 
-      &:hover {
-        background-color: #f1f1f1;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      @media (min-width: 640px) {
+        font-size: 0.9rem;
+      }
+
+      @media (min-width: 640px) {
+        padding: 2px 8px;
       }
     }
 
     .amount {
-      color: #388e3c;
-      font-size: 1.1rem;
+      color: #1a1a1a;
       font-weight: 800;
     }
 
     .income {
-      color: #d32f2f;
+      color: #10b981;
     }
 
     .expense {
-      color: #616161;
+      color: #ef4444;
     }
   }
 }

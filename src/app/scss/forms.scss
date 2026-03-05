@@ -1,9 +1,57 @@
-.error-message {
-  color: red;
-  font-size: 0.8rem;
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  background-color: #f8d7da;
-  border: 1px solid red;
+@use 'variables' as v;
+
+@mixin form-group {
+  .form-group {
+    margin-bottom: v.$spacing-large;
+
+    label {
+      display: block;
+      font-size: v.$font-size-small;
+      color: v.$dark-gray;
+      margin-bottom: v.$spacing-small;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: v.$spacing-small v.$spacing-medium;
+      border: 1px solid v.$border-color;
+      border-radius: v.$border-radius;
+      font-size: v.$font-size-base;
+      outline: none;
+
+      &:focus {
+        border-color: v.$primary-color;
+        box-shadow: 0 0 0 2px v.$focus-shadow-color;
+      }
+    }
+  }
+}
+
+@mixin keypad {
+  .keypad {
+    display: flex;
+    justify-content: space-between;
+    gap: v.$spacing-small;
+
+    button {
+      flex: 1;
+      padding: v.$spacing-medium;
+      font-size: v.$font-size-base;
+      background: v.$light-gray;
+      border: 1px solid v.$border-color;
+      border-radius: v.$border-radius;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: v.$secondary-color;
+      }
+
+      &:disabled {
+        background: v.$light-gray;
+        cursor: not-allowed;
+      }
+    }
+  }
 }

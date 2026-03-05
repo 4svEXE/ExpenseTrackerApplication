@@ -1,77 +1,8 @@
+@use '../../../scss/variables' as v;
+@use '../../../scss/forms';
+@use '../../../scss/buttons';
+
 .transaction-input-container {
-  background: #fff;
-  padding: 1.5rem;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  margin: 0 auto;
-  transition: .3s;
-  position: absolute;
-  left: -100%;
-
-  &.active {
-    left: 0;
-  }
-
-  .error-container {
-    margin-bottom: 1rem;
-
-    .error-message {
-      color: #e53e3e;
-      font-size: 0.875rem;
-    }
-  }
-
-  .form-group {
-    margin-bottom: 1.5rem;
-
-    label {
-      display: block;
-      font-size: 0.875rem;
-      color: #4a4a4a;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-      outline: none;
-
-      &:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-      }
-    }
-  }
-
-  .keypad {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-
-    button {
-      flex: 1;
-      padding: 0.75rem;
-      font-size: 1rem;
-      background: #f8f9fa;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      color: #333;
-      cursor: pointer;
-      transition: background 0.2s ease;
-
-      &:hover {
-        background: #e2e6ea;
-      }
-
-      &:disabled {
-        background: #e9ecef;
-        cursor: not-allowed;
-      }
-    }
-  }
+  @include forms.form-group;
+  @include forms.keypad;
 }

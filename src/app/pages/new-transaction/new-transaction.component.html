@@ -1,25 +1,27 @@
-<div class="transaction-type-container flex flex-col w-full">
-  <div class="transaction-type-header flex w-full gap-4">
-    <a
-      [routerLink]="['/new-transaction/categories/income']"
-      [routerLinkActiveOptions]="{ exact: true }"
-      routerLinkActive="active"
-      class="button"
-    >
-      + income
-    </a>
-    <a
-      [routerLink]="['/new-transaction/categories/expense']"
-      [routerLinkActiveOptions]="{ exact: true }"
-      routerLinkActive="active"
-      class="button"
-    >
-      - expense
-    </a>
-  </div>
+<div class="transaction-type-container flex flex-col w-full min-h-screen bg-slate-50/50 pb-20 pt-16">
 
-  <div class="categories flex flex-row flex-wrap">
-    <app-categories />
+  <div class="px-4 py-6 max-w-lg mx-auto w-full">
+    <h2 class="text-2xl font-extrabold text-center text-slate-800 tracking-tight mb-6">Нова транзакція</h2>
+
+    <!-- Segmented Control -->
+    <div class="transaction-type-header flex w-full bg-slate-200/50 p-1.5 rounded-2xl relative">
+      <a [routerLink]="['/new-transaction/categories/income']" [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-white text-emerald-600 shadow-sm"
+        class="flex-1 text-center py-2.5 rounded-xl font-bold text-sm text-slate-500 transition-all z-10 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrow-down-long"></i> Дохід
+      </a>
+      <a [routerLink]="['/new-transaction/categories/expense']" [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-white text-rose-500 shadow-sm"
+        class="flex-1 text-center py-2.5 rounded-xl font-bold text-sm text-slate-500 transition-all z-10 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrow-up-long"></i> Витрати
+      </a>
+    </div>
+
+    <!-- Container for categories -->
+    <div class="categories mt-6 border-t-2 border-slate-100 pt-6">
+      <app-categories />
+    </div>
+
   </div>
 
   <app-transaction-input />

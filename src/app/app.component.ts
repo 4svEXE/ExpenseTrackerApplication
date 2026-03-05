@@ -2,10 +2,12 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/layout/header/header.component';
 import { NavComponent } from './components/layout/nav/nav.component';
+import { ToastComponent } from './components/ui/toast/toast.component';
 
 const components = [
   HeaderComponent,
-  NavComponent
+  NavComponent,
+  ToastComponent
 ]
 
 @Component({

@@ -1,72 +1,43 @@
+// Mock data for transactions
+// Updated to use larger, diverse values for better chart visualization
+const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
+
+function getPastDate(monthsAgo: number, day: number) {
+  const d = new Date(currentYear, currentMonth - monthsAgo, day);
+  return d.toISOString().split('T')[0];
+}
+
 export const Transactions = [
-  {
-    "date": "2024-11-20",
-    "description": "Monthly salary",
-    "amount": 2000.00,
-    "category": "Salary",
-    "transactionType": "income"
-  },
-  {
-    "date": "2024-11-22",
-    "description": "Freelance project payment",
-    "amount": 500.00,
-    "category": "Freelance",
-    "transactionType": "income"
-  },
-  {
-    "date": "2024-11-23",
-    "description": "Bonus received",
-    "amount": 300.00,
-    "category": "Bonus",
-    "transactionType": "income"
-  },
-  {
-    "date": "2024-11-24",
-    "description": "Rent payment",
-    "amount": 800.00,
-    "category": "Rent",
-    "transactionType": "expense"
-  },
-  {
-    "date": "2024-11-25",
-    "description": "Groceries shopping",
-    "amount": 120.50,
-    "category": "Groceries",
-    "transactionType": "expense"
-  },
-  {
-    "date": "2024-11-25",
-    "description": "Dinner at restaurant",
-    "amount": 45.00,
-    "category": "Entertainment",
-    "transactionType": "expense"
-  },
-  {
-    "date": "2024-11-26",
-    "description": "Electricity bill",
-    "amount": 65.00,
-    "category": "Utilities",
-    "transactionType": "expense"
-  },
-  {
-    "date": "2024-11-27",
-    "description": "Public transport monthly pass",
-    "amount": 50.00,
-    "category": "Transport",
-    "transactionType": "expense"
-  },
-  {
-    "date": "2024-11-28",
-    "description": "Investment in stocks",
-    "amount": 1000.00,
-    "category": "Investments",
-    "transactionType": "income"
-  },
-  {
-    "date": "2024-11-29",
-    "description": "Bonus from client",
-    "amount": 150.00,
-    "category": "Bonus",
-    "transactionType": "income"
-  }
-]
+  // ПОВТОРИТИ СТРУКТУРУ З ВЕЛИКИМИ ЧИСЛАМИ
+
+  // currentMonth
+  { date: getPastDate(0, 5), description: 'Основна зарплата', amount: 95000, category: 'Зарплата', transactionType: 'income' },
+  { date: getPastDate(0, 7), description: 'Фріланс проект', amount: 15000, category: 'Фріланс', transactionType: 'income' },
+  { date: getPastDate(0, 10), description: 'Оренда офісу', amount: 20000, category: 'Оренда', transactionType: 'expense' },
+  { date: getPastDate(0, 15), description: 'Супермаркет', amount: 8000, category: 'Їжа', transactionType: 'expense' },
+
+  // currentMonth - 1
+  { date: getPastDate(1, 5), description: 'Зарплата за лютий', amount: 88000, category: 'Зарплата', transactionType: 'income' },
+  { date: getPastDate(1, 20), description: 'Ремонт авто', amount: 25000, category: 'Транспорт', transactionType: 'expense' },
+  { date: getPastDate(1, 22), description: 'Вечеря', amount: 3000, category: 'Їжа', transactionType: 'expense' },
+
+  // currentMonth - 2
+  { date: getPastDate(2, 5), description: 'Зарплата за січень', amount: 85000, category: 'Зарплата', transactionType: 'income' },
+  { date: getPastDate(2, 10), description: 'Подарунки до свят', amount: 15000, category: 'Розваги', transactionType: 'expense' },
+  { date: getPastDate(2, 18), description: 'Комуналка', amount: 4500, category: 'Комуналка', transactionType: 'expense' },
+
+  // currentMonth - 3
+  { date: getPastDate(3, 5), description: 'Зарплата за грудень', amount: 85000, category: 'Зарплата', transactionType: 'income' },
+  { date: getPastDate(3, 25), description: 'Новорічний бонус', amount: 50000, category: 'Бонус', transactionType: 'income' },
+  { date: getPastDate(3, 20), description: 'Велике замовлення', amount: 30000, category: 'Їжа', transactionType: 'expense' },
+
+  // currentMonth - 4
+  { date: getPastDate(4, 5), description: 'Зарплата за листопад', amount: 80000, category: 'Зарплата', transactionType: 'income' },
+  { date: getPastDate(4, 12), description: 'Курси англійської', amount: 12000, category: 'Освіта', transactionType: 'expense' },
+
+  // currentMonth - 5
+  { date: getPastDate(5, 5), description: 'Зарплата за жовтень', amount: 80000, category: 'Зарплата', transactionType: 'income' },
+  { date: getPastDate(5, 10), description: 'Страхування', amount: 10000, category: 'Страхування', transactionType: 'expense' }
+];

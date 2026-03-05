@@ -1,26 +1,84 @@
-<div class="transaction-item">
-  <div class="transaction-header">
-    <span class="transaction-date">{{ item.date | date: 'dd.MM.yyyy HH:mm' }}</span>
-    <div class="flex gap-2">
-      <span
-      class="transaction-type"
-      [ngClass]="{
-        income: item.transactionType === 'income',
-        expense: item.transactionType === 'expense'
-      }"
-    >
-      {{ item.transactionType | titlecase }}
-    </span>
-    <button class="delete" (click)="onDelete()">×</button>
+<!-- Minimalist Item Row -->
+<div
+  class="group flex items-center justify-between p-1 pr-3 rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
+  (click)="openDetails()">
+
+  <div class="flex items-center gap-3">
+    <!-- Category Icon -->
+    <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0"
+      [ngClass]="item.transactionType === 'income' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'">
+      <i [class]="categoryIcon"></i>
+    </div>
+
+    <!-- Category Name -->
+    <div class="flex flex-col">
+      <span class="text-sm font-semibold text-slate-700">{{ item.category }}</span>
+      <span class="text-[10px] text-slate-400 font-medium truncate max-w-[150px]" *ngIf="item.description">
+        {{ item.description }}
+      </span>
     </div>
   </div>
-  <div class="transaction-details">
-    <h3 class="transaction-description">{{ item.description }}</h3>
-    <div class="transaction-info">
-      <span class="transaction-category">{{ item.category }}</span>
-      <span class="transaction-amount">
-        {{ item.amount | currency : "USD" : "symbol" : "1.2-2" }}
+
+  <!-- Amount -->
+  <div class="text-right">
+    <span class="text-sm font-bold"
+      [ngClass]="item.transactionType === 'income' ? 'text-emerald-500' : 'text-slate-800'">
+      {{ item.transactionType === 'income' ? '+' : '-' }}{{ item.amount | number:'1.0-0' }} ₴
+    </span>
+  </div>
+</div>
+
+<!-- Bottom Sheet Backdrop -->
+<div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end justify-center" *ngIf="showDetails"
+  (click)="closeDetails()" [class.animating-out]="isAnimating">
+
+  <!-- Content Sheet -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 pb-10 shadow-2xl z-51 sm:max-w-lg sm:mx-auto"
+    [class.animating-out]="isAnimating" (click)="$event.stopPropagation()">
+
+    <!-- Drag Handle -->
+    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
+
+    <!-- Header Info -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-16 h-16 rounded-3xl flex items-center justify-center text-3xl mb-4"
+        [ngClass]="item.transactionType === 'income' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'">
+        <i [class]="categoryIcon"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800">{{ item.category }}</h3>
+      <span class="text-3xl font-black mt-2"
+        [ngClass]="item.transactionType === 'income' ? 'text-emerald-500' : 'text-slate-900'">
+        {{ item.transactionType === 'income' ? '+' : '-' }}{{ item.amount | number:'1.0-2' }} ₴
       </span>
+      <p class="text-sm text-slate-400 font-medium mt-1">{{ item.date | date:'dd MMMM, EEEE, HH:mm':'':'uk-UA' }}</p>
+    </div>
+
+    <!-- Details List -->
+    <div class="space-y-4 mb-8">
+      <div class="flex justify-between items-center py-3 border-b border-slate-50">
+        <span class="text-sm text-slate-400 font-semibold uppercase tracking-wider">Рахунок</span>
+        <span class="text-sm text-slate-700 font-bold">{{ accountName }}</span>
+      </div>
+      <div class="flex justify-between items-start py-3 border-b border-slate-50" *ngIf="item.description">
+        <span class="text-sm text-slate-400 font-semibold uppercase tracking-wider">Опис</span>
+        <span class="text-sm text-slate-700 font-medium text-right max-w-[200px]">{{ item.description }}</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="grid grid-cols-2 gap-4">
+      <button
+        class="flex items-center justify-center gap-2 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-colors"
+        (click)="closeDetails()">
+        <i class="fa-solid fa-xmark"></i>
+        Закрити
+      </button>
+      <button
+        class="flex items-center justify-center gap-2 py-4 bg-rose-50 text-rose-600 rounded-2xl font-bold hover:bg-rose-100 transition-colors"
+        (click)="onDelete($event)">
+        <i class="fa-solid fa-trash-can"></i>
+        Видалити
+      </button>
     </div>
   </div>
 </div>

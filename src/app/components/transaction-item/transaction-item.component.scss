@@ -1,84 +1,59 @@
-.transaction-item {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 2px 8px;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    background-color: #fff;
-  }
+:host {
+    display: block;
 }
 
-.transaction-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }
 
-.transaction-date {
-  font-size: 0.9rem;
-  color: #555;
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(100%);
+    }
 }
 
-.transaction-type {
-  font-size: 0.9rem;
-  font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-transform: capitalize;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
 
-  &.income {
-    background-color: #e0f7e0;
-    color: #388e3c;
-  }
-
-  &.expense {
-    background-color: #f8d7da;
-    color: #d32f2f;
-  }
+    to {
+        opacity: 1;
+    }
 }
 
-.transaction-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
-.transaction-description {
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 4px;
+.fixed.inset-0 {
+    animation: fadeIn 0.3s ease-out;
+
+    &.animating-out {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
 }
 
-.transaction-info {
-  display: flex;
-  gap: 12px;
-}
+.fixed.bottom-0 {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
-.transaction-category {
-  font-size: 0.85rem;
-  color: #777;
-}
-
-.transaction-amount {
-  font-size: 1rem;
-  font-weight: bold;
-}
-
-.delete {
-  padding: 4px;
-  border-radius: 4px;
-  line-height: 0px;
-  color: #f44336;
-  font-size: 1.8rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
+    &.animating-out {
+        animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 }

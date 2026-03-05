@@ -1,40 +1,101 @@
-<form
-  [formGroup]="transactionForm"
-  (ngSubmit)="onSubmit()"
-  class="transaction-input-container"
-  [class.active]="isValidTransactionCategory()"
->
-  <div *ngIf="transactionForm.get('description')?.touched" class="error-container">
-    <p class="error-message" *ngIf="transactionForm.get('description')?.errors">
-      Check inputs
-    </p>
-  </div>
+@if (isValidTransactionCategory()) {
+<!-- Backdrop -->
+<div
+  class="fixed inset-0 z-[999] bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 flex items-center justify-center p-4"
+  (click)="closeTransaction()">
 
-  <div class="form-group">
-    <label for="amount">Amount</label>
-    <input
-      id="amount"
-      type="number"
-      formControlName="amount"
-      class="form-control"
-      placeholder="Enter amount"
-    />
-  </div>
+  <!-- Modal Content -->
+  <div class="relative w-full md:w-[400px] transition-all duration-300" (click)="$event.stopPropagation()">
 
-  <div class="form-group">
-    <label for="description">Description</label>
-    <input
-      id="description"
-      type="text"
-      formControlName="description"
-      class="form-control"
-      placeholder="Enter description"
-    />
-  </div>
+    <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()"
+      class="bg-white rounded-3xl p-5 md:p-6 shadow-2xl flex flex-col gap-4">
 
-  <div class="keypad">
-    <button type="button" (click)="clearAmount()">C</button>
-    <button type="button" (click)="deleteLast()">←</button>
-    <button type="submit" [disabled]="transactionForm.invalid">OK</button>
+      <!-- Header -->
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-extrabold"
+          [ngClass]="transaction.transactionType === 'income' ? 'text-emerald-500' : 'text-rose-500'">
+          {{ transaction.transactionType === 'income' ? 'Новий дохід' : 'Нова витрата' }}
+        </h3>
+        <button type="button"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+          (click)="closeTransaction()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Category -->
+      <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+        <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm"
+          [ngClass]="transaction.transactionType === 'income' ? 'text-emerald-500' : 'text-rose-500'">
+          <i class="fa-solid fa-tag"></i>
+        </div>
+        <div>
+          <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Категорія</p>
+          <p class="text-sm font-bold text-slate-700">{{ transaction.category }}</p>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div>
+        <label for="accountId"
+          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Рахунок</label>
+        <div class="relative">
+          <select id="accountId" formControlName="accountId"
+            class="appearance-none w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-semibold text-sm text-slate-700 transition-all cursor-pointer">
+            <option *ngFor="let acc of accounts()" [value]="acc.id">
+              {{ acc.name }} ({{ acc.balance | currency:acc.currency:'symbol-narrow':'1.0-0' }})
+            </option>
+          </select>
+          <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <i class="fa-solid fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div>
+        <label for="amount"
+          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Сума</label>
+        <input id="amount" type="number" formControlName="amount" autocomplete="off"
+          class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-bold text-2xl text-slate-800 transition-all"
+          placeholder="0.00" />
+        <app-error-message [control]="transactionForm.get('amount')" [customMessages]="{
+            required: 'Поле суми обов’язкове.',
+            min: 'Сума має бути більше 0.01.',
+            pattern: 'До 2 знаків після коми.'
+          }"></app-error-message>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description"
+          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Опис</label>
+        <input id="description" type="text" formControlName="description" autocomplete="off"
+          class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-medium text-sm text-slate-700 transition-all"
+          placeholder="Коментар..." />
+        <app-error-message [control]="transactionForm.get('description')" [customMessages]="{
+            required: 'Поле опису обов’язкове.',
+            maxlength: 'Максимум 50 символів.'
+          }"></app-error-message>
+      </div>
+
+      <!-- Actions -->
+      <div class="grid grid-cols-3 gap-2 mt-2">
+        <button type="button" (click)="clearAmount()"
+          class="py-3 rounded-xl bg-slate-100 border border-slate-200/60 text-slate-500 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 transition-colors font-bold flex items-center justify-center text-lg">
+          C
+        </button>
+        <button type="button" (click)="deleteLast()"
+          class="py-3 rounded-xl bg-slate-100 border border-slate-200/60 text-slate-500 hover:bg-slate-200 transition-colors flex items-center justify-center">
+          <i class="fa-solid fa-delete-left text-xl"></i>
+        </button>
+        <button type="submit" [disabled]="transactionForm.invalid"
+          class="py-3 rounded-xl text-white shadow-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
+          [ngClass]="transaction.transactionType === 'income' ? 'bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 disabled:bg-slate-300' : 'bg-indigo-600 shadow-indigo-200 hover:bg-indigo-700 disabled:bg-slate-300'">
+          <i class="fa-solid fa-check text-xl"></i>
+        </button>
+      </div>
+    </form>
   </div>
-</form>
+</div>
+}

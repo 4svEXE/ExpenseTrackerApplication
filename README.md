@@ -65,7 +65,9 @@ For more information on using the Angular CLI, including detailed command refere
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "baseHref": "https://4svEXE.github.io/expense-tracker-application/",
+            "baseHref": "https://4svEXE.github.io/expense-tracker-application/"
+            "baseHref": "https://4svEXE.github.io/ExpenseTrackerApplication/",
+            ,
 
 ng build
 

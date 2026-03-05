@@ -7,6 +7,16 @@ export const routes: Routes = [
       import('./pages/home/home.component').then((m) => m.HomeComponent),
   },
   {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+  },
+  {
+    path: 'wallets',
+    loadComponent: () =>
+      import('./pages/wallets/wallets.component').then((m) => m.WalletsComponent),
+  },
+  {
     path: 'settings',
     loadComponent: () =>
       import('./pages/settings/settings.component').then((m) => m.SettingsComponent),
@@ -20,6 +30,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/new-transaction/new-transaction.component').then((m) => m.NewTransactionComponent),
   },
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: '**', redirectTo: 'home' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '**', redirectTo: 'dashboard' },
 ];

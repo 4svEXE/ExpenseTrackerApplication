@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -7,30 +7,49 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { TransactionService } from '../../../services/transaction.service';
-import { Transaction } from '../../../types/Transaction';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { TransactionService } from '../../../services/transaction.service';
+import { ErrorMessageComponent } from '../../error-message/error-message.component';
+import { Transaction } from '../../../types/Transaction';
+import { FinanceDataService } from '../../../services/finance-data.service';
+import { AudioService } from '../../../services/audio.service';
 
 @Component({
   selector: 'app-transaction-input',
   templateUrl: './transaction-input.component.html',
   styleUrls: ['./transaction-input.component.scss'],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ErrorMessageComponent],
 })
 export class TransactionInputComponent implements OnInit {
   transactionForm!: FormGroup;
   transactionSub!: Subscription;
-  transaction!: Transaction;
+  transaction: Transaction = {
+    amount: 0,
+    category: '',
+    date: '',
+    description: '',
+    transactionType: 'income'
+  };
+
+  financeData = inject(FinanceDataService);
+  accounts = this.financeData.accounts;
+
+  audio = inject(AudioService);
 
   constructor(
     private fb: FormBuilder,
-    private transactionService: TransactionService
-  ) {}
+    private transactionService: TransactionService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
+    const lastAccountId = localStorage.getItem('lastAccountId') || (this.accounts().length > 0 ? this.accounts()[0].id : '');
+
     this.transactionForm = this.fb.group({
+      accountId: [lastAccountId, [Validators.required]],
       amount: [
-        0,
+        null,
         [
           Validators.required,
           Validators.min(0.01),
@@ -48,15 +67,26 @@ export class TransactionInputComponent implements OnInit {
   }
 
   clearAmount(): void {
-    this.transactionForm.patchValue({ amount: 0 });
+    this.transactionForm.patchValue({ amount: null });
   }
 
-  isValidTransactionCategory(){
-    return this.transaction.category !== ''
+  closeTransaction(): void {
+    this.transactionService.setTransaction({
+      amount: 0,
+      category: '',
+      date: '',
+      description: '',
+      transactionType: 'income',
+    });
+    this.transactionForm.reset({ accountId: this.transactionForm.get('accountId')?.value });
+  }
+
+  isValidTransactionCategory() {
+    return this.transaction && this.transaction.category && this.transaction.category !== '';
   }
 
   deleteLast(): void {
-    const currentAmount = this.transactionForm.get('amount')?.value.toString();
+    const currentAmount = this.transactionForm.get('amount')?.value?.toString() || '';
     const newValue = currentAmount.slice(0, -1);
     this.transactionForm.patchValue({
       amount: parseFloat(newValue) || 0,
@@ -65,15 +95,36 @@ export class TransactionInputComponent implements OnInit {
 
   onSubmit(): void {
     if (this.transactionForm.valid) {
+      const formValue = this.transactionForm.value;
+      const tType = this.transaction.transactionType || 'expense';
+
+      // 1. Add Transaction
       this.transactionService.addTransaction({
         ...this.transaction,
-        ...this.transactionForm.value,
-        date: new Date().toISOString()
+        amount: formValue.amount,
+        description: formValue.description,
+        accountId: formValue.accountId,
+        date: new Date().toISOString(),
       });
 
-      console.log(this.transaction);
+      // 2. Adjust Balance
+      this.financeData.adjustAccountBalance(
+        formValue.accountId,
+        formValue.amount,
+        tType as 'income' | 'expense'
+      );
+
+      // 3. Audio & Haptic feedback
+      if (tType === 'income') {
+        this.audio.playIncome();
+      } else {
+        this.audio.playOutcome();
+      }
+
+      localStorage.setItem('lastAccountId', formValue.accountId);
 
       this.transactionForm.reset();
+      this.router.navigate(['/home']);
     } else {
       this.transactionForm.markAllAsTouched();
     }

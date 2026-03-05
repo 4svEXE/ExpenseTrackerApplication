@@ -1,9 +1,14 @@
 <header class="flex justify-evenly gap-2">
-  <p>Logo</p>
+  <div class="logo-container flex items-center">
+    <img src="icons/logo.svg" alt="ETA Logo" class="h-7 w-auto md:h-8 mix-blend-multiply" />
+  </div>
 
-  <div class="amount-box gap-1 md:gap-4">
-    <div class="expense">- {{ totalExpense$ | async }}</div>
-    <div class="income">+ {{ totalIncome$ | async }}</div>
-    <div class="amount">💸: {{ totalAmount$ | async }}</div>
+  <div class="amount-box gap-1 md:gap-2 items-center flex">
+    <div class="expense">- {{ totalExpense$ | async | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
+    <div class="income">+ {{ totalIncome$ | async | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
+    <div class="amount flex items-center gap-2">
+      <i class="fa-solid fa-wallet text-neutral-400"></i>
+      <span>{{ totalBalance | currency:userCurrency:'symbol-narrow':'1.0-0' }}</span>
+    </div>
   </div>
 </header>

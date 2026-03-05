@@ -7,13 +7,30 @@ import { TransactionService } from '../../../services/transaction.service';
 
 @Component({
   selector: 'app-filters',
+  standalone: true,
   imports: [CommonModule, FilterByTypeComponent, FilterByCategoryComponent],
   templateUrl: './filters.component.html',
   styleUrl: './filters.component.scss',
 })
 export class FiltersComponent {
   isLAtest = true;
-  constructor(private transactionService: TransactionService) {}
+  isFiltersOpen = false;
+  currentDate: Date = new Date();
+
+  constructor(private transactionService: TransactionService) {
+    this.transactionService.currentViewDate$.subscribe(date => {
+      this.currentDate = date;
+    });
+  }
+
+  changeMonth(delta: number) {
+    const newDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + delta, 1);
+    this.transactionService.setCurrentViewDate(newDate);
+  }
+
+  toggleFilters() {
+    this.isFiltersOpen = !this.isFiltersOpen;
+  }
 
   sortByDate() {
     this.isLAtest = !this.isLAtest;

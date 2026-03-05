@@ -1,52 +1,69 @@
-export const Categories = [
+export interface Category {
+  name: string;
+  icon: string;
+  transactionType: 'income' | 'expense';
+  color?: string;
+}
+
+export const Categories: Category[] = [
   {
-    name: 'Salary',
-    image: 'assets/icons/salary.png',
+    name: 'Зарплата',
+    icon: 'fa-solid fa-money-bill-wave',
     transactionType: 'income',
+    color: '#10b981'
   },
   {
-    name: 'Bonus',
-    image: 'assets/icons/bonus.png',
+    name: 'Бонус',
+    icon: 'fa-solid fa-gift',
     transactionType: 'income',
+    color: '#f59e0b'
   },
   {
-    name: 'Investments',
-    image: 'assets/icons/investments.png',
+    name: 'Інвестиції',
+    icon: 'fa-solid fa-chart-line',
     transactionType: 'income',
+    color: '#6366f1'
   },
   {
-    name: 'Rental Income',
-    image: 'assets/icons/rental_income.png',
+    name: 'Оренда (дохід)',
+    icon: 'fa-solid fa-house-chimney-user',
     transactionType: 'income',
+    color: '#2dd4bf'
   },
   {
-    name: 'Freelance',
-    image: 'assets/icons/freelance.png',
+    name: 'Фриланс',
+    icon: 'fa-solid fa-laptop-code',
     transactionType: 'income',
+    color: '#8b5cf6'
   },
   {
-    name: 'Groceries',
-    image: 'assets/icons/groceries.png',
+    name: 'Продукти',
+    icon: 'fa-solid fa-cart-shopping',
     transactionType: 'expense',
+    color: '#f43f5e'
   },
   {
-    name: 'Rent',
-    image: 'assets/icons/rent.png',
+    name: 'Оренда (витрати)',
+    icon: 'fa-solid fa-house-chimney',
     transactionType: 'expense',
+    color: '#ef4444'
   },
   {
-    name: 'Entertainment',
-    image: 'assets/icons/entertainment.png',
+    name: 'Розваги',
+    icon: 'fa-solid fa-mask',
     transactionType: 'expense',
+    color: '#d946ef'
   },
   {
-    name: 'Utilities',
-    image: 'assets/icons/utilities.png',
+    name: 'Комунальні',
+    icon: 'fa-solid fa-bolt',
     transactionType: 'expense',
+    color: '#0ea5e9'
   },
   {
-    name: 'Transport',
-    image: 'assets/icons/transport.png',
+    name: 'Транспорт',
+    icon: 'fa-solid fa-car',
     transactionType: 'expense',
+    color: '#f97316'
   },
 ];
