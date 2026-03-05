@@ -109,8 +109,12 @@ export class MonthPlanComponent {
 
     return this.financeData.incomePlans().map(plan => {
       // Find matching tag or category
-      const matched = txs.filter(t => t.tags.includes(plan.category) || t.title.toLowerCase().includes(plan.category.toLowerCase()));
-      const fact = matched.reduce((acc, t) => acc + t.amountUah, 0);
+      const planCat = (plan.category || '').toLowerCase();
+      const matched = txs.filter(t =>
+        (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
+        (t.title && t.title.toLowerCase().includes(planCat))
+      );
+      const fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
       return { ...plan, factAmount: fact };
     });
   });
@@ -123,11 +127,15 @@ export class MonthPlanComponent {
 
     return this.financeData.expensePlans().map(plan => {
       let fact = 0;
-      if (plan.category.toLowerCase().includes('податки')) {
+      const planCat = (plan.category || '').toLowerCase();
+      if (planCat.includes('податки')) {
         fact = taxTotal;
       } else {
-        const matched = txs.filter(t => t.tags.includes(plan.category) || t.title.toLowerCase().includes(plan.category.toLowerCase()));
-        fact = matched.reduce((acc, t) => acc + t.amountUah, 0);
+        const matched = txs.filter(t =>
+          (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
+          (t.title && t.title.toLowerCase().includes(planCat))
+        );
+        fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
       }
       return { ...plan, factAmount: fact };
     });

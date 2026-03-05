@@ -58,9 +58,10 @@ export interface Subscription {
 })
 export class FinanceDataService {
   private readonly INCOME_PLANS_KEY = 'incomePlans';
-  private readonly EXPENSE_PLANS_KEY = 'expensePlans';
   private readonly ACCOUNTS_KEY = 'accounts';
-  private readonly SUBSCRIPTIONS_KEY = 'subscriptions';
+  private readonly EXPENSE_PLANS_KEY = 'expensePlans';
+  private readonly SUBS_KEY = 'subscriptions';
+  private readonly NOTIFIED_GOALS_KEY = 'notifiedGoals';
 
   private settingsService = inject(SettingsService);
   private ts = inject(TransactionService);
@@ -69,7 +70,6 @@ export class FinanceDataService {
 
   userSettings = this.settingsService.userSettings;
 
-  // Data Signals
   transactions = signal<Transaction[]>([]);
   incomePlans = signal<IncomePlan[]>([]);
   expensePlans = signal<ExpensePlan[]>([]);
@@ -77,13 +77,11 @@ export class FinanceDataService {
   subscriptions = signal<Subscription[]>([]);
 
   totalBalance = computed(() => {
-    const mainCurrency = this.userSettings().currency;
-    return this.accounts().reduce((sum, acc) => {
-      let balance = acc.balance;
-      if (acc.currency !== mainCurrency) {
-        balance = balance * this.getExchangeRate(acc.currency, mainCurrency);
-      }
-      return sum + balance;
+    const curr = this.userSettings().currency;
+    return this.accounts().reduce((s, a) => {
+      let b = Number(a.balance) || 0;
+      if (a.currency !== curr) b *= this.getExchangeRate(a.currency, curr);
+      return s + b;
     }, 0);
   });
 
@@ -92,37 +90,37 @@ export class FinanceDataService {
   constructor() {
     this.loadData();
 
-    // Subscribe to all transactions from the central service
-    this.ts.allTransactions$.subscribe((txs: any[]) => {
-      const parsed = txs.map((t: any, index) => {
-        let accountName = t.account || 'Картка/Готівка';
+    this.ts.allTransactions$.subscribe(txs => {
+      const parsed = (txs || []).map((t: any, i) => {
+        let acc = t.account || 'Картка';
         if (t.accountId) {
-          const matchingAccount = this.accounts().find(a => a.id === t.accountId);
-          if (matchingAccount) accountName = matchingAccount.name;
+          const match = this.accounts().find(a => a.id === t.accountId);
+          if (match) acc = match.name;
         }
 
-        let transactionDate: Date;
+        let date: Date;
         if (typeof t.date === 'string' && t.date.includes('-') && !t.date.includes('T')) {
           const [y, m, d] = t.date.split('-').map(Number);
-          transactionDate = new Date(y, m - 1, d);
+          date = new Date(y, m - 1, d);
         } else {
-          transactionDate = new Date(t.date);
+          date = new Date(t.date || new Date());
         }
+
+        const amt = Number(t.amount) || Number(t.amountUah) || 0;
 
         return {
           ...t,
-          id: t.id || index.toString(),
-          date: transactionDate,
-          amountUah: t.amount !== undefined ? t.amount : (t.amountUah || 0),
-          amountEur: t.amountEur || 0,
+          id: (t.id || i).toString(),
+          title: (t.description || t.title || t.category || 'Транзакція').toString(),
+          date,
+          amountUah: amt,
           type: (t.transactionType === 'income' || t.type === 'income') ? 'income' : 'expense',
-          title: t.description || t.title || t.category || 'Транзакція',
-          expenseColor: t.expenseColor || this.getThemeColor(t.category),
-          tags: t.tags || [t.category].filter(Boolean),
-          account: accountName,
+          category: t.category || 'Інше',
+          expenseColor: t.expenseColor || this.getThemeColor(t.category || ''),
+          tags: Array.isArray(t.tags) ? t.tags : [t.category].filter(Boolean),
+          account: acc,
           client: t.client || '',
-          paymentType: t.paymentType || 'Звичайна',
-          category: t.category || ''
+          paymentType: t.paymentType || 'Звичайна'
         } as Transaction;
       });
 
@@ -144,99 +142,69 @@ export class FinanceDataService {
 
   private checkGoalCompletion() {
     const now = new Date();
-    const m = now.getMonth();
-    const y = now.getFullYear();
-    const periodKey = `${m}-${y}`;
+    const period = `goal-${now.getMonth()}-${now.getFullYear()}`;
+    const total = this.getMonthlyIncomeFactTotal();
+    const goal = Number(this.userSettings().monthlyIncomeGoal) || 0;
 
-    const totalIncome = this.getMonthlyIncomeFactTotal();
-    const mainGoal = this.userSettings().monthlyIncomeGoal;
-
-    if (mainGoal > 0 && totalIncome >= mainGoal) {
-      const goalKey = `main-${periodKey}`;
-      if (!this.notifiedGoals.has(goalKey)) {
-        this.toasts.show('Вітаємо! Ви досягли місячної цілі доходу!', 'success');
+    if (goal > 0 && total >= goal) {
+      if (!this.notifiedGoals.has(period)) {
+        this.toasts.show('Вітаємо! Ви досягли місячної цілі доходу! 🚀', 'success');
         this.audio.playChallengeComplete();
-        this.notifiedGoals.add(goalKey);
+        this.notifiedGoals.add(period);
+        this.saveNotifiedGoals();
       }
     }
   }
 
-  private getExchangeRate(from: string, to: string): number {
-    if (from === to) return 1;
-    const rates: Record<string, number> = { 'UAH': 1, 'USD': 38.5, 'EUR': 41.5, 'CZK': 1.6 };
-    return (rates[from] || 1) / (rates[to] || 1);
+  private saveNotifiedGoals() {
+    localStorage.setItem(this.NOTIFIED_GOALS_KEY, JSON.stringify(Array.from(this.notifiedGoals)));
+  }
+
+  getExchangeRate(f: string, t: string) {
+    if (f === t) return 1;
+    const r: any = { 'UAH': 1, 'USD': 38.5, 'EUR': 41.5, 'CZK': 1.6 };
+    return (r[f] || 1) / (r[t] || 1);
   }
 
   loadData() {
-    const savedInc = localStorage.getItem(this.INCOME_PLANS_KEY);
-    if (savedInc) this.incomePlans.set(JSON.parse(savedInc));
-    else this.incomePlans.set([
-      { id: '1', category: 'Індивідуальна розробка', planAmount: 80000, factAmount: 25000 },
-      { id: '2', category: 'Шаблони', planAmount: 40000, factAmount: 15000 }
-    ]);
+    const load = (key: string, def: any) => {
+      const s = localStorage.getItem(key);
+      return s ? JSON.parse(s) : def;
+    };
 
-    const savedExp = localStorage.getItem(this.EXPENSE_PLANS_KEY);
-    if (savedExp) this.expensePlans.set(JSON.parse(savedExp));
-    else this.expensePlans.set([
-      { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000 },
-      { id: '2', category: 'Їжа', type: 'mandatory', amount: 10000 }
-    ]);
+    this.incomePlans.set(load(this.INCOME_PLANS_KEY, [
+      { id: '1', category: 'Зарплата', planAmount: 80000, factAmount: 0 }
+    ]));
+    this.expensePlans.set(load(this.EXPENSE_PLANS_KEY, [
+      { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000 }
+    ]));
+    this.accounts.set(load(this.ACCOUNTS_KEY, [
+      { id: '1', name: 'Картка', balance: 50000, currency: 'UAH', tags: [] }
+    ]));
+    this.subscriptions.set(load(this.SUBS_KEY, []).map((s: any) => ({ ...s, nextPaymentDate: new Date(s.nextPaymentDate) })));
 
-    const savedAcc = localStorage.getItem(this.ACCOUNTS_KEY);
-    if (savedAcc) this.accounts.set(JSON.parse(savedAcc));
-    else this.accounts.set([
-      { id: '1', name: 'ФОП', balance: 145000, currency: 'UAH', tags: ['Основний'], color: '#10b981' },
-      { id: '2', name: 'Моно', balance: 25000, currency: 'UAH', tags: ['Особистий'], color: '#171717' }
-    ]);
-
-    const savedSubs = localStorage.getItem(this.SUBSCRIPTIONS_KEY);
-    if (savedSubs) this.subscriptions.set(JSON.parse(savedSubs).map((s: any) => ({ ...s, nextPaymentDate: new Date(s.nextPaymentDate) })));
-  }
-
-  saveSettings(settings: UserSettings) { this.settingsService.saveSettings(settings); }
-  saveIncomePlans(plans: IncomePlan[]) { this.incomePlans.set(plans); localStorage.setItem(this.INCOME_PLANS_KEY, JSON.stringify(plans)); }
-  saveExpensePlans(plans: ExpensePlan[]) { this.expensePlans.set(plans); localStorage.setItem(this.EXPENSE_PLANS_KEY, JSON.stringify(plans)); }
-  saveAccounts(accounts: AccountBalance[]) { this.accounts.set(accounts); localStorage.setItem(this.ACCOUNTS_KEY, JSON.stringify(accounts)); }
-
-  adjustAccountBalance(accountId: string, amount: number, type: 'income' | 'expense') {
-    const accs = [...this.accounts()];
-    const i = accs.findIndex(a => a.id === accountId);
-    if (i !== -1) {
-      accs[i].balance += (type === 'income' ? amount : -amount);
-      this.saveAccounts(accs);
+    const savedNotified = localStorage.getItem(this.NOTIFIED_GOALS_KEY);
+    if (savedNotified) {
+      this.notifiedGoals = new Set(JSON.parse(savedNotified));
     }
-  }
-
-  saveSubscriptions(subs: Subscription[]) { this.subscriptions.set(subs); localStorage.setItem(this.SUBSCRIPTIONS_KEY, JSON.stringify(subs)); }
-
-  clearAllData() {
-    localStorage.clear();
-    this.ts.setTransactions([]);
-    this.transactions.set([]);
-    this.loadData();
-  }
-
-  loadMockData() {
-    this.clearAllData();
-    this.ts.initTransactions();
-  }
-
-  getMonthlyIncomePlanTotal(): number {
-    return this.incomePlans().reduce((acc, p) => acc + p.planAmount, 0);
   }
 
   getMonthlyIncomeFactTotal(): number {
     const now = new Date();
     return this.transactions()
       .filter(t => t.type === 'income' && t.date.getMonth() === now.getMonth() && t.date.getFullYear() === now.getFullYear())
-      .reduce((s, t) => s + t.amountUah, 0);
+      .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
+  }
+
+  getMonthlyIncomePlanTotal(): number {
+    return this.incomePlans().reduce((s, p) => s + (Number(p.planAmount) || 0), 0);
   }
 
   getTotalExpensesThisMonth(): number {
     const now = new Date();
     return this.transactions()
       .filter(t => t.type === 'expense' && t.date.getMonth() === now.getMonth() && t.date.getFullYear() === now.getFullYear())
-      .reduce((s, t) => s + t.amountUah, 0);
+      .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
   }
 
   getFinancialHistory(monthsCount: number = 6) {
@@ -249,14 +217,14 @@ export class FinanceDataService {
 
       const inc = this.transactions()
         .filter(t => t.type === 'income' && t.date.getMonth() === m && t.date.getFullYear() === y)
-        .reduce((s, t) => s + t.amountUah, 0);
+        .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
 
       const exp = this.transactions()
         .filter(t => t.type === 'expense' && t.date.getMonth() === m && t.date.getFullYear() === y)
-        .reduce((s, t) => s + t.amountUah, 0);
+        .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
 
       history.push({
-        label: d.toLocaleDateString('uk-UA', { month: 'short', year: '2-digit' }),
+        label: d.toLocaleDateString('uk-UA', { month: 'short' }),
         income: inc,
         expense: exp,
         net: inc - exp,
@@ -269,13 +237,29 @@ export class FinanceDataService {
   }
 
   getNetGrowthPercentage(): number {
-    const history = this.getFinancialHistory(2);
-    if (history.length < 2) return 0;
-    const current = history[1].net;
-    const prev = history[0].net;
-    if (prev === 0) return current > 0 ? 100 : (current < 0 ? -100 : 0);
-    return ((current - prev) / Math.abs(prev)) * 100;
+    const h = this.getFinancialHistory(2);
+    if (h.length < 2) return 0;
+    const c = h[1].net;
+    const p = h[0].net;
+    if (p === 0) return c > 0 ? 100 : 0;
+    return ((c - p) / Math.abs(p)) * 100;
   }
 
-  getExpenseTransactions() { return this.transactions().filter(t => t.type === 'expense'); }
+  saveSettings(s: UserSettings) { this.settingsService.saveSettings(s); }
+  saveAccounts(a: AccountBalance[]) { this.accounts.set(a); localStorage.setItem(this.ACCOUNTS_KEY, JSON.stringify(a)); }
+  saveIncomePlans(p: IncomePlan[]) { this.incomePlans.set(p); localStorage.setItem(this.INCOME_PLANS_KEY, JSON.stringify(p)); }
+  saveExpensePlans(p: ExpensePlan[]) { this.expensePlans.set(p); localStorage.setItem(this.EXPENSE_PLANS_KEY, JSON.stringify(p)); }
+  saveSubscriptions(s: Subscription[]) { this.subscriptions.set(s); localStorage.setItem(this.SUBS_KEY, JSON.stringify(s)); }
+
+  adjustAccountBalance(id: string, amt: number, type: 'income' | 'expense') {
+    const accs = [...this.accounts()];
+    const i = accs.findIndex(a => a.id === id);
+    if (i !== -1) {
+      accs[i].balance = (Number(accs[i].balance) || 0) + (type === 'income' ? amt : -amt);
+      this.saveAccounts(accs);
+    }
+  }
+
+  clearAllData() { localStorage.clear(); location.reload(); }
+  loadMockData() { this.ts.initTransactions(); }
 }
