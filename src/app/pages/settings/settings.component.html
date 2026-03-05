@@ -100,7 +100,7 @@
                         <label class="text-sm font-semibold text-slate-600">Гучність</label>
                         <div class="flex items-center gap-3">
                             <button (click)="playTestSound()"
-                                class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md hover:bg-indigo-100 transition-colors uppercase tracking-wider">
+                                class="text-[10px] font-bold text-black bg-slate-100 px-2 py-1 rounded-md hover:bg-slate-200 transition-colors uppercase tracking-wider">
                                 <i class="fa-solid fa-play mr-1"></i> Тест
                             </button>
                             <span class="text-xs font-bold text-slate-800">{{ (settings.soundVolume * 100) |
@@ -268,6 +268,54 @@
                     <i class="fa-solid fa-trash-can"></i> Очистити все
                 </button>
             </div>
+        </div>
+
+        <!-- About Application -->
+        <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-6 overflow-hidden">
+            <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-neutral-400"></i>
+                Про додаток
+            </h3>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-black transition-all cursor-pointer group"
+                    onclick="window.open('https://www.instagram.com/sv.png/', '_blank')">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white shadow-sm">
+                            <i class="fa-brands fa-instagram text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Розробник</p>
+                            <p class="text-[11px] text-black font-black group-hover:underline">
+                                Иван Сташко @sv.png
+                            </p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-black transition-all cursor-pointer group"
+                    onclick="window.open('https://t.me/+pLDBzgIEVZc0MTQy', '_blank')">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-[#229ED9] flex items-center justify-center text-white shadow-sm">
+                            <i class="fa-brands fa-telegram text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Telegram Канал</p>
+                            <p class="text-[11px] text-black font-black group-hover:underline">
+                                Приєднатися до спільноти
+                            </p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                </div>
+            </div>
+
+            <p class="text-center text-[10px] text-slate-400 font-bold mt-10 uppercase tracking-widest">
+                Expense Tracker Application v1.2.0 • 2026
+            </p>
         </div>
 
     </div>

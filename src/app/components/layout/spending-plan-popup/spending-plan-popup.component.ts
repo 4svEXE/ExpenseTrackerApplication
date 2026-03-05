@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FinanceDataService } from '../../../services/finance-data.service';
 
 @Component({
-    selector: 'app-spending-plan-popup',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-spending-plan-popup',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="fixed inset-0 z-[1100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div class="bg-white rounded-[32px] w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in duration-300">
         <!-- Header -->
@@ -23,9 +23,9 @@ import { FinanceDataService } from '../../../services/finance-data.service';
         <!-- Body -->
         <div class="p-6">
           <div class="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-            <div *ngFor="let plan of expensePlans()" class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-indigo-200 transition-all">
+            <div *ngFor="let plan of expensePlans()" class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-black transition-all">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-indigo-500 border border-slate-50 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-black border border-slate-50 transition-colors">
                   <i class="fa-solid fa-receipt"></i>
                 </div>
                 <div>
@@ -54,7 +54,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -62,10 +62,10 @@ import { FinanceDataService } from '../../../services/finance-data.service';
   `]
 })
 export class SpendingPlanPopupComponent {
-    private financeData = inject(FinanceDataService);
+  private financeData = inject(FinanceDataService);
 
-    @Output() close = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>();
 
-    expensePlans = this.financeData.expensePlans;
-    currency = (() => this.financeData.userSettings().currency);
+  expensePlans = this.financeData.expensePlans;
+  currency = (() => this.financeData.userSettings().currency);
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 
@@ -126,11 +126,8 @@ export class GrowthChartComponent {
   selectedPeriod = signal(Number(localStorage.getItem('chart_period')) || 12);
 
   constructor() {
-    // Save selection
-    import('@angular/core').then(m => {
-      m.effect(() => {
-        localStorage.setItem('chart_period', this.selectedPeriod().toString());
-      }, { allowSignalWrites: true });
+    effect(() => {
+      localStorage.setItem('chart_period', this.selectedPeriod().toString());
     });
   }
 

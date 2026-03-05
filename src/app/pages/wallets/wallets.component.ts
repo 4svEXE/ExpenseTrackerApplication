@@ -28,7 +28,7 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
         <!-- Керування планами -->
         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-8">
             <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm border border-indigo-100">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-black shadow-sm border border-slate-200">
                   <i class="fa-solid fa-chart-pie"></i>
                 </div>
                 Фінансові Плани
@@ -62,7 +62,7 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
                             </div>
                           </div>
                           <div class="flex items-center justify-between mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label class="flex items-center gap-2 cursor-pointer ml-2">
                                 <input type="checkbox" [(ngModel)]="plan.isRecurring" (change)="saveIncomePlans()"
                                     class="w-4 h-4 rounded border-slate-300 text-black focus:ring-black">
                                 <span class="text-[10px] font-bold text-slate-500 uppercase">Повтор кожного місяця</span>
@@ -117,14 +117,14 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
                                 </select>
                             </div>
                             <div class="flex items-center justify-end gap-2 pb-1">
-                                <label class="flex items-center gap-2 cursor-pointer mt-5 mr-2">
+                                <label class="flex items-center gap-2 cursor-pointer mt-5 ml-4 mr-2">
                                     <input type="checkbox" [(ngModel)]="plan.isRecurring" (change)="saveExpensePlans()"
                                         class="w-4 h-4 rounded border-slate-300 text-black focus:ring-black">
                                     <span class="text-[10px] font-bold text-slate-500 uppercase">Повтор</span>
                                 </label>
                                 <button (click)="movePlanToWish(plan)" title="У вішліст"
-                                    class="text-indigo-500 hover:text-indigo-700 transition-colors p-2 mt-5">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    class="text-black hover:text-neutral-600 transition-colors p-2 mt-5">
+                                    <i class="fa-solid fa-gift"></i>
                                 </button>
                                 <button (click)="removeExpensePlan(i)"
                                     class="text-rose-500 hover:text-rose-700 transition-colors p-2 mt-5">
@@ -143,18 +143,18 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
         </div>
 
         <!-- Вішліст -->
-        <div class="bg-indigo-900 rounded-3xl p-6 md:p-8 shadow-xl text-white mt-8 relative overflow-hidden">
+        <div class="bg-black rounded-3xl p-6 md:p-8 shadow-xl text-white mt-8 relative overflow-hidden">
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
             
             <div class="flex justify-between items-center mb-6 relative z-10">
                 <h3 class="text-xl font-bold flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-indigo-200 shadow-sm border border-white/10">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-slate-200 shadow-sm border border-white/10">
                       <i class="fa-solid fa-heart"></i>
                     </div>
                     Вішліст (Мрії)
                 </h3>
                 <button (click)="addWish()"
-                    class="bg-white text-indigo-900 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all flex items-center gap-2">
+                    class="bg-white text-black px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all flex items-center gap-2">
                     <i class="fa-solid fa-plus text-[10px]"></i> Додати мрію
                 </button>
             </div>
