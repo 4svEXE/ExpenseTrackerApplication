@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TransactionType } from '../../../../types/transaction-type';
+import { TransactionType } from '../../../../types/transaction-type.enum';
 import { TransactionService } from '../../../../services/transaction.service';
 import { CommonModule } from '@angular/common';
 

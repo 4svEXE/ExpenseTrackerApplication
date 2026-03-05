@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from './local-storage.service';
-import { Transaction } from '../types/transaction';
-import { Transactions } from '../db/transactions';
-import { TransactionType } from '../types/transaction-type';
+import { Transaction } from '../types/transaction.interface';
+import { Transactions } from '../db/transactions-list.data';
+import { TransactionType } from '../types/transaction-type.enum';
 
 @Injectable({
   providedIn: 'root',

@@ -1,4 +1,4 @@
-import { TransactionType } from "./transaction-type";
+import { TransactionType } from "./transaction-type.enum";
 
 
 export type Transaction = {

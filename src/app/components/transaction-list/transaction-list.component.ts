@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TransactionService } from '../../services/transaction.service';
-import { Transaction } from '../../types/transaction';
+import { Transaction } from '../../types/transaction.interface';
 import { TransactionItemComponent } from '../transaction-item/transaction-item.component';
 import { CommonModule } from '@angular/common';
 

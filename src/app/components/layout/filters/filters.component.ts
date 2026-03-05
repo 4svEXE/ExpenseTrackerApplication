@@ -1,4 +1,4 @@
-import { Transaction } from './../../../types/transaction';
+import { Transaction } from './../../../types/transaction.interface';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FilterByTypeComponent } from './filter-by-type/filter-by-type.component';

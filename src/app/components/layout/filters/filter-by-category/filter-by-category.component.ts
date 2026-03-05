@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TransactionService } from '../../../../services/transaction.service';
-import { TransactionCategory } from '../../../../types/transaction-category';
+import { TransactionCategory } from '../../../../types/transaction-category.interface';
 import { CategoryService } from '../../../../services/category.service';
 
 @Component({

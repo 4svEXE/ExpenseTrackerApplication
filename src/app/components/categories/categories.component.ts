@@ -1,8 +1,8 @@
-import { Transaction } from './../../types/transaction';
+import { Transaction } from './../../types/transaction.interface';
 import { Component, Input, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TransactionType } from '../../types/transaction-type';
-import { TransactionCategory } from '../../types/transaction-category';
+import { TransactionType } from '../../types/transaction-type.enum';
+import { TransactionCategory } from '../../types/transaction-category.interface';
 import { CategoryService } from '../../services/category.service';
 import { TransactionService } from '../../services/transaction.service';
 import { Subscription } from 'rxjs';

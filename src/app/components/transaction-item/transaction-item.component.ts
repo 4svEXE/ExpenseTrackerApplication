@@ -1,5 +1,5 @@
 import { Component, Input, inject } from '@angular/core';
-import { Transaction } from '../../types/transaction';
+import { Transaction } from '../../types/transaction.interface';
 import { CommonModule } from '@angular/common';
 import { TransactionService } from '../../services/transaction.service';
 import { CategoryService } from '../../services/category.service';
