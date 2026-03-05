@@ -38,7 +38,7 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "https://4svEXE.github.io/ExpenseTrackerApplication/",
+              "baseHref": "/",
               "budgets": [
                 {
                   "type": "initial",
