@@ -52,29 +52,44 @@
         </div>
       </div>
 
-      <!-- Amount -->
-      <div>
-        <label for="amount"
-          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Сума</label>
-        <input id="amount" type="number" formControlName="amount" autocomplete="off"
-          class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-bold text-2xl text-slate-800 transition-all"
-          placeholder="0.00" />
-        <app-error-message [control]="transactionForm.get('amount')" [customMessages]="{
-            required: 'Поле суми обов’язкове.',
-            min: 'Сума має бути більше 0.01.',
-            pattern: 'До 2 знаків після коми.'
-          }"></app-error-message>
+      <!-- Amount & Currency -->
+      <div class="grid grid-cols-4 gap-2">
+        <div class="col-span-3">
+          <label for="amount"
+            class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Сума</label>
+          <input id="amount" type="number" formControlName="amount" autocomplete="off"
+            class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-bold text-2xl text-slate-800 transition-all"
+            placeholder="0.00" />
+        </div>
+        <div class="col-span-1">
+          <label for="currency"
+            class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Валюта</label>
+          <select id="currency" formControlName="currency"
+            class="w-full px-2 py-3.5 rounded-xl bg-slate-100 border border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm text-slate-700 transition-all cursor-pointer appearance-none text-center">
+            <option value="UAH">₴</option>
+            <option value="USD">$</option>
+            <option value="EUR">€</option>
+            <option value="CZK">Kč</option>
+          </select>
+        </div>
+        <div class="col-span-4">
+          <app-error-message [control]="transactionForm.get('amount')" [customMessages]="{
+              required: 'Поле суми обов’язкове.',
+              min: 'Сума має бути більше 0.01.',
+              pattern: 'До 2 знаків після коми.'
+            }"></app-error-message>
+        </div>
       </div>
 
       <!-- Description -->
       <div>
         <label for="description"
-          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Опис</label>
+          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Коментар
+          (необов'язково)</label>
         <input id="description" type="text" formControlName="description" autocomplete="off"
           class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-medium text-sm text-slate-700 transition-all"
-          placeholder="Коментар..." />
+          placeholder="Можна не вказувати..." />
         <app-error-message [control]="transactionForm.get('description')" [customMessages]="{
-            required: 'Поле опису обов’язкове.',
             maxlength: 'Максимум 50 символів.'
           }"></app-error-message>
       </div>
@@ -89,7 +104,7 @@
           class="py-3 rounded-xl bg-slate-100 border border-slate-200/60 text-slate-500 hover:bg-slate-200 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-delete-left text-xl"></i>
         </button>
-        <button type="submit" [disabled]="transactionForm.invalid"
+        <button type="submit" [disabled]="transactionForm.invalid" (click)="onSubmit($event)"
           class="py-3 rounded-xl text-white shadow-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
           [ngClass]="transaction.transactionType === 'income' ? 'bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 disabled:bg-slate-300' : 'bg-indigo-600 shadow-indigo-200 hover:bg-indigo-700 disabled:bg-slate-300'">
           <i class="fa-solid fa-check text-xl"></i>

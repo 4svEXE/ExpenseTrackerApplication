@@ -8,9 +8,9 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="card-container h-full">
-      <div class="flex justify-between items-center mb-4 md:mb-6">
+      <div class="flex justify-between items-center mb-4 md:mb-6 pt-10">
         <h3 class="text-lg md:text-xl font-bold text-slate-800 drop-shadow-sm">Рахунки та Картки</h3>
-        <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+        <button (click)="onAddAccount()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white transition-all active:scale-95">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         </button>
       </div>
@@ -73,5 +73,23 @@ export class AccountsListComponent {
 
   onAccountClick(acc: AccountBalance) {
     this.accountClicked.emit(acc);
+  }
+
+  onAddAccount() {
+    const name = prompt('Введіть назву рахунку:');
+    if (name) {
+      this.financeData.addAccount({
+        name,
+        balance: 0,
+        currency: this.userCurrency,
+        tags: [],
+        color: this.generateRandomColor()
+      });
+    }
+  }
+
+  private generateRandomColor(): string {
+    const colors = ['#171717', '#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+    return colors[Math.floor(Math.random() * colors.length)];
   }
 }

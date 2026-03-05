@@ -5,6 +5,7 @@ import { TransactionType } from '../../types/transaction-type.enum';
 import { TransactionCategory } from '../../types/transaction-category.interface';
 import { CategoryService } from '../../services/category.service';
 import { TransactionService } from '../../services/transaction.service';
+import { FinanceDataService } from '../../services/finance-data.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -45,7 +46,8 @@ export class CategoriesComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private categoryService: CategoryService,
-    private transactionService: TransactionService
+    private transactionService: TransactionService,
+    public financeData: FinanceDataService
   ) { }
 
   toggleEditMode() {
@@ -98,6 +100,7 @@ export class CategoriesComponent implements OnInit {
     this.transactionService.setTransaction({
       ...this.transaction,
       category: category.name,
+      amount: category.plannedAmount || 0
     });
   }
 

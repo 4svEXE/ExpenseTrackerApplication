@@ -1,5 +1,5 @@
 <div class="settings-wrapper min-h-screen bg-slate-50/50 p-4 md:p-8 font-sans pb-24">
-    <div class="max-w-[800px] mx-auto space-y-6 md:space-y-8">
+    <div class="max-w-[800px] mx-auto space-y-6 md:space-y-8 pt-10">
 
         <div class="flex items-center gap-3 mb-6">
             <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
@@ -38,6 +38,21 @@
                             <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
                         </select>
                         <p class="text-[10px] text-slate-400 mt-1">Впливає на загальні суми та розрахунки</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">Податок (%)</label>
+                        <input type="number" [(ngModel)]="settings.taxRate"
+                            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium">
+                        <p class="text-[10px] text-slate-400 mt-1">Вираховується від загального доходу</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">Фіксований податок/збір</label>
+                        <input type="number" [(ngModel)]="settings.taxFixedAmount"
+                            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium">
+                        <p class="text-[10px] text-slate-400 mt-1">Стала сума щомісяця (напр. ЄСВ)</p>
                     </div>
                 </div>
             </div>
@@ -83,8 +98,14 @@
                 <div *ngIf="settings.soundEnabled" class="px-4">
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-sm font-semibold text-slate-600">Гучність</label>
-                        <span class="text-xs font-bold text-slate-800">{{ (settings.soundVolume * 100) | number:'1.0-0'
-                            }}%</span>
+                        <div class="flex items-center gap-3">
+                            <button (click)="playTestSound()"
+                                class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md hover:bg-indigo-100 transition-colors uppercase tracking-wider">
+                                <i class="fa-solid fa-play mr-1"></i> Тест
+                            </button>
+                            <span class="text-xs font-bold text-slate-800">{{ (settings.soundVolume * 100) |
+                                number:'1.0-0' }}%</span>
+                        </div>
                     </div>
                     <input type="range" min="0" max="1" step="0.01" [(ngModel)]="settings.soundVolume"
                         class="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-black">
@@ -119,100 +140,90 @@
             </div>
         </div>
 
-        <!-- Керування планами -->
+        <!-- Notifications Settings -->
         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
             <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-neutral-400"></i>
-                Фінансові Плани
+                <i class="fa-solid fa-bell text-neutral-400"></i>
+                Сповіщення та Нагадування
             </h3>
 
-            <!-- Income Plans -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-bold text-slate-700">Планові доходи</h4>
-                    <button (click)="addIncomePlan()"
-                        class="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors">
-                        + Додати
-                    </button>
-                </div>
-                <div class="space-y-4">
-                    <div *ngFor="let plan of incomePlans; let i = index"
-                        class="relative bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col md:flex-row gap-3">
-                        <div class="flex-1">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Категорія</label>
-                            <input type="text" [(ngModel)]="plan.category" placeholder="Зарплата..."
-                                class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black">
+            <div class="space-y-6">
+                <!-- Notification Toggle -->
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-500 shadow-sm border border-slate-50">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <div class="w-full md:w-32">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
-                            <input type="number" [(ngModel)]="plan.planAmount" placeholder="0"
-                                class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Нагадування заповнити витрати</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Щоденне сповіщення у вибраний час</p>
                         </div>
-                        <button (click)="removeIncomePlan(i)"
-                            class="md:self-end w-full md:w-10 h-10 flex items-center justify-center text-rose-500 bg-rose-50 md:bg-transparent rounded-xl transition-colors">
-                            <i class="fa-solid fa-trash-can md:text-lg"></i>
-                        </button>
                     </div>
-                    <div *ngIf="incomePlans.length === 0"
-                        class="text-sm text-slate-400 text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        Немає планів доходів.
-                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="settings.notificationEnabled" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+                        </div>
+                    </label>
                 </div>
-                <div class="mt-4 flex justify-end">
-                    <button (click)="saveIncomePlans()"
-                        class="bg-neutral-100 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-200 transition-colors w-full md:w-auto">
-                        Зберегти доходи
-                    </button>
+
+                <div *ngIf="settings.notificationEnabled" class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Час сповіщення</label>
+                        <input type="time" [(ngModel)]="settings.notificationTime"
+                            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black outline-none transition-all font-medium text-black">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Текст
+                            нагадування</label>
+                        <input type="text" [(ngModel)]="settings.notificationText" placeholder="Час заповнити витрати!"
+                            class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black outline-none transition-all font-medium text-black">
+                    </div>
                 </div>
             </div>
 
-            <!-- Expense Plans -->
-            <div>
-                <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-bold text-slate-700">Планові витрати</h4>
-                    <button (click)="addExpensePlan()"
-                        class="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition-colors">
-                        + Додати
-                    </button>
-                </div>
-                <div class="space-y-4">
-                    <div *ngFor="let plan of expensePlans; let i = index"
-                        class="relative bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col md:flex-row gap-3">
-                        <div class="flex-1">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Категорія</label>
-                            <input type="text" [(ngModel)]="plan.category" placeholder="Оренда..."
-                                class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black">
+            <div class="mt-8 flex justify-end">
+                <button (click)="saveSettings()"
+                    class="bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-neutral-800 transition-all shadow-lg">
+                    Зберегти сповіщення
+                </button>
+            </div>
+        </div>
+
+        <!-- Gamification Settings -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-neutral-400"></i>
+                Ігровий процес (ETA Coins)
+            </h3>
+
+            <div class="space-y-6">
+                <div class="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-amber-500 shadow-sm border border-amber-50">
+                            <i class="fa-solid fa-coins"></i>
                         </div>
-                        <div class="w-full md:w-40">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Тип</label>
-                            <select [(ngModel)]="plan.type"
-                                class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 outline-none focus:border-black">
-                                <option value="mandatory">Обов'язкові</option>
-                                <option value="savings">Заощадження</option>
-                                <option value="unexpected">Непередбачені</option>
-                            </select>
+                        <div>
+                            <p class="font-bold text-amber-900 text-sm">Анімація монет</p>
+                            <p class="text-[10px] text-amber-600 font-medium">Отримуйте монетки за кожну транзакцію</p>
                         </div>
-                        <div class="w-full md:w-32">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
-                            <input type="number" [(ngModel)]="plan.amount" placeholder="0"
-                                class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black">
-                        </div>
-                        <button (click)="removeExpensePlan(i)"
-                            class="md:self-end w-full md:w-10 h-10 flex items-center justify-center text-rose-500 bg-rose-50 md:bg-transparent rounded-xl transition-colors">
-                            <i class="fa-solid fa-trash-can md:text-lg"></i>
-                        </button>
                     </div>
-                    <div *ngIf="expensePlans.length === 0"
-                        class="text-sm text-slate-400 text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        Немає планів витрат.
-                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="settings.gamificationEnabled" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500">
+                        </div>
+                    </label>
                 </div>
-                <div class="mt-4 flex justify-end">
-                    <button (click)="saveExpensePlans()"
-                        class="bg-neutral-100 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-200 transition-colors w-full md:w-auto">
-                        Зберегти витрати
-                    </button>
-                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button (click)="saveSettings()"
+                    class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-200">
+                    Зберегти налаштування гри
+                </button>
             </div>
         </div>
 

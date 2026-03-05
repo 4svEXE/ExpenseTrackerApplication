@@ -35,4 +35,10 @@ export class AudioService {
     playChallengeComplete() {
         this.playSound('/audio/challenge_complete.mp3');
     }
+
+    playTest(volume: number) {
+        const audio = new Audio('/audio/income.mp3');
+        audio.volume = volume;
+        audio.play().catch(e => console.warn(e));
+    }
 }

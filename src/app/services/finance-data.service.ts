@@ -26,6 +26,7 @@ export interface IncomePlan {
   category: string;
   planAmount: number;
   factAmount: number;
+  isRecurring?: boolean; // monthly
 }
 
 export interface ExpensePlan {
@@ -33,6 +34,8 @@ export interface ExpensePlan {
   category: string;
   type: 'mandatory' | 'savings' | 'unexpected';
   amount: number;
+  isRecurring?: boolean; // monthly
+  isCompleted?: boolean; // for one-time
 }
 
 export interface AccountBalance {
@@ -166,6 +169,25 @@ export class FinanceDataService {
     return (r[f] || 1) / (r[t] || 1);
   }
 
+  addAccount(acc: Omit<AccountBalance, 'id'>) {
+    const newAcc = {
+      ...acc,
+      id: Date.now().toString(),
+      balance: Number(acc.balance) || 0
+    };
+    const current = this.accounts();
+    this.saveAccounts([...current, newAcc]);
+    this.toasts.show('Рахунок додано!', 'success');
+  }
+
+  getNetIncomeFact(): number {
+    const total = this.getMonthlyIncomeFactTotal();
+    const settings = this.userSettings();
+    const pctTax = total * ((settings.taxRate || 0) / 100);
+    const fixedTax = settings.taxFixedAmount || 0;
+    return total - pctTax - fixedTax;
+  }
+
   loadData() {
     const load = (key: string, def: any) => {
       const s = localStorage.getItem(key);
@@ -176,7 +198,7 @@ export class FinanceDataService {
       { id: '1', category: 'Зарплата', planAmount: 80000, factAmount: 0 }
     ]));
     this.expensePlans.set(load(this.EXPENSE_PLANS_KEY, [
-      { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000 }
+      { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000, isRecurring: true }
     ]));
     this.accounts.set(load(this.ACCOUNTS_KEY, [
       { id: '1', name: 'Картка', balance: 50000, currency: 'UAH', tags: [] }
@@ -194,6 +216,25 @@ export class FinanceDataService {
     return this.transactions()
       .filter(t => t.type === 'income' && t.date.getMonth() === now.getMonth() && t.date.getFullYear() === now.getFullYear())
       .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
+  }
+
+  getTaxAmount(): number {
+    const total = this.getMonthlyIncomeFactTotal();
+    const settings = this.userSettings();
+    const pctTax = total * ((settings.taxRate || 0) / 100);
+    const fixedTax = Number(settings.taxFixedAmount) || 0;
+    return pctTax + fixedTax;
+  }
+
+  getPlannedExpensesTotalUah(): number {
+    const plans = this.expensePlans()
+      .filter(p => p.isRecurring || !p.isCompleted)
+      .reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
+    const subs = this.subscriptions()
+      .reduce((s, sub) => s + (Number(sub.priceUah) || 0), 0);
+
+    return plans + subs;
   }
 
   getMonthlyIncomePlanTotal(): number {
@@ -258,6 +299,13 @@ export class FinanceDataService {
       accs[i].balance = (Number(accs[i].balance) || 0) + (type === 'income' ? amt : -amt);
       this.saveAccounts(accs);
     }
+  }
+
+  addCoins(amount: number = 1) {
+    if (!this.userSettings().gamificationEnabled) return;
+    const settings = { ...this.userSettings() };
+    settings.coins = (settings.coins || 0) + amount;
+    this.saveSettings(settings);
   }
 
   clearAllData() { localStorage.clear(); location.reload(); }

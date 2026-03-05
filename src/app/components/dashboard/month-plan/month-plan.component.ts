@@ -123,13 +123,13 @@ export class MonthPlanComponent {
     const activeMonth = new Date().getMonth();
     const activeYear = new Date().getFullYear();
     const txs = this.financeData.transactions().filter(t => t.type === 'expense' && t.date.getMonth() === activeMonth && t.date.getFullYear() === activeYear);
-    const taxTotal = this.financeData.getMonthlyIncomeFactTotal() * 0.1; // Special mapping for automatic calculation of 10% taxes
 
-    return this.financeData.expensePlans().map(plan => {
+    // 1. Regular Expense Plans
+    const plans = this.financeData.expensePlans().map(plan => {
       let fact = 0;
       const planCat = (plan.category || '').toLowerCase();
       if (planCat.includes('податки')) {
-        fact = taxTotal;
+        fact = this.financeData.getTaxAmount();
       } else {
         const matched = txs.filter(t =>
           (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
@@ -139,6 +139,18 @@ export class MonthPlanComponent {
       }
       return { ...plan, factAmount: fact };
     });
+
+    // 2. Add Active Subscriptions as plans
+    const subs = this.financeData.subscriptions().map(s => ({
+      id: s.id,
+      category: `Sub: ${s.name}`,
+      amount: s.priceUah,
+      factAmount: s.totalSpent > 0 ? s.priceUah : 0, // Simplified: if paid this month? 
+      type: 'mandatory' as const,
+      isRecurring: true
+    }));
+
+    return [...plans, ...subs];
   });
 
   totalIncomeFact = computed(() => this.computedIncomePlans().reduce((acc, p) => acc + p.factAmount, 0));

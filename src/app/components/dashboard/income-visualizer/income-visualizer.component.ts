@@ -42,13 +42,10 @@ interface Bar {
           <span class="w-3 h-3 rounded-full bg-[#10b981]"></span> Здобутий дохід
         </div>
         <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-[#f87171]"></span> Оренда
+          <span class="w-3 h-3 rounded-full bg-[#fbbf24]"></span> Витрати по категоріях
         </div>
         <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-[#fbbf24]"></span> Їжа/Інші
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-slate-100 border border-slate-200"></span> План (не зароблено)
+          <span class="w-3 h-3 rounded-full bg-slate-100 border border-slate-200"></span> Заплановано
         </div>
       </div>
     </div>
@@ -74,8 +71,12 @@ export class IncomeVisualizerComponent {
     });
   }
 
+  get planTotal() {
+    return this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
+  }
+
   calculateBars() {
-    const incomeGoal = this.financeData.userSettings().monthlyIncomeGoal;
+    const incomeGoal = this.planTotal || 10000;
 
     // Total Bars
     const numBarsTotal = Math.max(1, Math.ceil(incomeGoal / 1000));

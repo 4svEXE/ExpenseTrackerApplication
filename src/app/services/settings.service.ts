@@ -7,6 +7,13 @@ export interface UserSettings {
     soundEnabled: boolean;
     soundVolume: number; // 0 to 1
     vibrationEnabled: boolean;
+    taxRate?: number; // percentage
+    taxFixedAmount?: number; // fixed amount per month
+    notificationEnabled?: boolean;
+    notificationTime?: string; // HH:mm
+    notificationText?: string;
+    gamificationEnabled?: boolean;
+    coins?: number;
 }
 
 @Injectable({
@@ -16,12 +23,19 @@ export class SettingsService {
     private readonly SETTINGS_KEY = 'userSettings';
 
     userSettings = signal<UserSettings>({
-        name: 'ФОП',
-        monthlyIncomeGoal: 140000,
+        name: 'Бомжулька>',
+        monthlyIncomeGoal: 14000,
         currency: 'UAH',
         soundEnabled: true,
         soundVolume: 0.5,
-        vibrationEnabled: true
+        vibrationEnabled: true,
+        taxRate: 5,
+        taxFixedAmount: 0,
+        notificationEnabled: true,
+        notificationTime: '20:00',
+        notificationText: 'Час заповнити витрати! 💸',
+        gamificationEnabled: true,
+        coins: 0
     });
 
     constructor() {

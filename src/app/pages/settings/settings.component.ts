@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FinanceDataService, UserSettings, IncomePlan, ExpensePlan } from '../../services/finance-data.service';
+import { AudioService } from '../../services/audio.service';
 
 @Component({
   selector: 'app-settings',
@@ -12,6 +13,7 @@ import { FinanceDataService, UserSettings, IncomePlan, ExpensePlan } from '../..
 })
 export class SettingsComponent implements OnInit {
   financeData = inject(FinanceDataService);
+  audio = inject(AudioService);
 
   // Local state for forms
   settings: UserSettings = {
@@ -20,10 +22,15 @@ export class SettingsComponent implements OnInit {
     currency: 'UAH',
     soundEnabled: true,
     soundVolume: 0.5,
-    vibrationEnabled: true
+    vibrationEnabled: true,
+    taxRate: 0,
+    taxFixedAmount: 0,
+    notificationEnabled: true,
+    notificationTime: '20:00',
+    notificationText: 'Час заповнити витрати! 💸',
+    gamificationEnabled: true,
+    coins: 0
   };
-  incomePlans: IncomePlan[] = [];
-  expensePlans: ExpensePlan[] = [];
 
   currencies = ['UAH', 'USD', 'EUR', 'CZK'];
 
@@ -32,53 +39,16 @@ export class SettingsComponent implements OnInit {
   }
 
   loadData() {
-    // Clone data to avoid direct mutation before saving
     this.settings = { ...this.financeData.userSettings() };
-    this.incomePlans = JSON.parse(JSON.stringify(this.financeData.incomePlans()));
-    this.expensePlans = JSON.parse(JSON.stringify(this.financeData.expensePlans()));
   }
 
   saveSettings() {
     this.financeData.saveSettings(this.settings);
-    alert('Загальні налаштування збережено!');
+    alert('Налаштування збережено!');
   }
 
-  // --- Income Plans ---
-  addIncomePlan() {
-    this.incomePlans.push({
-      id: Date.now().toString(),
-      category: '',
-      planAmount: 0,
-      factAmount: 0
-    });
-  }
-
-  removeIncomePlan(index: number) {
-    this.incomePlans.splice(index, 1);
-  }
-
-  saveIncomePlans() {
-    this.financeData.saveIncomePlans(this.incomePlans);
-    alert('Плани доходів збережено!');
-  }
-
-  // --- Expense Plans ---
-  addExpensePlan() {
-    this.expensePlans.push({
-      id: Date.now().toString(),
-      category: '',
-      type: 'mandatory',
-      amount: 0
-    });
-  }
-
-  removeExpensePlan(index: number) {
-    this.expensePlans.splice(index, 1);
-  }
-
-  saveExpensePlans() {
-    this.financeData.saveExpensePlans(this.expensePlans);
-    alert('Плани витрат збережено!');
+  playTestSound() {
+    this.audio.playTest(this.settings.soundVolume);
   }
 
   // --- Data Management ---

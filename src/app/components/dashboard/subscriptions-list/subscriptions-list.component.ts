@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
             <tr>
               <th class="px-3 md:px-5 py-2 md:py-3">Сервіс</th>
               <th class="px-3 md:px-5 py-2 md:py-3">Ціна</th>
-              <th class="px-3 md:px-5 py-2 md:py-3">Наст. оплата</th>
+              <th class="px-3 md:px-5 py-2 md:py-3">Оплата</th>
               <th class="px-3 md:px-5 py-2 md:py-3 text-right">Витрачено</th>
             </tr>
           </thead>

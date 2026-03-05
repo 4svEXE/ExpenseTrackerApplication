@@ -2,13 +2,15 @@ import { Categories } from '../db/categories-list.data';
 import { TransactionCategory } from '../types/transaction-category.interface';
 import { TransactionType } from '../types/transaction-type.enum';
 import { LocalStorageService } from './local-storage.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { FinanceDataService } from './finance-data.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoryService {
   private readonly StorageKey = 'Categories';
+  private financeData = inject(FinanceDataService);
 
   constructor(private localStorageService: LocalStorageService) { }
 
@@ -66,9 +68,56 @@ export class CategoryService {
       return categories;
     }
 
-    return categories.filter(
+    const filtered = categories.filter(
       (category) => category.transactionType === type
     );
+
+    // Merge in planned items as categories if they don't exist
+    if (type === 'income') {
+      const plans = this.financeData.incomePlans();
+      plans.forEach(p => {
+        if (!filtered.some(c => c.name.toLowerCase() === p.category.toLowerCase())) {
+          filtered.push({
+            name: p.category,
+            icon: 'fa-solid fa-bullseye', // Distinctive icon for plans
+            transactionType: 'income',
+            plannedAmount: p.planAmount
+          } as TransactionCategory);
+        }
+      });
+    } else if (type === 'expense') {
+      const plans = this.financeData.expensePlans();
+      plans.forEach(p => {
+        if (!filtered.some(c => c.name.toLowerCase() === p.category.toLowerCase())) {
+          filtered.push({
+            name: p.category,
+            icon: 'fa-solid fa-bullseye',
+            transactionType: 'expense',
+            plannedAmount: p.amount
+          } as TransactionCategory);
+        }
+      });
+
+      // Also include active subscriptions as virtual categories
+      const subs = this.financeData.subscriptions();
+      subs.forEach(s => {
+        if (!filtered.some(c => c.name.toLowerCase().includes(s.name.toLowerCase()))) {
+          filtered.push({
+            name: `Sub: ${s.name}`,
+            icon: 'fa-solid fa-calendar-check',
+            transactionType: 'expense',
+            plannedAmount: s.priceUah
+          } as TransactionCategory);
+        }
+      });
+    }
+
+    // Sort: put items with plannedAmount first
+    return filtered.sort((a, b) => {
+      if (a.plannedAmount && !b.plannedAmount) return -1;
+      if (!a.plannedAmount && b.plannedAmount) return 1;
+      return 0;
+    });
   }
 
   addCategory(category: TransactionCategory): void {

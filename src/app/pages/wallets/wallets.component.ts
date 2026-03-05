@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
-import { FinanceDataService, AccountBalance, Subscription } from '../../services/finance-data.service';
+import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePlan } from '../../services/finance-data.service';
 
 @Component({
   selector: 'app-wallets',
@@ -23,6 +23,119 @@ import { FinanceDataService, AccountBalance, Subscription } from '../../services
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           <app-accounts-list (accountClicked)="editAccount($event)"></app-accounts-list>
           <app-subscriptions-list (subscriptionClicked)="editSubscription($event)"></app-subscriptions-list>
+        </div>
+
+        <!-- Керування планами -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-8">
+            <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm border border-indigo-100">
+                  <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                Фінансові Плани
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Income Plans -->
+              <div>
+                  <div class="flex justify-between items-center mb-4">
+                      <h4 class="font-bold text-slate-700">Планові доходи</h4>
+                      <button (click)="addIncomePlan()"
+                          class="bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-neutral-800 transition-all flex items-center gap-2">
+                          <i class="fa-solid fa-plus text-[10px]"></i> Додати
+                      </button>
+                  </div>
+                  <div class="space-y-4">
+                      <div *ngFor="let plan of incomePlans; let i = index"
+                          class="relative bg-slate-50 p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col gap-3"
+                          [class.border-emerald-500]="plan.isNew" 
+                          [class.border-slate-100]="!plan.isNew">
+                          <div class="flex gap-3">
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Категорія</label>
+                                <input type="text" [(ngModel)]="plan.category" (change)="saveIncomePlans()" placeholder="Зарплата..."
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
+                            </div>
+                            <div class="w-24">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
+                                <input type="number" [(ngModel)]="plan.planAmount" (change)="saveIncomePlans()" placeholder="0"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
+                            </div>
+                          </div>
+                          <div class="flex items-center justify-between mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" [(ngModel)]="plan.isRecurring" (change)="saveIncomePlans()"
+                                    class="w-4 h-4 rounded border-slate-300 text-black focus:ring-black">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Повтор кожного місяця</span>
+                            </label>
+                            <button (click)="removeIncomePlan(i)"
+                                class="text-rose-500 hover:text-rose-700 transition-colors p-2">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                          </div>
+                      </div>
+                      <div *ngIf="incomePlans.length === 0"
+                          class="text-sm text-slate-400 text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          Немає планів доходів. Почніть планувати свій бюджет!
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Expense Plans -->
+              <div>
+                  <div class="flex justify-between items-center mb-4">
+                      <h4 class="font-bold text-slate-700">Планові витрати</h4>
+                      <button (click)="addExpensePlan()"
+                          class="bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-neutral-800 transition-all flex items-center gap-2">
+                          <i class="fa-solid fa-plus text-[10px]"></i> Додати
+                      </button>
+                  </div>
+                  <div class="space-y-4">
+                      <div *ngFor="let plan of expensePlans; let i = index"
+                          class="relative bg-slate-50 p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col gap-3"
+                          [class.border-emerald-500]="plan.isNew" 
+                          [class.border-slate-100]="!plan.isNew">
+                          <div class="flex gap-3">
+                            <div class="flex-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Категорія</label>
+                                <input type="text" [(ngModel)]="plan.category" (change)="saveExpensePlans()" placeholder="Оренда..."
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
+                            </div>
+                            <div class="w-24">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
+                                <input type="number" [(ngModel)]="plan.amount" (change)="saveExpensePlans()" placeholder="0"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
+                            </div>
+                          </div>
+                          <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Тип</label>
+                                <select [(ngModel)]="plan.type" (change)="saveExpensePlans()"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold text-slate-600 outline-none focus:border-black">
+                                    <option value="mandatory">Обов'язкові</option>
+                                    <option value="savings">Заощадження</option>
+                                    <option value="unexpected">Непередбачені</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-end gap-4 pb-1">
+                                <label class="flex items-center gap-2 cursor-pointer mt-5">
+                                    <input type="checkbox" [(ngModel)]="plan.isRecurring" (change)="saveExpensePlans()"
+                                        class="w-4 h-4 rounded border-slate-300 text-black focus:ring-black">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">Повтор</span>
+                                </label>
+                                <button (click)="removeExpensePlan(i)"
+                                    class="text-rose-500 hover:text-rose-700 transition-colors p-2 mt-5">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                          </div>
+                      </div>
+                      <div *ngIf="expensePlans.length === 0"
+                          class="text-sm text-slate-400 text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          Немає планів витрат. Додайте обов'язкові платежі або заощадження.
+                      </div>
+                  </div>
+              </div>
+            </div>
         </div>
 
         <div class="p-8 bg-neutral-900 rounded-3xl text-white shadow-2xl relative overflow-hidden group">
@@ -163,8 +276,28 @@ import { FinanceDataService, AccountBalance, Subscription } from '../../services
     }
   `]
 })
-export class WalletsComponent {
+export class WalletsComponent implements OnInit {
   financeData = inject(FinanceDataService);
+
+  incomePlans: (IncomePlan & { isNew?: boolean })[] = [];
+  expensePlans: (ExpensePlan & { isNew?: boolean })[] = [];
+
+  ngOnInit() {
+    this.loadPlans();
+  }
+
+  loadPlans() {
+    this.incomePlans = JSON.parse(JSON.stringify(this.financeData.incomePlans()));
+    this.expensePlans = JSON.parse(JSON.stringify(this.financeData.expensePlans()));
+  }
+
+  saveIncomePlans() {
+    this.financeData.saveIncomePlans(this.incomePlans);
+  }
+
+  saveExpensePlans() {
+    this.financeData.saveExpensePlans(this.expensePlans);
+  }
 
   // Account Modal State
   isModalOpen = signal(false);
@@ -305,5 +438,48 @@ export class WalletsComponent {
       totalSpent: 0
     };
     this.newSubDate = new Date().toISOString().split('T')[0];
+  }
+
+  // ==== PLANNING CRUD ====
+  addIncomePlan() {
+    const newId = Date.now().toString();
+    this.incomePlans.unshift({
+      id: newId,
+      category: '',
+      planAmount: 0,
+      factAmount: 0,
+      isRecurring: true,
+      isNew: true
+    });
+    setTimeout(() => {
+      const p = this.incomePlans.find(x => x.id === newId);
+      if (p) p.isNew = false;
+    }, 3000);
+  }
+
+  removeIncomePlan(index: number) {
+    this.incomePlans.splice(index, 1);
+    this.saveIncomePlans();
+  }
+
+  addExpensePlan() {
+    const newId = Date.now().toString();
+    this.expensePlans.unshift({
+      id: newId,
+      category: '',
+      type: 'mandatory',
+      amount: 0,
+      isRecurring: true,
+      isNew: true
+    });
+    setTimeout(() => {
+      const p = this.expensePlans.find(x => x.id === newId);
+      if (p) p.isNew = false;
+    }, 3000);
+  }
+
+  removeExpensePlan(index: number) {
+    this.expensePlans.splice(index, 1);
+    this.saveExpensePlans();
   }
 }

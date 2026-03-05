@@ -23,34 +23,28 @@ import { RouterModule } from '@angular/router';
         <table class="w-full text-left text-sm whitespace-nowrap" *ngIf="recentTransactions.length > 0; else emptyState">
           <thead class="bg-slate-50/50 text-slate-500 font-semibold tracking-wider uppercase text-[10px]">
             <tr>
-              <th class="px-3 md:px-6 py-2 md:py-4">Назва / Теги</th>
-              <th class="px-3 md:px-6 py-2 md:py-4">Дата</th>
-              <th class="px-3 md:px-6 py-2 md:py-4">Рахунок</th>
-              <th class="px-3 md:px-6 py-2 md:py-4 text-right">₴</th>
-              <th class="px-3 md:px-6 py-2 md:py-4 text-right">€</th>
+              <th class="px-3 md:px-6 py-2 md:py-4">Назва</th>
+              <th class="px-3 md:px-6 py-2 md:py-4 text-right">Сума</th>
+              <th class="px-3 md:px-6 py-2 md:py-4 text-center">Рахунок</th>
+              <th class="px-3 md:px-6 py-2 md:py-4 text-right">Дата</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr *ngFor="let t of recentTransactions" class="hover:bg-slate-50/50 transition-colors">
               <td class="px-3 md:px-6 py-3 md:py-4">
                 <div class="font-bold text-slate-800 text-xs md:text-sm">{{ t.title }}</div>
-                <div class="flex flex-wrap gap-1 mt-1">
-                  <span *ngFor="let tag of t.tags" class="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
-                    {{ tag }}
-                  </span>
-                </div>
-              </td>
-              <td class="px-3 md:px-6 py-3 md:py-4 text-slate-600 font-medium text-[10px] md:text-sm">
-                {{ t.date | date:'d MMM':'':'uk-UA' }}
-              </td>
-              <td class="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-sm">
-                <div class="font-medium text-slate-700">{{ t.account }}</div>
               </td>
               <td class="px-3 md:px-6 py-3 md:py-4 text-right font-bold text-xs md:text-sm" [ngClass]="t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'">
                 {{ t.type === 'income' ? '+' : '-' }}{{ t.amountUah | currency:userCurrency:'symbol-narrow':'1.0-0' }}
               </td>
-              <td class="px-3 md:px-6 py-3 md:py-4 text-right font-semibold text-slate-500 text-[10px] md:text-sm">
-                {{ t.type === 'income' ? '+' : '-' }}{{ t.amountEur | currency:'EUR':'symbol-narrow':'1.0-0' }}
+              <td class="px-3 md:px-6 py-3 md:py-4 text-center text-[10px] md:text-sm">
+                <div class="inline-flex items-center px-2 py-1 rounded-md bg-slate-50 border border-slate-100 text-slate-600 font-medium">
+                  <i class="fa-solid fa-credit-card mr-1.5 opacity-40"></i>
+                  {{ t.account }}
+                </div>
+              </td>
+              <td class="px-3 md:px-6 py-3 md:py-4 text-right text-slate-500 font-medium text-[10px] md:text-sm">
+                {{ t.date | date:'d MMM' }}
               </td>
             </tr>
           </tbody>

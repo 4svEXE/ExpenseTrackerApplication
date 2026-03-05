@@ -14,6 +14,7 @@ import { ErrorMessageComponent } from '../../error-message/error-message.compone
 import { Transaction } from '../../../types/transaction.interface';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { AudioService } from '../../../services/audio.service';
+import { CoinAnimationService } from '../../../services/coin-animation.service';
 
 @Component({
   selector: 'app-transaction-input',
@@ -40,7 +41,8 @@ export class TransactionInputComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private transactionService: TransactionService,
-    private router: Router
+    private router: Router,
+    private coinService: CoinAnimationService
   ) { }
 
   ngOnInit(): void {
@@ -48,6 +50,7 @@ export class TransactionInputComponent implements OnInit {
 
     this.transactionForm = this.fb.group({
       accountId: [lastAccountId, [Validators.required]],
+      currency: [this.financeData.userSettings().currency, [Validators.required]],
       amount: [
         null,
         [
@@ -56,12 +59,15 @@ export class TransactionInputComponent implements OnInit {
           Validators.pattern(/^\d+(\.\d{1,2})?$/),
         ],
       ],
-      description: ['', [Validators.required, Validators.maxLength(50)]],
+      description: ['', [Validators.maxLength(50)]],
     });
 
     this.transactionSub = this.transactionService.transaction$.subscribe(
       (transaction) => {
         this.transaction = transaction;
+        if (transaction && transaction.amount > 0) {
+          this.transactionForm.patchValue({ amount: transaction.amount });
+        }
       }
     );
   }
@@ -93,15 +99,21 @@ export class TransactionInputComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
+  onSubmit(event?: MouseEvent | PointerEvent): void {
     if (this.transactionForm.valid) {
       const formValue = this.transactionForm.value;
       const tType = this.transaction.transactionType || 'expense';
+      const targetAccount = this.accounts().find(a => a.id === formValue.accountId);
+
+      let finalAmount = formValue.amount;
+      if (targetAccount && formValue.currency !== targetAccount.currency) {
+        finalAmount = formValue.amount * this.financeData.getExchangeRate(formValue.currency, targetAccount.currency);
+      }
 
       // 1. Add Transaction
       this.transactionService.addTransaction({
         ...this.transaction,
-        amount: formValue.amount,
+        amount: finalAmount,
         description: formValue.description,
         accountId: formValue.accountId,
         date: new Date().toISOString(),
@@ -110,7 +122,7 @@ export class TransactionInputComponent implements OnInit {
       // 2. Adjust Balance
       this.financeData.adjustAccountBalance(
         formValue.accountId,
-        formValue.amount,
+        finalAmount,
         tType as 'income' | 'expense'
       );
 
@@ -119,6 +131,11 @@ export class TransactionInputComponent implements OnInit {
         this.audio.playIncome();
       } else {
         this.audio.playOutcome();
+      }
+
+      // 4. Gamification Animation
+      if (event && this.financeData.userSettings().gamificationEnabled) {
+        this.coinService.animate(event.clientX, event.clientY);
       }
 
       localStorage.setItem('lastAccountId', formValue.accountId);

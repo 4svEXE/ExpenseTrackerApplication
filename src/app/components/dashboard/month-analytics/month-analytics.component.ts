@@ -36,7 +36,9 @@ import { CommonModule } from '@angular/common';
         <div class="flex flex-col h-full bg-white/50 group-hover:bg-white/80 transition-all rounded-2xl p-4 md:p-5 border border-white/60 shadow-sm relative overflow-hidden">
           <div class="absolute -right-6 -top-6 w-24 h-24 bg-slate-100 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
           <div class="relative z-10">
-            <h4 class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Податки (10%)</h4>
+            <h4 class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Податки ({{ taxRate }}%{{ financeData.userSettings().taxFixedAmount ? ' + фікс' : '' }})
+            </h4>
             <div class="text-xl md:text-3xl font-extrabold text-slate-800">{{ taxAmount | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
             <div class="text-[9px] text-slate-400 mt-1 font-medium bg-slate-100/50 inline-block px-2 py-0.5 rounded-full">Авто-розрахунок</div>
           </div>
@@ -78,7 +80,11 @@ export class MonthAnalyticsComponent {
   }
 
   get taxAmount() {
-    return this.factTotal * 0.1;
+    return this.financeData.getTaxAmount();
+  }
+
+  get taxRate() {
+    return this.financeData.userSettings().taxRate || 0;
   }
 
   get netDifference() {

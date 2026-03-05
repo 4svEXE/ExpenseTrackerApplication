@@ -82,7 +82,7 @@ export class FinancialAssistantComponent {
   }
 
   get planTotal() {
-    return this.financeData.userSettings().monthlyIncomeGoal;
+    return this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
   }
 
   get factTotal() {

@@ -11,6 +11,12 @@
   <div class="relative flex flex-col items-center justify-start cursor-pointer group"
     (click)="!isEditMode() && onSelectCategory(category)">
 
+    <!-- Planned Amount Badge -->
+    <div *ngIf="category.plannedAmount && !isEditMode()"
+      class="absolute -top-1 -right-1 z-10 bg-indigo-600 text-[8px] md:text-[10px] text-white px-2 py-0.5 rounded-full font-bold shadow-md border-2 border-white">
+      {{ category.plannedAmount | currency:financeData.userSettings().currency:'symbol-narrow':'1.0-0' }}
+    </div>
+
     <!-- Delete Badge (Only in Edit Mode) -->
     <button *ngIf="isEditMode()" (click)="deleteCategory(category, $event)"
       class="absolute -top-1 -right-1 z-10 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-rose-600 hover:scale-110 transition-all active:scale-90 border-2 border-white">
