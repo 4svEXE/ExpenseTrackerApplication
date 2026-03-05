@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { TransactionService } from '../../../services/transaction.service';
 import { ErrorMessageComponent } from '../../error-message/error-message.component';
-import { Transaction } from '../../../types/Transaction';
+import { Transaction } from '../../../types/transaction';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { AudioService } from '../../../services/audio.service';
 

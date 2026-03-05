@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TransactionService } from '../../../../services/transaction.service';
-import { TransactionCategory } from '../../../../types/TransactionCategory';
+import { TransactionCategory } from '../../../../types/transaction-category';
 import { CategoryService } from '../../../../services/category.service';
 
 @Component({
@@ -16,12 +16,12 @@ export class FilterByCategoryComponent {
   constructor(
     private transactionService: TransactionService,
     private categoryService: CategoryService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.categories = this.categoryService.getCategories();
   }
-  
+
   onCategoryChange(event: any): void {
     this.selectedCategory = event.target.value as TransactionCategory | '';
 

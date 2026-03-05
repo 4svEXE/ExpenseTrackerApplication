@@ -1,6 +1,6 @@
-import { Categories } from '../db/Categories';
-import { TransactionCategory } from '../types/TransactionCategory';
-import { TransactionType } from '../types/TransactionType';
+import { Categories } from '../db/categories';
+import { TransactionCategory } from '../types/transaction-category';
+import { TransactionType } from '../types/transaction-type';
 import { LocalStorageService } from './local-storage.service';
 import { Injectable } from '@angular/core';
 

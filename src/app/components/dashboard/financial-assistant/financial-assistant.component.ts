@@ -44,7 +44,7 @@ import { CommonModule } from '@angular/common';
           <div class="h-3 w-full bg-white/20 rounded-full overflow-hidden backdrop-blur-sm border border-white/10">
             <div 
               class="h-full bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] rounded-full transition-all duration-1000 ease-out"
-              [style.width.%]="progressPercentage"
+              [style.width.%]="visualProgress"
             ></div>
           </div>
         </div>
@@ -96,6 +96,10 @@ export class FinancialAssistantComponent {
   get progressPercentage() {
     const p = this.planTotal;
     if (p === 0) return 0;
-    return Math.min((this.factTotal / p) * 100, 100);
+    return (this.factTotal / p) * 100;
+  }
+
+  get visualProgress() {
+    return Math.min(this.progressPercentage, 100);
   }
 }

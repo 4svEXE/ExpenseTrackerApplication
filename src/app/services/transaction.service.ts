@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from './local-storage.service';
-import { Transaction } from '../types/Transaction';
-import { Transactions } from '../db/Transactions';
-import { TransactionType } from '../types/TransactionType';
+import { Transaction } from '../types/transaction';
+import { Transactions } from '../db/transactions';
+import { TransactionType } from '../types/transaction-type';
 
 @Injectable({
   providedIn: 'root',
