@@ -36,6 +36,12 @@ export interface WishItem {
   category?: string;
 }
 
+export interface DebtItem {
+  id: string;
+  name: string;
+  amount: number;
+}
+
 export interface ExpensePlan {
   id: string;
   category: string;
@@ -79,6 +85,7 @@ export class FinanceDataService {
   private readonly SUBS_KEY = 'subscriptions';
   private readonly NOTIFIED_GOALS_KEY = 'notifiedGoals';
   private readonly WISHLIST_KEY = 'wishlist';
+  private readonly DEBTS_KEY = 'debts';
 
   private settingsService = inject(SettingsService);
   private ts = inject(TransactionService);
@@ -91,6 +98,7 @@ export class FinanceDataService {
   incomePlans = signal<IncomePlan[]>([]);
   expensePlans = signal<ExpensePlan[]>([]);
   wishlist = signal<WishItem[]>([]);
+  debts = signal<DebtItem[]>([]);
   accounts = signal<AccountBalance[]>([]);
   subscriptions = signal<Subscription[]>([]);
 
@@ -233,6 +241,7 @@ export class FinanceDataService {
       { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000, isRecurring: true }
     ]));
     this.wishlist.set(load(this.WISHLIST_KEY, []));
+    this.debts.set(load(this.DEBTS_KEY, []));
     this.accounts.set(load(this.ACCOUNTS_KEY, [
       { id: '1', name: 'Картка', balance: 50000, currency: 'UAH', tags: [] }
     ]));
@@ -337,6 +346,7 @@ export class FinanceDataService {
   saveExpensePlans(p: ExpensePlan[]) { this.expensePlans.set(p); localStorage.setItem(this.EXPENSE_PLANS_KEY, JSON.stringify(p)); }
   saveSubscriptions(s: Subscription[]) { this.subscriptions.set(s); localStorage.setItem(this.SUBS_KEY, JSON.stringify(s)); }
   saveWishlist(w: WishItem[]) { this.wishlist.set(w); localStorage.setItem(this.WISHLIST_KEY, JSON.stringify(w)); }
+  saveDebts(d: DebtItem[]) { this.debts.set(d); localStorage.setItem(this.DEBTS_KEY, JSON.stringify(d)); }
 
   adjustAccountBalance(id: string, amt: number, type: 'income' | 'expense') {
     const accs = [...this.accounts()];

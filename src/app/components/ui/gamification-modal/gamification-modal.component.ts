@@ -16,25 +16,33 @@ import { FinanceDataService } from '../../../services/finance-data.service';
            (click)="$event.stopPropagation()">
         
         <!-- Header -->
-        <div class="bg-gradient-to-br from-amber-400 to-orange-500 p-8 text-white relative shrink-0">
+        <div class="bg-gradient-to-br from-amber-400 to-orange-500 p-5 text-white relative shrink-0">
             <div class="absolute top-4 right-4 cursor-pointer w-10 h-10 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors" (click)="gamificationService.toggleInfoModal()">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </div>
             
-            <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 shadow-xl border border-white/30">
-                <i class="fa-solid fa-coins text-3xl"></i>
+            <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-3 shadow-xl border border-white/30">
+                <i class="fa-solid fa-coins text-2xl"></i>
             </div>
-            <h3 class="text-2xl font-black tracking-tight mb-1">Гейміфікація</h3>
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Система магічних івентів</p>
+            <h3 class="text-xl font-black tracking-tight mb-1">Гейміфікація</h3>
+            <p class="text-[8px] font-black uppercase tracking-[0.2em] opacity-80">Система магічних івентів</p>
         </div>
 
         <!-- Content -->
         <div class="p-8 overflow-y-auto custom-scrollbar flex-1">
             
             <!-- Timer Section -->
-            <div class="mb-8 p-6 bg-slate-900 rounded-2xl text-white text-center shadow-inner">
+            <div class="mb-8 p-6 bg-slate-900 rounded-2xl text-white text-center shadow-inner relative overflow-hidden">
                 <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Наступна пригода через</p>
-                <p class="text-4xl font-mono font-black text-amber-400">{{ gamificationService.timeUntilNext }}</p>
+                <div class="flex flex-col items-center gap-4">
+                    <p class="text-4xl font-mono font-black text-amber-400">{{ gamificationService.timeUntilNext }}</p>
+                    <button (click)="gamificationService.speedUp()" 
+                            [disabled]="financeData.userSettings().coins! < 1"
+                            class="px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-30 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border border-white/10 active:scale-95">
+                        <i class="fa-solid fa-bolt text-amber-400"></i>
+                        Пришвидшити (-20хв за 1 🪙)
+                    </button>
+                </div>
             </div>
 
             <!-- Achievement Section -->
@@ -120,20 +128,17 @@ import { FinanceDataService } from '../../../services/finance-data.service';
     `,
     styles: [`
         .animate-expand-coin {
-            animation: expand-coin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            transform-origin: 15% 5%;
+            animation: expand-circle 0.8s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        @keyframes expand-coin {
-            from {
+        @keyframes expand-circle {
+            0% {
+                clip-path: circle(0% at 15% 5%);
                 opacity: 0;
-                transform: scale(0.1) translate(-100px, -100px);
-                border-radius: 9999px;
             }
-            to {
+            100% {
+                clip-path: circle(150% at 15% 5%);
                 opacity: 1;
-                transform: scale(1) translate(0, 0);
-                border-radius: 0.5rem;
             }
         }
 

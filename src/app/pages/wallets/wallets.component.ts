@@ -12,7 +12,7 @@ import { ConfirmService } from '../../services/confirm.service';
   imports: [CommonModule, FormsModule, AccountsListComponent, SubscriptionsListComponent],
   template: `
     <div class="wallets-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 font-sans pb-24">
-      <div class="max-w-[1200px] mx-auto space-y-6 md:space-y-8">
+      <div class="max-w-[1200px] mx-auto space-y-6 md:space-y-8 pb-10">
         <div class="flex items-center gap-3 mb-6 md:mb-10">
           <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
             <i class="fa-solid fa-wallet text-neutral-400"></i>
@@ -150,7 +150,7 @@ import { ConfirmService } from '../../services/confirm.service';
             <div class="flex justify-between items-center mb-6 relative z-10">
                 <h3 class="text-xl font-bold flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-slate-200 shadow-sm border border-white/10">
-                      <i class="fa-solid fa-heart"></i>
+                      <i class="fa-solid fa-gift"></i>
                     </div>
                     Вішліст (Мрії)
                 </h3>
@@ -188,6 +188,51 @@ import { ConfirmService } from '../../services/confirm.service';
                 <div *ngIf="wishlist().length === 0" 
                      class="col-span-full py-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
                     <p class="text-white/40 text-sm font-bold">У вас ще немає мрій? Подумайте, що б ви хотіли купити! ✨</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Борги -->
+        <div class="bg-rose-950 rounded-3xl p-6 md:p-8 shadow-xl text-white mt-8 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+            
+            <div class="flex justify-between items-center mb-6 relative z-10">
+                <h3 class="text-xl font-bold flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-slate-200 shadow-sm border border-white/10">
+                      <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    Борги (Зобов'язання)
+                </h3>
+                <button (click)="addDebt()"
+                    class="bg-white text-rose-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Додати борг
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+                <div *ngFor="let debt of debts(); let i = index" 
+                     class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 flex flex-col gap-3 group">
+                    <input [(ngModel)]="debt.name" (change)="saveDebts()" placeholder="Кому ви винні?"
+                           class="bg-transparent border-none text-white font-bold placeholder:text-white/40 focus:ring-0 p-0 text-sm">
+                    
+                    <div class="flex items-center justify-between mt-auto">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-white/50 font-bold uppercase">Сума:</span>
+                            <input type="number" [(ngModel)]="debt.amount" (change)="saveDebts()"
+                                   class="bg-transparent border-none text-white font-black p-0 w-20 text-sm focus:ring-0">
+                        </div>
+                        <div class="flex gap-2">
+                            <button (click)="removeDebt(i)"
+                                    class="w-8 h-8 rounded-lg bg-white/5 text-white/30 hover:bg-white/20 hover:text-white/60 transition-colors flex items-center justify-center">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="debts().length === 0" 
+                     class="col-span-full py-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
+                    <p class="text-white/40 text-sm font-bold">Боргів немає. Ви вільні як вітер! 🕊️</p>
                 </div>
             </div>
         </div>
@@ -366,6 +411,7 @@ export class WalletsComponent implements OnInit {
   incomePlans: (IncomePlan & { isNew?: boolean })[] = [];
   expensePlans: (ExpensePlan & { isNew?: boolean })[] = [];
   wishlist = this.financeData.wishlist;
+  debts = this.financeData.debts;
 
   ngOnInit() {
     this.loadPlans();
@@ -618,6 +664,30 @@ export class WalletsComponent implements OnInit {
 
   saveWishlist() {
     this.financeData.saveWishlist(this.wishlist());
+  }
+
+  // ==== DEBTS ====
+  addDebt() {
+    const d = [...this.debts()];
+    d.unshift({
+      id: Date.now().toString(),
+      name: '',
+      amount: 0
+    });
+    this.financeData.saveDebts(d);
+  }
+
+  async removeDebt(index: number) {
+    const d = [...this.debts()];
+    const item = d[index];
+    if (await this.confirmService.confirm(`Видалити борг "${item.name || 'Без назви'}"?`)) {
+      d.splice(index, 1);
+      this.financeData.saveDebts(d);
+    }
+  }
+
+  saveDebts() {
+    this.financeData.saveDebts(this.debts());
   }
 
   moveWishToPlan(wish: any) {

@@ -203,6 +203,15 @@ export class GamificationService {
         }
     }
 
+    speedUp() {
+        if (this.financeData.userSettings().coins! >= 1) {
+            this.financeData.addCoins(-1);
+            // 20 minutes in ms = 1,200,000
+            this.nextEventTime.update(val => val - 1200000);
+            this.saveState();
+        }
+    }
+
     claimAchievement() {
         const achiev = this.activeAchievement();
         if (achiev && achiev.completed) {
