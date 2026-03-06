@@ -27,7 +27,7 @@ import { RouterModule } from '@angular/router';
                   {{ p.factAmount | currency:userCurrency:'symbol-narrow':'1.0-0' }} / {{ p.planAmount | currency:userCurrency:'symbol-narrow':'1.0-0' }}
                 </div>
                 <div class="text-xs md:text-sm font-bold text-emerald-600 mt-0.5">
-                  {{ p.planAmount ? (p.factAmount / p.planAmount * 100) : 0 | number:'1.0-0' }}%
+                  {{ p.planAmount ? (p.factAmount / p.planAmount * 100) : 0 | number:'1.0-2' }}%
                 </div>
               </div>
             </div>
@@ -63,7 +63,7 @@ import { RouterModule } from '@angular/router';
                 </div>
                 <!-- Optional overspending visual cue -->
                 <div class="text-xs md:text-sm font-bold mt-0.5" [ngClass]="p.amount && p.factAmount > p.amount ? 'text-rose-600' : 'text-slate-600'">
-                  {{ p.amount ? (p.factAmount / p.amount * 100) : 0 | number:'1.0-0' }}%
+                  {{ p.amount ? (p.factAmount / p.amount * 100) : 0 | number:'1.0-2' }}%
                 </div>
               </div>
             </div>

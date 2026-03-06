@@ -59,6 +59,7 @@ import { ConfirmService } from '../../services/confirm.service';
                             <div class="w-24">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
                                 <input type="number" [(ngModel)]="plan.planAmount" (change)="saveIncomePlans()" placeholder="0"
+                                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                     class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
                             </div>
                           </div>
@@ -104,6 +105,7 @@ import { ConfirmService } from '../../services/confirm.service';
                             <div class="w-24">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
                                 <input type="number" [(ngModel)]="plan.amount" (change)="saveExpensePlans()" placeholder="0"
+                                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                     class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
                             </div>
                           </div>
@@ -164,12 +166,14 @@ import { ConfirmService } from '../../services/confirm.service';
                 <div *ngFor="let wish of wishlist(); let i = index" 
                      class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 flex flex-col gap-3 group">
                     <input [(ngModel)]="wish.name" (change)="saveWishlist()" placeholder="Що ви хочете?"
+                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                            class="bg-transparent border-none text-white font-bold placeholder:text-white/40 focus:ring-0 p-0 text-sm">
                     
                     <div class="flex items-center justify-between mt-auto">
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] text-white/50 font-bold uppercase">Сума:</span>
                             <input type="number" [(ngModel)]="wish.amount" (change)="saveWishlist()"
+                                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                    class="bg-transparent border-none text-white font-black p-0 w-20 text-sm focus:ring-0">
                         </div>
                         <div class="flex gap-2">
@@ -201,11 +205,11 @@ import { ConfirmService } from '../../services/confirm.service';
                     <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-slate-200 shadow-sm border border-white/10">
                       <i class="fa-solid fa-hand-holding-dollar"></i>
                     </div>
-                    Борги
+                    Борги та Позики
                 </h3>
                 <button (click)="addDebt()"
                     class="bg-white text-rose-950 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-plus text-[10px]"></i> Додати
+                    <i class="fa-solid fa-plus text-[10px]"></i> Додати запис
                 </button>
             </div>
 
@@ -214,25 +218,37 @@ import { ConfirmService } from '../../services/confirm.service';
                      [ngClass]="debt.amount < 0 ? 'bg-rose-500/10 border-rose-500/20' : 'bg-emerald-500/10 border-emerald-500/20'"
                      class="backdrop-blur-md p-4 rounded-2xl border flex flex-col gap-3 group transition-all">
                     
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full" [ngClass]="debt.amount < 0 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'"></div>
-                        <input [(ngModel)]="debt.name" (change)="saveDebts()" placeholder="Суб'єкт боргу..."
-                           class="bg-transparent border-none text-white font-bold placeholder:text-white/40 focus:ring-0 p-0 text-sm flex-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-1">
+                            <i class="fa-solid" [ngClass]="debt.amount < 0 ? 'fa-arrow-left text-rose-400' : 'fa-arrow-right text-emerald-400'"></i>
+                            <input [(ngModel)]="debt.name" placeholder="Хто?"
+                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
+                               class="bg-transparent border-none text-white font-bold placeholder:text-white/40 focus:ring-0 p-0 text-sm flex-1">
+                        </div>
+                        <button (click)="toggleDebtType(i)" 
+                                class="text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest border transition-all active:scale-95"
+                                [ngClass]="debt.amount < 0 ? 'bg-rose-500/20 border-rose-500/50 text-rose-200' : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200'">
+                            {{ debt.amount < 0 ? 'Я винен' : 'Мені винні' }}
+                        </button>
                     </div>
                     
-                    <div class="flex items-center justify-between mt-auto">
+                    <div class="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] text-white/50 font-bold uppercase">Сума:</span>
                             <div class="flex items-center bg-black/20 rounded-lg px-2">
-                                <span class="text-xs font-black mr-1" [ngClass]="debt.amount < 0 ? 'text-rose-400' : 'text-emerald-400'">
-                                    {{ debt.amount > 0 ? '+' : (debt.amount < 0 ? '' : '') }}
-                                </span>
-                                <input type="number" [(ngModel)]="debt.amount" (change)="saveDebts()"
+                                <input type="number" [ngModel]="Math.abs(debt.amount)" 
+                                       (ngModelChange)="updateDebtAmount(i, $event)"
+                                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                        class="bg-transparent border-none text-white font-black p-1 w-20 text-sm focus:ring-0">
+                                <span class="text-[10px] font-bold text-white/40">₴</span>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <button (click)="removeDebt(i)"
+                        <div class="flex gap-1">
+                            <button (click)="saveDebts()" title="Зберегти"
+                                    class="w-8 h-8 rounded-lg bg-white/10 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center justify-center active:scale-90">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button (click)="removeDebt(i)" title="Видалити"
                                     class="w-8 h-8 rounded-lg bg-white/5 text-white/30 hover:bg-white/20 hover:text-white/60 transition-colors flex items-center justify-center">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
                             </button>
@@ -698,6 +714,19 @@ export class WalletsComponent implements OnInit {
 
   saveDebts() {
     this.financeData.saveDebts(this.debts());
+  }
+
+  toggleDebtType(index: number) {
+    const d = [...this.debts()];
+    d[index].amount = -d[index].amount;
+    this.financeData.saveDebts(d);
+  }
+
+  updateDebtAmount(index: number, val: number) {
+    const d = [...this.debts()];
+    const isNegative = d[index].amount < 0;
+    d[index].amount = isNegative ? -Math.abs(val) : Math.abs(val);
+    this.financeData.saveDebts(d);
   }
 
   moveWishToPlan(wish: any) {
