@@ -31,9 +31,6 @@ import { GamificationBannerComponent } from '../../components/dashboard/gamifica
         
         <!-- Header / Main Dashboard Section (A) -->
         <section class="space-y-4 md:space-y-6">
-          <!-- Gamification Events & Achievements -->
-          <app-gamification-banner></app-gamification-banner>
-
           <!-- Top Row: Assistant + Growth Chart -->
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 relative z-10">
             <div class="xl:col-span-2">
@@ -43,6 +40,9 @@ import { GamificationBannerComponent } from '../../components/dashboard/gamifica
               <app-growth-chart class="block h-full"></app-growth-chart>
             </div>
           </div>
+
+          <!-- Gamification Events & Achievements -->
+          <app-gamification-banner></app-gamification-banner>
 
           <!-- Middle Row: Income Visualizer + Transactions Context -->
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">

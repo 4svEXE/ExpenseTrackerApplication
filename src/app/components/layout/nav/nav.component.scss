@@ -47,6 +47,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
+          line-height: 1; // Better centering
 
           &.active-nav {
             background-color: #eb28b0;
@@ -55,8 +56,7 @@
           }
 
           .close-icon {
-            font-size: 28px;
-            margin-top: -2px;
+            font-size: 24px;
           }
         }
 
@@ -94,39 +94,39 @@
 
   .sub-btn {
     position: absolute;
-    width: 42px;
-    height: 42px;
+    width: 48px; // Larger
+    height: 48px; // Larger
     border-radius: 50%;
     border: none;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 5;
-    top: 5px;
+    top: 0;
     left: -50%;
     transform: translate(-50%, -50%) scale(0);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 
     &.income {
-      background-color: #10b981; // emerald-500
+      background-color: #34d399; // Lighter emerald (400)
     }
 
     &.expense {
-      background-color: #f43f5e; // rose-500
+      background-color: #fb7185; // Lighter rose (400)
     }
   }
 
   &.expanded {
     .sub-btn.income {
-      transform: translate(-140%, -140%) scale(1);
+      transform: translate(-150%, -180%) scale(1); // Higher and wider
     }
 
     .sub-btn.expense {
-      transform: translate(40%, -140%) scale(1);
+      transform: translate(50%, -180%) scale(1); // Higher and wider
     }
   }
 }

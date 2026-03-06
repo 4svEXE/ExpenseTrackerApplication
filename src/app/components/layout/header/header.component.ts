@@ -3,6 +3,7 @@ import { AmountService } from '../../../services/amount.service';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { map, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { GamificationService } from '../../../services/gamification.service';
 
 @Component({
   selector: 'app-header',
@@ -15,6 +16,7 @@ export class HeaderComponent {
   totalExpense$!: Observable<number>;
 
   financeData = inject(FinanceDataService);
+  gamificationService = inject(GamificationService);
 
   constructor(private amountService: AmountService) {
     this.totalIncome$ = this.amountService.amount$.pipe(map(amounts => amounts.totalIncome));
@@ -27,5 +29,9 @@ export class HeaderComponent {
 
   get userCurrency() {
     return this.financeData.userSettings().currency;
+  }
+
+  openGamificationInfo() {
+    this.gamificationService.toggleInfoModal();
   }
 }

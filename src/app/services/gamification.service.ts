@@ -17,6 +17,7 @@ export interface GameChoice {
 export interface GameEvent {
     id: string;
     text: string;
+    iconUrl: string;
     choices: GameChoice[];
 }
 
@@ -32,6 +33,11 @@ export class GamificationService {
     nextEventTime = signal<number>(0);
 
     activeAchievement = signal<{ text: string, reward: number, completed: boolean } | null>(null);
+    isInfoModalOpen = signal(false);
+
+    toggleInfoModal() {
+        this.isInfoModalOpen.set(!this.isInfoModalOpen());
+    }
 
     private readonly STORAGE_KEY = 'gamification_state_v2';
 
@@ -78,7 +84,12 @@ export class GamificationService {
     generateNewEvent() {
         if (!this.financeData.userSettings().eventsEnabled) return;
 
-        const event = FANTASY_EVENTS[Math.floor(Math.random() * FANTASY_EVENTS.length)];
+        const event = { ...FANTASY_EVENTS[Math.floor(Math.random() * FANTASY_EVENTS.length)] };
+
+        // Randomly generate character icon using DiceBear
+        const seed = Math.random().toString(36).substring(7);
+        event.iconUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+
         this.currentEvent.set(event);
         this.eventResult.set(null);
 
@@ -190,14 +201,15 @@ const FANTASY_EVENTS: GameEvent[] = [
     {
         id: 'f1',
         text: 'Старий маг пропонує вам випити зілля невідомого кольору. Це може бути еліксир багатства або просто прострочений сік.',
+        iconUrl: '', // Will be set in generateNewEvent
         choices: [
             {
                 text: 'Випити (3 монети)',
                 cost: 3,
                 outcomes: [
-                    { text: 'Ваші кишені наповнилися золотом! Ви відчуваєте прилив сил.', reward: 25, probability: 0.3 },
+                    { text: 'Ваші кишені наповнилися золотом! Ви відчуваєте прилив сил.', reward: 5, probability: 0.3 },
                     { text: 'Це було звичайне молоко, але кумедно пахло.', reward: 0, probability: 0.4 },
-                    { text: 'Ой... здається зілля було зіпсоване. Ви втратили трохи монет, поки бігли до кущів.', reward: -10, probability: 0.3 }
+                    { text: 'Ой... здається зілля було зіпсоване. Ви втратили трохи монет, поки бігли до кущів.', reward: -5, probability: 0.3 }
                 ]
             },
             {
@@ -210,13 +222,14 @@ const FANTASY_EVENTS: GameEvent[] = [
     {
         id: 'f2',
         text: 'Ви знайшли сплячого дракона, набитого золотом. Один золотий злиток лежить зовсім поруч з його носом.',
+        iconUrl: '', // Will be set in generateNewEvent
         choices: [
             {
                 text: 'Спробувати забрати',
                 cost: 0,
                 outcomes: [
-                    { text: 'Ви тихо забрали злиток! Дракон навіть не ворухнувся.', reward: 50, probability: 0.2 },
-                    { text: 'Дракон чхнув вогнем! Ви ледь встигли відскочити, але край гаманця підгорів.', reward: -20, probability: 0.8 }
+                    { text: 'Ви тихо забрали злиток! Дракон навіть не ворухнувся.', reward: 5, probability: 0.2 },
+                    { text: 'Дракон чхнув вогнем! Ви ледь встигли відскочити, але край гаманця підгорів.', reward: -5, probability: 0.8 }
                 ]
             },
             {
@@ -296,17 +309,17 @@ const scenarios = [
     {
         text: (c: string, i: string) => `${c} пропонує вам купити ${i}. Виглядає підозріло, але ціна приваблива.`,
         choicePos: 'Купити',
-        choiceNeg: 'Відмовитись'
+        choiceNeg: 'Ні'
     },
     {
         text: (c: string, i: string) => `${c} кличе вас зіграти в кості на ${i}. Ризик — благородна справа?`,
         choicePos: 'Грати',
-        choiceNeg: 'Відмовитись'
+        choiceNeg: 'Ні'
     },
     {
         text: (c: string, i: string) => `Ви бачите, як ${c} впустив ${i} у багнюку. Що зробите?`,
-        choicePos: 'Підняти собі',
-        choiceNeg: 'Ігнорувати'
+        choicePos: 'Підняти',
+        choiceNeg: 'Ігнор'
     },
     {
         text: (c: string, i: string) => `${c} благає про допомогу! У нього відібрали ${i}. Потрібні гроші на викуп.`,
@@ -331,24 +344,26 @@ for (let i = 3; i <= 200; i++) {
     const scn = scenarios[Math.floor(Math.random() * scenarios.length)];
 
     const cre = `${adj} ${noun}`;
-    const baseCost = Math.floor(Math.random() * 15) + 3;
+    // Limit cost/reward to 5 max as per user request
+    const baseCost = Math.floor(Math.random() * 3) + 1; // 1-3 cost 
     const isHighRisk = Math.random() > 0.7;
 
     FANTASY_EVENTS.push({
         id: `f${i}`,
         text: scn.text(cre, item),
+        iconUrl: '', // Will be set in generateNewEvent
         choices: [
             {
                 text: `${scn.choicePos} (${baseCost} мон.)`,
                 cost: baseCost,
                 outcomes: isHighRisk ? [
-                    { text: 'Неймовірна удача! Ви знайшли в цьому набагато більше, ніж очікували.', reward: baseCost * 5, probability: 0.15 },
-                    { text: 'Це була пастка. Вас пограбували посеред білого дня.', reward: -baseCost * 2, probability: 0.45 },
-                    { text: 'Ви отримали предмет, але він виявився підробкою.', reward: Math.floor(baseCost / 2), probability: 0.4 }
+                    { text: 'Неймовірна удача! Ви знайшли в цьому набагато більше, ніж очікували.', reward: 5, probability: 0.15 },
+                    { text: 'Це була пастка. Вас пограбували посеред білого дня.', reward: -5, probability: 0.45 },
+                    { text: 'Ви отримали предмет, але він виявився підробкою.', reward: 2, probability: 0.4 }
                 ] : [
-                    { text: 'Вдала угода. Ви отримали прибуток.', reward: Math.floor(baseCost * 2.5), probability: 0.4 },
+                    { text: 'Вдала угода. Ви отримали прибуток.', reward: 5, probability: 0.4 },
                     { text: 'Це було марнування часу, ви ледь повернули своє.', reward: baseCost, probability: 0.4 },
-                    { text: 'Вас трохи надурили на решті.', reward: -Math.floor(baseCost / 3), probability: 0.2 }
+                    { text: 'Вас трохи надурили на решті.', reward: -2, probability: 0.2 }
                 ]
             },
             {
