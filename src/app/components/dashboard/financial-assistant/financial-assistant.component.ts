@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-financial-assistant',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="assistant-card relative overflow-hidden text-white flex justify-between items-center">
       <!-- Background decorators -->
@@ -14,7 +15,12 @@ import { CommonModule } from '@angular/common';
 
       <div class="relative z-10 w-full">
         <h2 class="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight text-white flex items-center gap-3">
-          <i class="fa-solid fa-user-circle opacity-50"></i>
+          <div *ngIf="financeData.userSettings().avatarUrl" 
+               class="w-10 h-10 md:w-12 md:h-12 rounded-2xl border-2 border-white/20 shadow-xl overflow-hidden flex items-center justify-center bg-white/10 cursor-pointer hover:scale-105 active:scale-95 transition-all"
+               routerLink="/settings">
+            <img [src]="financeData.userSettings().avatarUrl" alt="U" class="w-full h-full object-cover" />
+          </div>
+          <i class="fa-solid fa-user-circle opacity-50" *ngIf="!financeData.userSettings().avatarUrl"></i>
           Привіт, {{ userName }}!
         </h2>
         <p class="text-neutral-400 text-xs md:text-sm font-medium opacity-90 mb-4">{{ currentDate | date:'fullDate':'':'uk-UA' }}</p>
