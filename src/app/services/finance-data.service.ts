@@ -54,11 +54,17 @@ export interface AccountBalance {
   color?: string;
 }
 
+export type SubscriptionPeriod = 'monthly' | '3months' | 'yearly' | 'custom';
+
 export interface Subscription {
   id: string;
   name: string;
+  price: number;
+  currency: string;
   priceUah: number;
   priceEur?: number;
+  period: SubscriptionPeriod;
+  customDays?: number;
   nextPaymentDate: Date;
   totalSpent: number;
 }
@@ -230,7 +236,13 @@ export class FinanceDataService {
     this.accounts.set(load(this.ACCOUNTS_KEY, [
       { id: '1', name: 'Картка', balance: 50000, currency: 'UAH', tags: [] }
     ]));
-    this.subscriptions.set(load(this.SUBS_KEY, []).map((s: any) => ({ ...s, nextPaymentDate: new Date(s.nextPaymentDate) })));
+    this.subscriptions.set(load(this.SUBS_KEY, []).map((s: any) => ({
+      ...s,
+      nextPaymentDate: new Date(s.nextPaymentDate),
+      price: s.price || s.priceUah || 0,
+      currency: s.currency || 'UAH',
+      period: s.period || 'monthly'
+    })));
 
     const savedNotified = localStorage.getItem(this.NOTIFIED_GOALS_KEY);
     if (savedNotified) {

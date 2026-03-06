@@ -40,8 +40,12 @@ import { CommonModule } from '@angular/common';
                 {{ s.name }}
               </td>
               <td class="px-3 md:px-5 py-3 md:py-4 text-slate-600 font-medium text-xs md:text-sm">
-                <div>{{ s.priceUah | currency:'UAH':'symbol-narrow':'1.0-0' }}</div>
-                <div class="text-[9px] md:text-[10px] text-slate-400" *ngIf="s.priceEur">{{ s.priceEur | currency:'EUR':'symbol-narrow':'1.0-0' }}</div>
+                <div class="font-bold text-slate-900">{{ s.price | currency:s.currency:'symbol-narrow':'1.0-2' }}</div>
+                <div class="text-[9px] md:text-[10px] text-slate-400">
+                    {{ s.priceUah | currency:'UAH':'symbol-narrow':'1.0-0' }}
+                    <span class="mx-1">•</span>
+                    {{ getPeriodLabel(s.period) }}
+                </div>
               </td>
               <td class="px-3 md:px-5 py-3 md:py-4">
                 <div class="flex items-center gap-2">
@@ -82,6 +86,16 @@ export class SubscriptionsListComponent {
     const diffTime = date.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
+  }
+
+  getPeriodLabel(period: string): string {
+    const labels: Record<string, string> = {
+      'monthly': 'місяць',
+      '3months': '3 міс.',
+      'yearly': 'рік',
+      'custom': 'кастом'
+    };
+    return labels[period] || period;
   }
 
   onSubscriptionClick(s: Subscription) {

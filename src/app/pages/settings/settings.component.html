@@ -241,6 +241,27 @@
                         </div>
                     </label>
                 </div>
+
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-rose-500 shadow-sm border border-slate-50">
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Нагадування про підтримку</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Показувати прохання підтримати проект при
+                                доходах</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="settings.supportDonationReminder"
+                            (change)="onSupportToggle()" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500">
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <div class="mt-8 flex justify-end">
@@ -303,7 +324,7 @@
                     onclick="window.open('https://t.me/+pLDBzgIEVZc0MTQy', '_blank')">
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-10 h-10 rounded-xl bg-[#229ED9] flex items-center justify-center text-white shadow-sm">
+                            class="w-10 h-[40px !important] rounded-xl bg-[#229ED9] flex items-center justify-center text-white shadow-sm">
                             <i class="fa-brands fa-telegram text-xl"></i>
                         </div>
                         <div>
@@ -314,6 +335,23 @@
                         </div>
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100 shadow-sm hover:border-amber-500 transition-all cursor-pointer group"
+                    onclick="window.open('https://send.monobank.ua/jar/7iYKvKtNXp', '_blank')">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-sm">
+                            <i class="fa-solid fa-heart text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-amber-900 text-sm">Підтримати проект</p>
+                            <p class="text-[11px] text-amber-700 font-black group-hover:underline">
+                                Задонатити на розвиток та нові фішки
+                            </p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-amber-300 text-xs"></i>
                 </div>
             </div>
 

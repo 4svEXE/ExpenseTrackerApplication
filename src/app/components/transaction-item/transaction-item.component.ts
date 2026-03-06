@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { TransactionService } from '../../services/transaction.service';
 import { CategoryService } from '../../services/category.service';
 import { FinanceDataService } from '../../services/finance-data.service';
+import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-transaction-item',
@@ -14,6 +15,7 @@ import { FinanceDataService } from '../../services/finance-data.service';
 export class TransactionItemComponent {
   @Input() item!: Transaction;
   financeData = inject(FinanceDataService);
+  confirmService = inject(ConfirmService);
 
   showDetails = false;
   isAnimating = false;
@@ -63,9 +65,9 @@ export class TransactionItemComponent {
     }, 300);
   }
 
-  onDelete(event: Event) {
+  async onDelete(event: Event) {
     event.stopPropagation();
-    if (confirm('Видалити транзакцію?')) {
+    if (await this.confirmService.confirm('Видалити транзакцію?')) {
       this.transactionService.deleteTransaction(this.item);
       this.closeDetails();
     }

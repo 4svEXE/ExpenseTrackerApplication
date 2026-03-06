@@ -15,6 +15,7 @@ import { Transaction } from '../../../types/transaction.interface';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { AudioService } from '../../../services/audio.service';
 import { CoinAnimationService } from '../../../services/coin-animation.service';
+import { SupportService } from '../../../services/support.service';
 
 @Component({
   selector: 'app-transaction-input',
@@ -42,7 +43,8 @@ export class TransactionInputComponent implements OnInit {
     private fb: FormBuilder,
     private transactionService: TransactionService,
     private router: Router,
-    private coinService: CoinAnimationService
+    private coinService: CoinAnimationService,
+    private supportService: SupportService
   ) { }
 
   ngOnInit(): void {
@@ -138,6 +140,10 @@ export class TransactionInputComponent implements OnInit {
         this.coinService.animate(event.clientX, event.clientY);
       }
 
+      // 4.5. Support Reminder for Income
+      if (tType === 'income') {
+        this.supportService.showDonationRequest();
+      }
       // 5. Show Plan Popup?
       if (this.financeData.userSettings().showPlanPostTransaction) {
         setTimeout(() => {

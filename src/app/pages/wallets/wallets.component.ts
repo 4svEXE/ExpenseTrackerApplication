@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
-import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePlan } from '../../services/finance-data.service';
+import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePlan, SubscriptionPeriod } from '../../services/finance-data.service';
+import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-wallets',
@@ -191,7 +192,7 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
             </div>
         </div>
 
-        <div class="p-8 bg-neutral-900 rounded-3xl text-white shadow-2xl relative overflow-hidden group">
+        <div class="p-8 bg-neutral-900 hidden rounded-3xl text-white shadow-2xl relative overflow-hidden group">
           <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
           <div class="relative z-10">
             <h3 class="text-xl font-bold mb-2">Налаштування</h3>
@@ -288,15 +289,44 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
           
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-semibold text-slate-600 mb-1">Ціна (UAH)</label>
-              <input [(ngModel)]="newSub.priceUah" type="number" placeholder="0" 
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Ціна</label>
+              <input [(ngModel)]="newSub.price" type="number" placeholder="0" 
                 class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium text-black">
             </div>
             <div>
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Валюта</label>
+              <select [(ngModel)]="newSub.currency" class="w-full px-4 py-3 text-black rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium">
+                <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Періодичність</label>
+              <select [(ngModel)]="newSub.period" class="w-full px-4 py-3 text-black rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium">
+                <option value="monthly">Раз в місяць</option>
+                <option value="3months">Раз в 3 місяці</option>
+                <option value="yearly">Раз в рік</option>
+                <option value="custom">Кастомно</option>
+              </select>
+            </div>
+            <div *ngIf="newSub.period === 'custom'">
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Днів (Кастомно)</label>
+              <input [(ngModel)]="newSub.customDays" type="number" placeholder="30" 
+                class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium text-black">
+            </div>
+            <div *ngIf="newSub.period !== 'custom'">
               <label class="block text-sm font-semibold text-slate-600 mb-1">Дата наст. платежу</label>
               <input [(ngModel)]="newSubDate" type="date"
                 class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium text-black">
             </div>
+          </div>
+
+          <div *ngIf="newSub.period === 'custom'">
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Дата наст. платежу</label>
+              <input [(ngModel)]="newSubDate" type="date"
+                class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium text-black">
           </div>
 
         </div>
@@ -331,6 +361,7 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
 })
 export class WalletsComponent implements OnInit {
   financeData = inject(FinanceDataService);
+  confirmService = inject(ConfirmService);
 
   incomePlans: (IncomePlan & { isNew?: boolean })[] = [];
   expensePlans: (ExpensePlan & { isNew?: boolean })[] = [];
@@ -416,11 +447,13 @@ export class WalletsComponent implements OnInit {
     this.closeModal();
   }
 
-  deleteAccount() {
+  async deleteAccount() {
     if (!this.newAccount.id) return;
-    const accounts = this.financeData.accounts().filter(a => a.id !== this.newAccount.id);
-    this.financeData.saveAccounts(accounts);
-    this.closeModal();
+    if (await this.confirmService.confirm(`Ви впевнені, що хочете видалити рахунок "${this.newAccount.name}"?`)) {
+      const accounts = this.financeData.accounts().filter(a => a.id !== this.newAccount.id);
+      this.financeData.saveAccounts(accounts);
+      this.closeModal();
+    }
   }
 
   resetForm() {
@@ -457,11 +490,27 @@ export class WalletsComponent implements OnInit {
   saveSubscription() {
     if (!this.newSub.name?.trim()) return;
 
+    const price = this.newSub.price || 0;
+    const currency = this.newSub.currency || 'UAH';
+
+    const rateToUah = this.financeData.getExchangeRate(currency, 'UAH');
+    const rateToEur = this.financeData.getExchangeRate('EUR', 'UAH'); // The logic in service is (r[f] || 1) / (r[t] || 1)
+
+    // Wait, let's check getExchangeRate again
+    // getExchangeRate(f, t) => (r[f]/r[t])
+    // So UAH -> EUR => getExchangeRate('UAH', 'EUR') => 1 / 41.5 = 0.024
+    // currency -> UAH => getExchangeRate(currency, 'UAH') => r[currency] / 1
+    // currency -> EUR => getExchangeRate(currency, 'EUR') => r[currency] / 41.5
+
     const subToSave: Subscription = {
       id: this.newSub.id || Date.now().toString(),
       name: this.newSub.name.trim(),
-      priceUah: this.newSub.priceUah || 0,
-      priceEur: this.newSub.priceEur,
+      price: price,
+      currency: currency,
+      priceUah: price * this.financeData.getExchangeRate(currency, 'UAH'),
+      priceEur: price * this.financeData.getExchangeRate(currency, 'EUR'),
+      period: this.newSub.period || 'monthly',
+      customDays: this.newSub.customDays,
       nextPaymentDate: this.newSubDate ? new Date(this.newSubDate) : new Date(),
       totalSpent: this.newSub.totalSpent || 0
     };
@@ -478,17 +527,21 @@ export class WalletsComponent implements OnInit {
     this.closeSubModal();
   }
 
-  deleteSubscription() {
+  async deleteSubscription() {
     if (!this.newSub.id) return;
-    const subs = this.financeData.subscriptions().filter(s => s.id !== this.newSub.id);
-    this.financeData.saveSubscriptions(subs);
-    this.closeSubModal();
+    if (await this.confirmService.confirm(`Ви впевнені, що хочете видалити підписку "${this.newSub.name}"?`)) {
+      const subs = this.financeData.subscriptions().filter(s => s.id !== this.newSub.id);
+      this.financeData.saveSubscriptions(subs);
+      this.closeSubModal();
+    }
   }
 
   resetSubForm() {
     this.newSub = {
       name: '',
-      priceUah: 0,
+      price: 0,
+      currency: 'UAH',
+      period: 'monthly',
       totalSpent: 0
     };
     this.newSubDate = new Date().toISOString().split('T')[0];
@@ -511,9 +564,12 @@ export class WalletsComponent implements OnInit {
     }, 3000);
   }
 
-  removeIncomePlan(index: number) {
-    this.incomePlans.splice(index, 1);
-    this.saveIncomePlans();
+  async removeIncomePlan(index: number) {
+    const plan = this.incomePlans[index];
+    if (await this.confirmService.confirm(`Видалити план доходу "${plan.category || 'Без назви'}"?`)) {
+      this.incomePlans.splice(index, 1);
+      this.saveIncomePlans();
+    }
   }
 
   addExpensePlan() {
@@ -532,9 +588,12 @@ export class WalletsComponent implements OnInit {
     }, 3000);
   }
 
-  removeExpensePlan(index: number) {
-    this.expensePlans.splice(index, 1);
-    this.saveExpensePlans();
+  async removeExpensePlan(index: number) {
+    const plan = this.expensePlans[index];
+    if (await this.confirmService.confirm(`Видалити план витрат "${plan.category || 'Без назви'}"?`)) {
+      this.expensePlans.splice(index, 1);
+      this.saveExpensePlans();
+    }
   }
 
   // ==== WISHLIST ====
@@ -548,10 +607,13 @@ export class WalletsComponent implements OnInit {
     this.financeData.saveWishlist(wishes);
   }
 
-  removeWish(index: number) {
+  async removeWish(index: number) {
     const wishes = [...this.wishlist()];
-    wishes.splice(index, 1);
-    this.financeData.saveWishlist(wishes);
+    const wish = wishes[index];
+    if (await this.confirmService.confirm(`Видалити мрію "${wish.name || 'Без назви'}"?`)) {
+      wishes.splice(index, 1);
+      this.financeData.saveWishlist(wishes);
+    }
   }
 
   saveWishlist() {

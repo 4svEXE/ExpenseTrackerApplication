@@ -14,6 +14,7 @@ export interface UserSettings {
     notificationText?: string;
     gamificationEnabled?: boolean;
     showPlanPostTransaction?: boolean;
+    supportDonationReminder?: boolean;
     coins?: number;
 }
 
@@ -37,6 +38,7 @@ export class SettingsService {
         notificationText: 'Час заповнити витрати! 💸',
         gamificationEnabled: true,
         showPlanPostTransaction: true,
+        supportDonationReminder: true,
         coins: 0
     });
 

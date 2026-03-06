@@ -9,6 +9,7 @@ import { FinanceDataService } from '../../services/finance-data.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmService } from '../../services/confirm.service';
 
 const AVAILABLE_ICONS = [
   'fa-solid fa-money-bill-wave', 'fa-solid fa-gift', 'fa-solid fa-chart-line', 'fa-solid fa-house-chimney-user',
@@ -47,6 +48,7 @@ export class CategoriesComponent implements OnInit {
     private route: ActivatedRoute,
     private categoryService: CategoryService,
     private transactionService: TransactionService,
+    private confirmService: ConfirmService,
     public financeData: FinanceDataService
   ) { }
 
@@ -54,9 +56,9 @@ export class CategoriesComponent implements OnInit {
     this.isEditMode.set(!this.isEditMode());
   }
 
-  deleteCategory(category: TransactionCategory, event: Event) {
+  async deleteCategory(category: TransactionCategory, event: Event) {
     event.stopPropagation(); // prevent selecting the category
-    if (confirm(`Ви впевнені, що хочете видалити категорію "${category.name}"?`)) {
+    if (await this.confirmService.confirm(`Ви впевнені, що хочете видалити категорію "${category.name}"?`)) {
       this.categoryService.deleteCategory(category);
       this.loadCategories();
       // If the deleted category was selected, deselect it

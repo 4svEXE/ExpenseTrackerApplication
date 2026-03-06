@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { FinanceDataService, UserSettings } from '../../services/finance-data.service';
 import { AudioService } from '../../services/audio.service';
 import { NotificationService } from '../../services/notification.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { SupportService } from '../../services/support.service';
 
 @Component({
   selector: 'app-settings',
@@ -16,6 +18,8 @@ export class SettingsComponent implements OnInit {
   financeData = inject(FinanceDataService);
   audio = inject(AudioService);
   notification = inject(NotificationService);
+  confirmService = inject(ConfirmService);
+  supportService = inject(SupportService);
 
   // Local state for forms
   settings: UserSettings = {
@@ -31,6 +35,7 @@ export class SettingsComponent implements OnInit {
     notificationTime: '20:00',
     notificationText: 'Час заповнити витрати! 💸',
     gamificationEnabled: true,
+    supportDonationReminder: true,
     coins: 0
   };
 
@@ -58,20 +63,31 @@ export class SettingsComponent implements OnInit {
   }
 
   // --- Data Management ---
-  loadMockData() {
-    if (confirm('Видалити всі поточні дані та завантажити тестові?')) {
+  async loadMockData() {
+    if (await this.confirmService.confirm('Видалити всі поточні дані та завантажити тестові?')) {
       this.financeData.loadMockData();
       this.loadData();
-      alert('Тестові дані завантажено.');
+      // alert('Тестові дані завантажено.');
     }
   }
 
-  clearAllData() {
-    if (confirm('Ви впевнені, що хочете видалити всі транзакції та плани? Цю дію неможливо скасувати.')) {
+  async clearAllData() {
+    if (await this.confirmService.confirm('Ви впевнені, що хочете видалити всі транзакції та плани? Цю дію неможливо скасувати.')) {
       this.financeData.clearAllData();
       this.loadData();
-      alert('Усі дані видалено.');
+      // alert('Усі дані видалено.');
+    }
+  }
+
+  onSupportToggle() {
+    // Check the value of the signal from financeData
+    const current = this.financeData.userSettings().supportDonationReminder;
+
+    // If it's being turned OFF
+    if (current && !this.settings.supportDonationReminder) {
+      this.supportService.showFeedbackLoop();
+      // Reset the local toggle back to TRUE immediately!
+      this.settings.supportDonationReminder = true;
     }
   }
 }
-
