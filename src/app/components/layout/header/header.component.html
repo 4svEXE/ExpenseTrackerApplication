@@ -3,6 +3,13 @@
     <img src="icons/logo.svg" alt="ETA Logo" id="app-logo"
       class="h-7 w-auto md:h-8 mix-blend-multiply transition-transform duration-300" />
 
+    <!-- User Avatar -->
+    <div *ngIf="financeData.userSettings().avatarUrl"
+      class="w-7 h-7 md:w-8 md:h-8 rounded-full border border-slate-200 shadow-sm overflow-hidden flex items-center justify-center bg-white cursor-pointer"
+      routerLink="/settings">
+      <img [src]="financeData.userSettings().avatarUrl" alt="U" class="w-full h-full object-cover" />
+    </div>
+
     <!-- Coins Counter -->
     <div *ngIf="financeData.userSettings().coins" (click)="gamificationService.toggleInfoModal()"
       class="coins-counter flex items-center gap-1 bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full border border-amber-200 shadow-sm animate-in fade-in zoom-in duration-300 cursor-pointer active:scale-95 transition-all">

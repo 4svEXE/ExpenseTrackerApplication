@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { SupportService } from '../../../services/support.service';
 
 @Component({
-    selector: 'app-support-modal',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-support-modal',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div *ngIf="supportService.config().isOpen" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
       <div class="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-300 border border-white/20">
         
@@ -18,6 +18,7 @@ import { SupportService } from '../../../services/support.service';
           <h3 class="text-2xl font-black text-slate-900 mb-3 tracking-tight">Підтримайте проект</h3>
           <p class="text-slate-500 font-bold leading-relaxed mb-8">
             Навіть 10 грн допоможуть нам ставати кращими та додавати нові фішки! 🚀
+            (в налатуваннях можна відключити це зубожіле прохання автора)
           </p>
           
           <div class="space-y-3">
@@ -27,13 +28,13 @@ import { SupportService } from '../../../services/support.service';
               (click)="supportService.close()"
               class="block w-full py-4 bg-amber-500 text-white rounded-2xl font-black shadow-lg shadow-amber-200 hover:bg-amber-600 transition-all active:scale-95 text-sm uppercase tracking-widest"
             >
-              Задонатити
+              Поділитись копійчиною 💰
             </a>
             <button 
               (click)="supportService.close()" 
               class="w-full py-4 font-black text-slate-400 hover:text-slate-600 transition-colors text-xs uppercase tracking-widest"
             >
-              Можливо пізніше
+              Сорі, наступного разу 😢
             </button>
           </div>
         </div>
@@ -111,7 +112,7 @@ import { SupportService } from '../../../services/support.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     @keyframes zoom-in {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
@@ -122,5 +123,5 @@ import { SupportService } from '../../../services/support.service';
   `]
 })
 export class SupportModalComponent {
-    supportService = inject(SupportService);
+  supportService = inject(SupportService);
 }

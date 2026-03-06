@@ -9,6 +9,7 @@ export interface UserSettings {
     vibrationEnabled: boolean;
     taxRate?: number; // percentage
     taxFixedAmount?: number; // fixed amount per month
+    taxFixedCurrency?: 'UAH' | 'USD' | 'EUR' | 'CZK';
     notificationEnabled?: boolean;
     notificationTime?: string; // HH:mm
     notificationText?: string;
@@ -19,6 +20,7 @@ export interface UserSettings {
     visualImpairmentMode?: boolean;
     colorBlindMode?: boolean;
     coins?: number;
+    avatarUrl?: string;
 }
 
 @Injectable({
@@ -36,6 +38,7 @@ export class SettingsService {
         vibrationEnabled: true,
         taxRate: 5,
         taxFixedAmount: 0,
+        taxFixedCurrency: 'UAH',
         notificationEnabled: true,
         notificationTime: '20:00',
         notificationText: 'Час заповнити витрати! 💸',
@@ -45,7 +48,8 @@ export class SettingsService {
         eventsEnabled: true,
         visualImpairmentMode: false,
         colorBlindMode: false,
-        coins: 0
+        coins: 0,
+        avatarUrl: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Lucky'
     });
 
     constructor() {

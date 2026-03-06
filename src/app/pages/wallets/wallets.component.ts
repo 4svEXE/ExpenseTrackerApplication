@@ -11,7 +11,7 @@ import { ConfirmService } from '../../services/confirm.service';
   standalone: true,
   imports: [CommonModule, FormsModule, AccountsListComponent, SubscriptionsListComponent],
   template: `
-    <div class="wallets-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 font-sans pb-24">
+    <div class="wallets-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 font-sans pb-24 pt-10">
       <div class="max-w-[1200px] mx-auto space-y-6 md:space-y-8 pb-10">
         <div class="flex items-center gap-3 mb-6 md:mb-10">
           <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">

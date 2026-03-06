@@ -53,7 +53,21 @@
                         </div>
                         <div class="text-left">
                             <p class="font-black text-slate-800 text-sm uppercase tracking-tight">Гейміфікація</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase">Монети, Події, Режими</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Монети, Події, Попапи</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-black transition-colors"></i>
+                </button>
+
+                <button (click)="setCategory('accessibility')"
+                    class="w-full flex items-center justify-between px-6 py-5 rounded-3xl bg-white shadow-sm border border-slate-100 hover:border-black transition-all group active:scale-95">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white">
+                            <i class="fa-solid fa-universal-access"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black text-slate-800 text-sm uppercase tracking-tight">Доступність</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Зір, Контрастність, Режими</p>
                         </div>
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-black transition-colors"></i>
@@ -91,6 +105,7 @@
                             <span *ngIf="activeCategory === 'profile'">Профіль</span>
                             <span *ngIf="activeCategory === 'notifications'">Звук та сповіщення</span>
                             <span *ngIf="activeCategory === 'gamification'">Гейміфікація</span>
+                            <span *ngIf="activeCategory === 'accessibility'">Спеціальні можливості</span>
                             <span *ngIf="activeCategory === 'data'">Дані та інфо</span>
                         </h3>
                     </div>
@@ -100,6 +115,25 @@
                 <div *ngIf="activeCategory === 'profile'"
                     class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 animate-in fade-in duration-300">
                     <div class="space-y-6">
+
+                        <!-- Avatar Section -->
+                        <div class="flex flex-col items-center gap-4 py-4 border-b border-slate-50 mb-4">
+                            <div class="relative group">
+                                <div
+                                    class="w-24 h-24 rounded-[2rem] bg-slate-100 border-4 border-white shadow-xl overflow-hidden flex items-center justify-center transition-transform group-hover:scale-105">
+                                    <img [src]="settings.avatarUrl" alt="Avatar" class="w-full h-full object-cover"
+                                        *ngIf="settings.avatarUrl">
+                                    <i class="fa-solid fa-user text-3xl text-slate-300" *ngIf="!settings.avatarUrl"></i>
+                                </div>
+                                <button (click)="randomizeAvatar()"
+                                    class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-black text-white shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+                                    <i class="fa-solid fa-dice text-sm"></i>
+                                </button>
+                            </div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Твій крутий
+                                аватар</p>
+                        </div>
+
                         <div>
                             <label
                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Ваше
@@ -143,8 +177,14 @@
                                 <label
                                     class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Фікс.
                                     збір (щомісяця)</label>
-                                <input type="number" [(ngModel)]="settings.taxFixedAmount"
-                                    class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-black outline-none transition-all font-bold text-slate-800">
+                                <div class="flex gap-2">
+                                    <input type="number" [(ngModel)]="settings.taxFixedAmount"
+                                        class="flex-1 px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-black outline-none transition-all font-bold text-slate-800">
+                                    <select [(ngModel)]="settings.taxFixedCurrency"
+                                        class="w-24 px-3 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-black outline-none transition-all font-bold text-slate-800 appearance-none text-center">
+                                        <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -312,10 +352,17 @@
                             </div>
                         </div>
                     </div>
+                    <button (click)="saveSettings()"
+                        class="w-full py-5 bg-amber-500 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-lg shadow-amber-200 active:scale-95 transition-all">Зберегти
+                        налаштування гри</button>
+                </div>
 
+                <!-- Accessibility Section -->
+                <div *ngIf="activeCategory === 'accessibility'"
+                    class="space-y-6 animate-in slide-in-from-right-4 duration-300">
                     <div class="bg-black rounded-3xl p-6 md:p-8 shadow-xl text-white">
                         <h3 class="text-sm font-black mb-6 uppercase tracking-widest flex items-center gap-2">
-                            <i class="fa-solid fa-universal-access text-indigo-400"></i> Спеціальні можливості
+                            <i class="fa-solid fa-universal-access text-indigo-400"></i> Режими перегляду
                         </h3>
                         <div class="space-y-6">
                             <div class="flex items-center justify-between">
@@ -348,8 +395,8 @@
                         </div>
                     </div>
                     <button (click)="saveSettings()"
-                        class="w-full py-5 bg-amber-500 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-lg shadow-amber-200 active:scale-95 transition-all">Зберегти
-                        налаштування гри</button>
+                        class="w-full py-5 bg-black text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all">Зберегти
+                        налаштування доступності</button>
                 </div>
 
                 <!-- Data & About Section -->
@@ -398,21 +445,55 @@
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
                         <h3 class="text-sm font-black text-slate-400 mb-6 uppercase tracking-widest">Розробка</h3>
                         <div class="space-y-3">
-                            <a href="https://www.instagram.com/sv.png/" target="_blank"
-                                class="flex items-center justify-between p-6 bg-gradient-to-r from-indigo-50 to-white rounded-3xl border border-indigo-100 group">
+                            <a href="https://t.me/+pLDBzgIEVZc0MTQy" target="_blank"
+                                class="flex items-center justify-between p-6 bg-sky-50 rounded-3xl border border-sky-100 group">
                                 <div class="flex items-center gap-4">
                                     <div
-                                        class="w-10 h-10 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg">
+                                        class="w-10 h-10 rounded-2xl bg-[#229ED9] text-white flex items-center justify-center shadow-lg">
+                                        <i class="fa-brands fa-telegram text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black uppercase tracking-widest text-sky-900">Telegram
+                                            Спільнота</p>
+                                        <p class="text-[10px] font-bold text-slate-500">Оновлення та обговорення</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-arrow-up-right-from-square text-sky-300 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                            </a>
+
+                            <a href="https://send.monobank.ua/jar/7iYKvKtNXp" target="_blank"
+                                class="flex items-center justify-between p-6 bg-amber-50 rounded-3xl border border-amber-100 group">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg">
+                                        <i class="fa-solid fa-heart text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-black uppercase tracking-widest text-amber-900">
+                                            Підтримати автора</p>
+                                        <p class="text-[10px] font-bold text-slate-500">Донат на каву та сервер</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-arrow-up-right-from-square text-amber-300 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                            </a>
+
+                            <a href="https://www.instagram.com/sv.png/" target="_blank"
+                                class="flex items-center justify-between p-6 bg-gradient-to-r from-rose-50 to-white rounded-3xl border border-rose-100 group">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white flex items-center justify-center shadow-lg">
                                         <i class="fa-brands fa-instagram text-xl"></i>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-black uppercase tracking-widest text-indigo-900">Іван
+                                        <p class="text-xs font-black uppercase tracking-widest text-rose-900">Іван
                                             Сташко</p>
                                         <p class="text-[10px] font-bold text-slate-500">UX/UI Developer &#64;sv.png</p>
                                     </div>
                                 </div>
                                 <i
-                                    class="fa-solid fa-arrow-up-right-from-square text-indigo-300 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                                    class="fa-solid fa-arrow-up-right-from-square text-rose-300 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
                             </a>
                         </div>
                         <p class="text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mt-12">

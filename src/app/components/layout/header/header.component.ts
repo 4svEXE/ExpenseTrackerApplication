@@ -3,11 +3,12 @@ import { AmountService } from '../../../services/amount.service';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { map, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { GamificationService } from '../../../services/gamification.service';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

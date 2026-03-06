@@ -31,15 +31,17 @@ export class SettingsComponent implements OnInit {
     vibrationEnabled: true,
     taxRate: 0,
     taxFixedAmount: 0,
+    taxFixedCurrency: 'UAH',
     notificationEnabled: true,
     notificationTime: '20:00',
     notificationText: 'Час заповнити витрати! 💸',
     gamificationEnabled: true,
     supportDonationReminder: true,
-    coins: 0
+    coins: 0,
+    avatarUrl: ''
   };
 
-  activeCategory: 'menu' | 'profile' | 'notifications' | 'gamification' | 'data' = 'menu';
+  activeCategory: 'menu' | 'profile' | 'notifications' | 'gamification' | 'accessibility' | 'data' = 'menu';
 
   currencies = ['UAH', 'USD', 'EUR', 'CZK'];
 
@@ -53,6 +55,11 @@ export class SettingsComponent implements OnInit {
 
   goBack() {
     this.activeCategory = 'menu';
+  }
+
+  randomizeAvatar() {
+    const seed = Math.random().toString(36).substring(7);
+    this.settings.avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
   }
 
   loadData() {
