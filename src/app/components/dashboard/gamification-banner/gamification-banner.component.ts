@@ -4,10 +4,10 @@ import { GamificationService } from '../../../services/gamification.service';
 import { FinanceDataService } from '../../../services/finance-data.service';
 
 @Component({
-    selector: 'app-gamification-banner',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-gamification-banner',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div *ngIf="financeData.userSettings().eventsEnabled" class="space-y-2">
       
       <!-- Current Event (Compact Mode) -->
@@ -66,7 +66,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
 
           <button (click)="gamificationService.finishEvent()"
                   class="px-6 py-2 bg-black text-white rounded-xl font-black uppercase tracking-widest text-[9px]">
-            Далі
+            ОК
           </button>
         </div>
       </div>
@@ -90,17 +90,11 @@ import { FinanceDataService } from '../../../services/finance-data.service';
           </div>
           
           <div class="flex items-center gap-2">
-              <button *ngIf="!isGoalHidden && achiev.completed; else timer"
+              <button *ngIf="!isGoalHidden && achiev.completed"
                       (click)="gamificationService.claimAchievement()"
                       class="px-3 py-1.5 bg-amber-400 text-black rounded-lg text-[9px] font-black uppercase tracking-widest non-animated-btn">
                 {{ achiev.reward }} <i class="fa-solid fa-coins"></i>
               </button>
-              
-              <ng-template #timer>
-                <div *ngIf="!isGoalHidden" class="text-right mr-2">
-                  <p class="text-xs font-mono font-black">{{ gamificationService.timeUntilNext }}</p>
-                </div>
-              </ng-template>
 
               <button (click)="isGoalHidden = !isGoalHidden" 
                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-slate-400">
@@ -112,7 +106,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
 
     </div>
   `,
-    styles: [`
+  styles: [`
     :host { display: block; }
     .hidden-goal {
         background: transparent !important;
@@ -124,7 +118,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
   `]
 })
 export class GamificationBannerComponent {
-    gamificationService = inject(GamificationService);
-    financeData = inject(FinanceDataService);
-    isGoalHidden = false;
+  gamificationService = inject(GamificationService);
+  financeData = inject(FinanceDataService);
+  isGoalHidden = false;
 }

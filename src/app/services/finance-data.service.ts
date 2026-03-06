@@ -392,4 +392,43 @@ export class FinanceDataService {
 
   clearAllData() { localStorage.clear(); location.reload(); }
   loadMockData() { this.ts.initTransactions(); }
+
+  exportData() {
+    const data: Record<string, any> = {};
+    const keys = [
+      this.INCOME_PLANS_KEY, this.ACCOUNTS_KEY, this.EXPENSE_PLANS_KEY,
+      this.SUBS_KEY, this.NOTIFIED_GOALS_KEY, this.WISHLIST_KEY,
+      this.DEBTS_KEY, 'userSettings', 'Transactions', 'Categories'
+    ];
+
+    keys.forEach(key => {
+      const val = localStorage.getItem(key);
+      if (val) data[key] = JSON.parse(val);
+    });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eta_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.toasts.show('Експорт завершено!', 'success');
+  }
+
+  async importData(file: File) {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      Object.entries(data).forEach(([key, val]) => {
+        localStorage.setItem(key, JSON.stringify(val));
+      });
+
+      this.toasts.show('Дані імпортовано! Додаток перезавантажиться...', 'success');
+      setTimeout(() => location.reload(), 1500);
+    } catch (e) {
+      this.toasts.show('Помилка при імпорті даних!', 'error');
+    }
+  }
 }

@@ -39,10 +39,16 @@ export class SettingsComponent implements OnInit {
     coins: 0
   };
 
+  activeCategory: 'profile' | 'notifications' | 'gamification' | 'data' = 'profile';
+
   currencies = ['UAH', 'USD', 'EUR', 'CZK'];
 
   ngOnInit() {
     this.loadData();
+  }
+
+  setCategory(cat: any) {
+    this.activeCategory = cat;
   }
 
   loadData() {
@@ -51,7 +57,7 @@ export class SettingsComponent implements OnInit {
 
   saveSettings() {
     this.financeData.saveSettings(this.settings);
-    alert('Налаштування збережено!');
+    // Use toast instead of alert if possible, but financeData has one
   }
 
   playTestSound() {
@@ -67,7 +73,6 @@ export class SettingsComponent implements OnInit {
     if (await this.confirmService.confirm('Видалити всі поточні дані та завантажити тестові?')) {
       this.financeData.loadMockData();
       this.loadData();
-      // alert('Тестові дані завантажено.');
     }
   }
 
@@ -75,7 +80,17 @@ export class SettingsComponent implements OnInit {
     if (await this.confirmService.confirm('Ви впевнені, що хочете видалити всі транзакції та плани? Цю дію неможливо скасувати.')) {
       this.financeData.clearAllData();
       this.loadData();
-      // alert('Усі дані видалено.');
+    }
+  }
+
+  exportBackup() {
+    this.financeData.exportData();
+  }
+
+  onFileImport(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.financeData.importData(file);
     }
   }
 
@@ -88,13 +103,9 @@ export class SettingsComponent implements OnInit {
   }
 
   onSupportToggle() {
-    // Check the value of the signal from financeData
     const current = this.financeData.userSettings().supportDonationReminder;
-
-    // If it's being turned OFF
     if (current && !this.settings.supportDonationReminder) {
       this.supportService.showFeedbackLoop();
-      // Reset the local toggle back to TRUE immediately!
       this.settings.supportDonationReminder = true;
     }
   }

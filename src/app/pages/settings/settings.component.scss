@@ -1,1 +1,105 @@
 @use '../../scss/buttons';
+
+.active-nav {
+    background: white !important;
+    color: #18181b !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    transform: translateX(4px);
+
+    i {
+        color: #18181b !important;
+    }
+}
+
+// Fade in animations
+.animate-in {
+    animation-fill-mode: both;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slide-in-from-bottom {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-in-from-right {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes zoom-in {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation-name: fade-in;
+}
+
+.slide-in-from-bottom-4 {
+    animation-name: slide-in-from-bottom;
+}
+
+.slide-in-from-right-4 {
+    animation-name: slide-in-from-right;
+}
+
+.zoom-in {
+    animation-name: zoom-in;
+}
+
+// Custom range input for better mobile feel
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+
+    &:focus {
+        outline: none;
+    }
+
+    &::-webkit-slider-runnable-track {
+        height: 8px;
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 20px;
+        width: 20px;
+        background: #000;
+        border-radius: 50%;
+        margin-top: -6px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+}

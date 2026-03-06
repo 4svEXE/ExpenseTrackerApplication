@@ -9,17 +9,25 @@ export class AudioService {
 
     private playSound(path: string) {
         const settings = this.settingsService.userSettings();
-        if (!settings.soundEnabled) return;
+        if (settings.soundEnabled) {
+            const audio = new Audio(path);
+            audio.volume = settings.soundVolume;
+            audio.play().catch(err => console.warn('Audio playback failed', err));
+        }
 
-        const audio = new Audio(path);
-        audio.volume = settings.soundVolume;
-        audio.play().catch(err => console.warn('Audio playback failed (user interaction might be needed)', err));
+        if (settings.vibrationEnabled) {
+            this.vibrate();
+        }
+    }
 
-        if (settings.vibrationEnabled && navigator.vibrate) {
+    vibrate(pattern: number | number[] = 200) {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
             try {
-                navigator.vibrate(200);
+                // Some mobile browsers need a pattern to be really felt
+                const p = typeof pattern === 'number' ? [pattern] : pattern;
+                navigator.vibrate(p);
             } catch (e) {
-                // Vibrate might fail on some platforms/permissions
+                console.warn('Vibration failed', e);
             }
         }
     }
@@ -40,5 +48,6 @@ export class AudioService {
         const audio = new Audio('/audio/income.mp3');
         audio.volume = volume;
         audio.play().catch(e => console.warn(e));
+        this.vibrate([100, 50, 100]);
     }
 }
