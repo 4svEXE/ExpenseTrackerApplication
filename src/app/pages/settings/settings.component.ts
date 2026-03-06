@@ -39,7 +39,7 @@ export class SettingsComponent implements OnInit {
     coins: 0
   };
 
-  activeCategory: 'profile' | 'notifications' | 'gamification' | 'data' = 'profile';
+  activeCategory: 'menu' | 'profile' | 'notifications' | 'gamification' | 'data' = 'menu';
 
   currencies = ['UAH', 'USD', 'EUR', 'CZK'];
 
@@ -49,6 +49,10 @@ export class SettingsComponent implements OnInit {
 
   setCategory(cat: any) {
     this.activeCategory = cat;
+  }
+
+  goBack() {
+    this.activeCategory = 'menu';
   }
 
   loadData() {

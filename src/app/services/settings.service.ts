@@ -28,7 +28,7 @@ export class SettingsService {
     private readonly SETTINGS_KEY = 'userSettings';
 
     userSettings = signal<UserSettings>({
-        name: 'Бомжулька>',
+        name: 'Бомжулька',
         monthlyIncomeGoal: 14000,
         currency: 'UAH',
         soundEnabled: true,
@@ -40,7 +40,7 @@ export class SettingsService {
         notificationTime: '20:00',
         notificationText: 'Час заповнити витрати! 💸',
         gamificationEnabled: true,
-        showPlanPostTransaction: true,
+        showPlanPostTransaction: false,
         supportDonationReminder: true,
         eventsEnabled: true,
         visualImpairmentMode: false,

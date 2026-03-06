@@ -117,7 +117,7 @@ import { ConfirmService } from '../../services/confirm.service';
                                     <option value="unexpected">Непередбачені</option>
                                 </select>
                             </div>
-                            <div class="flex items-center justify-end gap-2 pb-1">
+                            <div class="flex items-center justify-end gap-1 pb-1">
                                 <label class="flex items-center gap-2 cursor-pointer mt-5 ml-4 mr-2 pl-2">
                                     <input type="checkbox" [(ngModel)]="plan.isRecurring" (change)="saveExpensePlans()"
                                         class="w-4 h-4 rounded border-slate-300 text-black focus:ring-black">

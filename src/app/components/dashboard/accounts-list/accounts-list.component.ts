@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="card-container h-full pt-10">
+    <div class="card-container h-full pt-10 pb-10">
       <div class="flex justify-between items-center mb-4 md:mb-6">
         <h3 class="text-lg md:text-xl font-bold text-slate-800 drop-shadow-sm">Рахунки та Картки</h3>
         <button (click)="addAccountClicked.emit()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white transition-all active:scale-95">

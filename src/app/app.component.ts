@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, HostListener } from '@angular/core';
+import { RouterOutlet, Router } from '@angular/router';
 import { HeaderComponent } from './components/layout/header/header.component';
 import { NavComponent } from './components/layout/nav/nav.component';
 import { ToastComponent } from './components/ui/toast/toast.component';
@@ -28,5 +28,14 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
+  private router = inject(Router);
   financeData = inject(FinanceDataService);
+
+  @HostListener('window:popstate')
+  onPopState() {
+    // If not on dashboard, redirect back to it
+    if (this.router.url !== '/dashboard' && this.router.url !== '/') {
+      this.router.navigate(['/dashboard'], { replaceUrl: true });
+    }
+  }
 }

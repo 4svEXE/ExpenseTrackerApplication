@@ -144,8 +144,8 @@ export class TransactionInputComponent implements OnInit {
       if (tType === 'income') {
         this.supportService.showDonationRequest();
       }
-      // 5. Show Plan Popup?
-      if (this.financeData.userSettings().showPlanPostTransaction) {
+      // 5. Show Plan Popup? (Only for income if enabled)
+      if (this.financeData.userSettings().showPlanPostTransaction && tType === 'income') {
         setTimeout(() => {
           this.financeData.showPlanPopup.set(true);
         }, event ? 1000 : 0);

@@ -235,15 +235,15 @@ export class FinanceDataService {
     };
 
     this.incomePlans.set(load(this.INCOME_PLANS_KEY, [
-      { id: '1', category: 'Зарплата', planAmount: 80000, factAmount: 0, isRecurring: true }
+      { id: '1', category: 'Зарплата', planAmount: 8000, factAmount: 0, isRecurring: true }
     ]));
     this.expensePlans.set(load(this.EXPENSE_PLANS_KEY, [
-      { id: '1', category: 'Оренда', type: 'mandatory', amount: 15000, isRecurring: true }
+      { id: '1', category: 'Оренда', type: 'mandatory', amount: 1500, isRecurring: true }
     ]));
     this.wishlist.set(load(this.WISHLIST_KEY, []));
     this.debts.set(load(this.DEBTS_KEY, []));
     this.accounts.set(load(this.ACCOUNTS_KEY, [
-      { id: '1', name: 'Картка', balance: 50000, currency: 'UAH', tags: [] }
+      { id: '1', name: 'Картка', balance: 5000, currency: 'UAH', tags: [] }
     ]));
     this.subscriptions.set(load(this.SUBS_KEY, []).map((s: any) => ({
       ...s,

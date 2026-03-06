@@ -72,7 +72,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
       </div>
 
       <!-- Achievement Section (With Hide Option) -->
-      <div *ngIf="gamificationService.activeAchievement() as achiev" 
+      <!-- <div *ngIf="gamificationService.activeAchievement() as achiev" 
            class="relative bg-slate-900 rounded-2xl p-3 text-white shadow-md relative overflow-hidden active-goal"
            [class.hidden-goal]="isGoalHidden">
         
@@ -102,7 +102,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
               </button>
           </div>
         </div>
-      </div>
+      </div> -->
 
     </div>
   `,
