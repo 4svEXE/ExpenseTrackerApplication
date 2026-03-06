@@ -262,6 +262,26 @@
                         </div>
                     </label>
                 </div>
+
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm border border-slate-50">
+                            <i class="fa-solid fa-dice"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Випадкові події</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Отримуйте або втрачайте монетки через
+                                випадкові івенти</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="settings.eventsEnabled" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <div class="mt-8 flex justify-end">
@@ -347,7 +367,7 @@
                         <div>
                             <p class="font-bold text-amber-900 text-sm">Підтримати проект</p>
                             <p class="text-[11px] text-amber-700 font-black group-hover:underline">
-                                Задонатити на розвиток та нові фішки
+                                Задонатити на розвиток та нові фішки (моно банка)
                             </p>
                         </div>
                     </div>
@@ -356,7 +376,7 @@
             </div>
 
             <p class="text-center text-[10px] text-slate-400 font-bold mt-10 uppercase tracking-widest">
-                Expense Tracker Application v1.2.4 • 2026
+                Expense Tracker Application v1.2.42 • 2026
             </p>
         </div>
 

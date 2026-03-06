@@ -15,6 +15,7 @@ export interface UserSettings {
     gamificationEnabled?: boolean;
     showPlanPostTransaction?: boolean;
     supportDonationReminder?: boolean;
+    eventsEnabled?: boolean;
     coins?: number;
 }
 
@@ -39,6 +40,7 @@ export class SettingsService {
         gamificationEnabled: true,
         showPlanPostTransaction: true,
         supportDonationReminder: true,
+        eventsEnabled: true,
         coins: 0
     });
 

@@ -10,6 +10,7 @@ import { MonthPlanComponent } from '../../components/dashboard/month-plan/month-
 import { MonthAnalyticsComponent } from '../../components/dashboard/month-analytics/month-analytics.component';
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
+import { GamificationBannerComponent } from '../../components/dashboard/gamification-banner/gamification-banner.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,7 +22,8 @@ import { SubscriptionsListComponent } from '../../components/dashboard/subscript
     GrowthChartComponent,
     TransactionsTableComponent,
     MonthPlanComponent,
-    MonthAnalyticsComponent
+    MonthAnalyticsComponent,
+    GamificationBannerComponent
   ],
   template: `
     <div class="dashboard-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 pt-[52px] md:pt-[72px] font-sans">
@@ -29,6 +31,9 @@ import { SubscriptionsListComponent } from '../../components/dashboard/subscript
         
         <!-- Header / Main Dashboard Section (A) -->
         <section class="space-y-4 md:space-y-6">
+          <!-- Gamification Events & Achievements -->
+          <app-gamification-banner></app-gamification-banner>
+
           <!-- Top Row: Assistant + Growth Chart -->
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 relative z-10">
             <div class="xl:col-span-2">
