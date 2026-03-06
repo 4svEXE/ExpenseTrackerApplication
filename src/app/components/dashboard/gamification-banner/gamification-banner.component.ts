@@ -76,9 +76,9 @@ import { FinanceDataService } from '../../../services/finance-data.service';
            class="relative bg-slate-900 rounded-2xl p-3 text-white shadow-md relative overflow-hidden active-goal"
            [class.hidden-goal]="isGoalHidden">
         
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center justify-between gap-4 text-content">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-amber-300 shrink-0">
+            <div class="goal-icon w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-amber-300 shrink-0">
                 <i class="fa-solid fa-award text-xs"></i>
             </div>
             <div *ngIf="!isGoalHidden">
@@ -90,7 +90,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
           <div class="flex items-center gap-2">
               <button *ngIf="!isGoalHidden && achiev.completed; else timer"
                       (click)="gamificationService.claimAchievement()"
-                      class="px-3 py-1.5 bg-amber-400 text-black rounded-lg text-[9px] font-black uppercase tracking-widest">
+                      class="px-3 py-1.5 bg-amber-400 text-black rounded-lg text-[9px] font-black uppercase tracking-widest non-animated-btn">
                 {{ achiev.reward }} <i class="fa-solid fa-coins"></i>
               </button>
               
@@ -117,7 +117,7 @@ import { FinanceDataService } from '../../../services/finance-data.service';
         border: 1px dashed rgba(0,0,0,0.1);
         color: #64748b !important;
         box-shadow: none !important;
-        .bg-white\/10 { background: #f1f5f9; color: #94a3b8; }
+        .goal-icon { background: #f1f5f9; color: #94a3b8; }
     }
   `]
 })

@@ -79,6 +79,14 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  onAccessibilityChange(event: any, type: 'visual' | 'colorblind') {
+    if (type === 'visual') {
+      this.settings.visualImpairmentMode = event.target.checked;
+    } else {
+      this.settings.colorBlindMode = event.target.checked;
+    }
+  }
+
   onSupportToggle() {
     // Check the value of the signal from financeData
     const current = this.financeData.userSettings().supportDonationReminder;

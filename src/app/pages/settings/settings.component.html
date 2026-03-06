@@ -272,7 +272,7 @@
                         <div>
                             <p class="font-bold text-slate-800 text-sm">Випадкові події</p>
                             <p class="text-[10px] text-slate-500 font-medium">Отримуйте або втрачайте монетки через
-                                випадкові івенти</p>
+                                випадкові івент-пригоди</p>
                         </div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -282,16 +282,51 @@
                         </div>
                     </label>
                 </div>
-            </div>
 
-            <div class="mt-8 flex justify-end">
-                <button (click)="saveSettings()"
-                    class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-200">
-                    Зберегти налаштування гри
-                </button>
+                <!-- Accessibility Settings -->
+                <div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-4">
+                    <h4
+                        class="text-[10px] font-black uppercase text-indigo-400 tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-universal-access"></i> Спеціальні можливості
+                    </h4>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Режим для людей з вадами зору</p>
+                            <p class="text-[10px] text-indigo-600 font-medium">Збільшені шрифти та виразніший контраст
+                            </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" [(ngModel)]="settings.visualImpairmentMode" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500">
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-indigo-100">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">Режим для дальтоніків</p>
+                            <p class="text-[10px] text-indigo-600 font-medium">Заміна червоного кольору на синій для
+                                кращої читаності</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" [(ngModel)]="settings.colorBlindMode" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button (click)="saveSettings()"
+                        class="bg-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-200">
+                        Зберегти налаштування гри
+                    </button>
+                </div>
             </div>
         </div>
-
         <!-- Data Management -->
         <div class="bg-rose-50/50 rounded-3xl p-6 md:p-8 shadow-sm border border-rose-100">
             <h3 class="text-lg font-bold text-rose-800 mb-4 flex items-center gap-2">

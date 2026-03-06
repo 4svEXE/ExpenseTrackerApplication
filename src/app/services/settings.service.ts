@@ -16,6 +16,8 @@ export interface UserSettings {
     showPlanPostTransaction?: boolean;
     supportDonationReminder?: boolean;
     eventsEnabled?: boolean;
+    visualImpairmentMode?: boolean;
+    colorBlindMode?: boolean;
     coins?: number;
 }
 
@@ -41,6 +43,8 @@ export class SettingsService {
         showPlanPostTransaction: true,
         supportDonationReminder: true,
         eventsEnabled: true,
+        visualImpairmentMode: false,
+        colorBlindMode: false,
         coins: 0
     });
 

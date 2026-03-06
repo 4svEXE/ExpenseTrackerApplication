@@ -1,4 +1,5 @@
-<div class="app-container">
+<div class="app-container" [class.accessibility-visual]="financeData.userSettings().visualImpairmentMode"
+  [class.accessibility-colorblind]="financeData.userSettings().colorBlindMode">
   <app-header />
 
   <router-outlet />
