@@ -32,7 +32,7 @@
         &.new-transaction {
           width: 50px;
           height: 50px;
-          font-size: 90;
+          font-size: 32px;
           font-weight: 700;
           border-radius: 50%;
           background-color: #a4ff11;
@@ -41,8 +41,23 @@
           left: -50%;
           transform: translate(-50%, -50%) scale(1.2);
           border: 3px solid #fff;
-          z-index: 2;
+          z-index: 10;
           color: #1b1a1a;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &.active-nav {
+            background-color: #eb28b0;
+            color: #fff;
+            transform: translate(-50%, -50%) scale(1.1) rotate(0deg);
+          }
+
+          .close-icon {
+            font-size: 28px;
+            margin-top: -2px;
+          }
         }
 
         .nav-icon {
@@ -70,6 +85,48 @@
 
 
       }
+    }
+  }
+}
+
+.expandable-nav {
+  position: relative;
+
+  .sub-btn {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    top: 5px;
+    left: -50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+    &.income {
+      background-color: #10b981; // emerald-500
+    }
+
+    &.expense {
+      background-color: #f43f5e; // rose-500
+    }
+  }
+
+  &.expanded {
+    .sub-btn.income {
+      transform: translate(-140%, -140%) scale(1);
+    }
+
+    .sub-btn.expense {
+      transform: translate(40%, -140%) scale(1);
     }
   }
 }

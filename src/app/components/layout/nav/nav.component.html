@@ -12,9 +12,20 @@
         </a>
       </li>
       <li class="li">
-        <a class="new-transaction" [routerLink]="transactionLink" routerLinkActive="active">
-          +
-        </a>
+        <div class="expandable-nav" [class.expanded]="isExpanded">
+          <button class="sub-btn income" (click)="navigateTo('income')">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <button class="sub-btn expense" (click)="navigateTo('expense')">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+
+          <a class="new-transaction" href="javascript:void(0)" (click)="toggleMenu($event)"
+            [class.active-nav]="isExpanded">
+            <span *ngIf="!isExpanded">+</span>
+            <span *ngIf="isExpanded" class="close-icon">&times;</span>
+          </a>
+        </div>
       </li>
       <li class="li">
         <a routerLink="/wallets" routerLinkActive="active">
