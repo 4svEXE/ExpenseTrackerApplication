@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { TransactionService } from '../../services/transaction.service';
 import { Transaction } from '../../types/transaction.interface';
 import { TransactionItemComponent } from '../transaction-item/transaction-item.component';
 import { CommonModule } from '@angular/common';
+import { FinanceDataService } from '../../services/finance-data.service';
 
 interface GroupedTransactions {
   date: Date;
@@ -18,6 +19,7 @@ interface GroupedTransactions {
 })
 export class TransactionListComponent implements OnInit {
   groupedTransactions: GroupedTransactions[] = [];
+  financeData = inject(FinanceDataService);
 
   constructor(private transactionService: TransactionService) { }
 
@@ -29,6 +31,8 @@ export class TransactionListComponent implements OnInit {
 
   private groupTransactionsByDate(transactions: Transaction[]): GroupedTransactions[] {
     const groups: { [key: string]: GroupedTransactions } = {};
+    const userCurrency = this.financeData.userSettings().currency;
+    const accounts = this.financeData.accounts();
 
     transactions.forEach(t => {
       if (!t.date) return;
@@ -41,10 +45,24 @@ export class TransactionListComponent implements OnInit {
         };
       }
       groups[dateKey].items.push(t);
+
+      // Determine transaction currency
+      let txCurrency = 'UAH';
+      if (t.accountId) {
+        const acc = accounts.find(a => a.id === t.accountId);
+        if (acc) txCurrency = acc.currency;
+      }
+
+      // Convert amount to user currency for the balance calculation
+      let amountInUserCurrency = t.amount;
+      if (txCurrency !== userCurrency) {
+        amountInUserCurrency = t.amount * this.financeData.getExchangeRate(txCurrency, userCurrency);
+      }
+
       if (t.transactionType === 'income') {
-        groups[dateKey].dailyBalance += t.amount;
+        groups[dateKey].dailyBalance += amountInUserCurrency;
       } else {
-        groups[dateKey].dailyBalance -= t.amount;
+        groups[dateKey].dailyBalance -= amountInUserCurrency;
       }
     });
 

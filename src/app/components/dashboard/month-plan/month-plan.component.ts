@@ -1,17 +1,23 @@
 import { Component, inject, computed } from '@angular/core';
 import { FinanceDataService, ExpensePlan } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-month-plan',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       
       <!-- Income Plans -->
       <div class="card-container border-t-4 border-t-neutral-900 flex flex-col h-full">
-        <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-4 md:mb-6">План доходів</h3>
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h3 class="text-lg md:text-xl font-bold text-slate-800">План доходів</h3>
+          <button routerLink="/wallets" class="text-emerald-600 hover:text-emerald-700 font-bold text-xs md:text-sm transition-colors">
+            Додати
+          </button>
+        </div>
         <div class="space-y-4 mb-auto">
           <div *ngFor="let p of computedIncomePlans()" class="p-3 bg-slate-50 rounded-xl">
             <div class="flex justify-between items-start mb-2">
@@ -41,7 +47,12 @@ import { CommonModule } from '@angular/common';
 
       <!-- Expense Plans -->
       <div class="card-container border-t-4 border-t-neutral-800 flex flex-col h-full">
-        <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-4 md:mb-6">План витрат</h3>
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h3 class="text-lg md:text-xl font-bold text-slate-800">План витрат</h3>
+          <button routerLink="/wallets" class="text-indigo-600 hover:text-indigo-700 font-bold text-xs md:text-sm transition-colors">
+            Додати
+          </button>
+        </div>
         <div class="space-y-4 mb-auto">
           <div *ngFor="let p of computedExpensePlans()" class="p-3 bg-slate-50 rounded-xl">
             <div class="flex justify-between items-start mb-2">

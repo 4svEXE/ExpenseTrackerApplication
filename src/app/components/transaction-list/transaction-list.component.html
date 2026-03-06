@@ -17,7 +17,8 @@
 
       <div class="text-right">
         <span class="text-sm font-bold" [ngClass]="group.dailyBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'">
-          {{ group.dailyBalance >= 0 ? '+' : '' }}{{ group.dailyBalance | number:'1.0-0' }} ₴
+          {{ group.dailyBalance >= 0 ? '+' : '' }}{{ group.dailyBalance | number:'1.0-0' }} {{
+          financeData.getCurrencySymbol(financeData.userSettings().currency) }}
         </span>
       </div>
     </div>

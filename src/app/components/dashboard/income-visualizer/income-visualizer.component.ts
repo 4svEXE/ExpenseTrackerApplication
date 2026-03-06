@@ -16,36 +16,71 @@ interface Bar {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="visualizer-container">
-      <h3 class="text-xl font-bold mb-4 drop-shadow-md text-slate-800">Візуалізація доходів та витрат</h3>
-      <p class="text-sm text-slate-500 mb-6">Кожна паличка — це 1000 одиниць. Поділки — по 250 одиниць.</p>
-      
-      <div class="grid grid-cols-5 md:flex md:flex-wrap gap-2 md:gap-3 lg:gap-4">
-        <div *ngFor="let bar of bars; let i = index" class="bar-wrapper flex flex-col gap-1 w-full md:w-[75px] lg:w-[90px]">
-          <!-- Visual Bar with 4 Segments -->
-          <div class="bar-container flex h-6 md:h-8 rounded-md overflow-hidden bg-slate-100 shadow-inner border border-slate-200">
-            <div *ngFor="let seg of bar.segments" class="segment flex-1 border-r last:border-r-0 border-white/50 relative overflow-hidden">
-              <div 
-                [style.height]="'100%'" 
-                [style.backgroundColor]="seg.color"
-                [style.width]="seg.fillPercentage + '%'"
-                class="absolute left-0 top-0 transition-all duration-500">
-              </div>
-            </div>
-          </div>
-          <div class="text-center text-[9px] md:text-xs font-medium text-slate-400 mt-1 truncate">{{ (i + 1) * 1000 }}</div>
+    <div class="visualizer-container animate-fade-in">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h3 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Візуалізація бюджету</h3>
+          <p class="text-xs md:text-sm text-slate-500 font-medium">Кожна паличка — це 1000 одиниць. Поділки — по 250 одиниць.</p>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 bg-slate-100/50 rounded-2xl border border-slate-200/60">
+           <span class="text-[10px] font-bold text-slate-400 uppercase">Ціль:</span>
+           <span class="text-sm font-black text-slate-700">{{ planTotal | number:'1.0-0' }} {{ userCurrencySymbol }}</span>
         </div>
       </div>
       
-      <div class="mt-8 flex flex-wrap gap-4 text-xs md:text-sm font-medium">
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-[#10b981]"></span> Здобутий дохід
+      <!-- Regular Income Bars -->
+      <div class="space-y-4">
+        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Планові надходження</h4>
+        <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
+          <div *ngFor="let bar of bars; let i = index" class="bar-wrapper flex flex-col gap-1.5 min-w-0">
+            <div class="bar-container flex h-7 md:h-9 rounded-xl overflow-hidden bg-slate-100/80 shadow-inner border border-slate-200/50">
+              <div *ngFor="let seg of bar.segments" class="segment flex-1 border-r last:border-r-0 border-white/40 relative overflow-hidden">
+                <div 
+                  [style.backgroundColor]="seg.color"
+                  [style.width]="seg.fillPercentage + '%'"
+                  class="absolute left-0 top-0 h-full transition-all duration-700 ease-out shadow-[inset_-2px_0_4px_rgba(0,0,0,0.05)]">
+                </div>
+              </div>
+            </div>
+            <div class="text-center text-[9px] font-bold text-slate-400 mt-0.5">{{ (i + 1) * 1000 }}</div>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-[#fbbf24]"></span> Витрати по категоріях
+      </div>
+
+      <!-- Extra Income Bars (Only visible if surplus exists) -->
+      <div class="mt-10 space-y-4 pt-8 border-t border-slate-100 border-dashed" *ngIf="extraBars.length > 0">
+        <div class="flex items-center gap-3">
+          <h4 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Надлишкові доходи 🔥</h4>
+          <div class="h-px bg-emerald-100 flex-1"></div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-slate-100 border border-slate-200"></span> Заплановано
+        <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
+          <div *ngFor="let bar of extraBars; let i = index" class="bar-wrapper flex flex-col gap-1.5 min-w-0 animate-in slide-in-from-bottom-2 duration-500">
+            <div class="bar-container flex h-7 md:h-9 rounded-xl overflow-hidden bg-emerald-50/50 shadow-inner border border-emerald-100/50">
+              <div *ngFor="let seg of bar.segments" class="segment flex-1 border-r last:border-r-0 border-white/40 relative overflow-hidden">
+                <div 
+                  [style.backgroundColor]="seg.color"
+                  [style.width]="seg.fillPercentage + '%'"
+                  class="absolute left-0 top-0 h-full transition-all duration-700 ease-out shadow-[inset_-2px_0_4px_rgba(255,255,255,0.2)]">
+                </div>
+              </div>
+            </div>
+            <div class="text-center text-[9px] font-bold text-emerald-400 mt-0.5">{{ (bars.length + i + 1) * 1000 }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-10 flex flex-wrap gap-6 py-4 px-6 bg-white/40 rounded-2xl border border-white/60">
+        <div class="flex items-center gap-2.5">
+          <span class="w-3.5 h-3.5 rounded-lg bg-[#10b981] shadow-sm shadow-emerald-200"></span> 
+          <span class="text-xs font-bold text-slate-600">Здобутий дохід</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="w-3.5 h-3.5 rounded-lg bg-[#fbbf24] shadow-sm shadow-amber-200"></span>
+          <span class="text-xs font-bold text-slate-600">Витрати</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span class="w-3.5 h-3.5 rounded-lg bg-slate-100 border border-slate-200"></span>
+          <span class="text-xs font-bold text-slate-600">Заплановано</span>
         </div>
       </div>
     </div>
@@ -64,6 +99,7 @@ interface Bar {
 export class IncomeVisualizerComponent {
   financeData = inject(FinanceDataService);
   bars: Bar[] = [];
+  extraBars: Bar[] = [];
 
   constructor() {
     effect(() => {
@@ -71,65 +107,94 @@ export class IncomeVisualizerComponent {
     });
   }
 
+  get userCurrencySymbol() {
+    return this.financeData.getCurrencySymbol(this.financeData.userSettings().currency);
+  }
+
   get planTotal() {
-    return this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
+    const goal = this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
+    return goal * this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
   }
 
   calculateBars() {
     const incomeGoal = this.planTotal || 10000;
-
-    // Total Bars
-    const numBarsTotal = Math.max(1, Math.ceil(incomeGoal / 1000));
-    this.bars = Array.from({ length: numBarsTotal }, () => ({
-      segments: Array.from({ length: 4 }, () => ({ fillPercentage: 0, color: 'transparent' }))
-    }));
+    const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
 
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    // 1. Fill Income (Green)
-    let filledIncome = this.financeData.transactions()
+    const totalActualIncome = this.financeData.transactions()
       .filter(t => t.type === 'income' && t.date.getMonth() === currentMonth && t.date.getFullYear() === currentYear)
-      .reduce((acc, t) => acc + t.amountUah, 0);
+      .reduce((acc, t) => acc + (t.amountUah * rateToUser), 0);
 
-    for (let i = 0; i < numBarsTotal; i++) {
+    // 1. Regular Bars (up to Goal)
+    const numBarsRegular = Math.max(1, Math.ceil(incomeGoal / 1000));
+    this.bars = Array.from({ length: numBarsRegular }, () => ({
+      segments: Array.from({ length: 4 }, () => ({ fillPercentage: 0, color: 'transparent' }))
+    }));
+
+    // 2. Extra Bars (Surplus)
+    const surplus = Math.max(0, totalActualIncome - incomeGoal);
+    const numBarsExtra = surplus > 0 ? Math.ceil(surplus / 1000) : 0;
+    this.extraBars = Array.from({ length: numBarsExtra }, () => ({
+      segments: Array.from({ length: 4 }, () => ({ fillPercentage: 0, color: 'transparent' }))
+    }));
+
+    // 3. Fill Income (Regular + Extra)
+    let remainingIncome = totalActualIncome;
+
+    // Fill regular bars first
+    for (let i = 0; i < numBarsRegular; i++) {
       for (let s = 0; s < 4; s++) {
-        const amountToFill = Math.min(250, filledIncome);
+        const amountToFill = Math.min(250, remainingIncome);
         if (amountToFill > 0) {
-          this.bars[i].segments[s] = {
-            fillPercentage: (amountToFill / 250) * 100,
-            color: '#10b981' // emerald-500 (Income)
-          };
-          filledIncome -= amountToFill;
+          this.bars[i].segments[s] = { fillPercentage: (amountToFill / 250) * 100, color: '#10b981' };
+          remainingIncome -= amountToFill;
         }
       }
     }
 
-    // 2. Overlay Expenses
+    // Fill extra bars if any income left
+    for (let i = 0; i < numBarsExtra; i++) {
+      for (let s = 0; s < 4; s++) {
+        const amountToFill = Math.min(250, remainingIncome);
+        if (amountToFill > 0) {
+          this.extraBars[i].segments[s] = { fillPercentage: (amountToFill / 250) * 100, color: '#10b981' };
+          remainingIncome -= amountToFill;
+        }
+      }
+    }
+
+    // 4. Overlay Expenses (Usually only makes sense against planned income, but we'll apply it globally)
     const expenses = this.financeData.transactions()
       .filter(t => t.type === 'expense' && t.date.getMonth() === currentMonth && t.date.getFullYear() === currentYear);
 
     let expenseOffset = 0;
     for (const exp of expenses) {
-      let remainingExp = exp.amountUah;
+      let remainingExp = exp.amountUah * rateToUser;
       const expColor = exp.expenseColor || '#fbbf24';
 
       while (remainingExp > 0) {
-        const barIdx = Math.floor(expenseOffset / 1000);
+        const barIdxTotal = Math.floor(expenseOffset / 1000);
         const segIdx = Math.floor((expenseOffset % 1000) / 250);
 
-        if (barIdx >= numBarsTotal) break;
+        let targetBar: Bar | null = null;
+        if (barIdxTotal < numBarsRegular) {
+          targetBar = this.bars[barIdxTotal];
+        } else if (barIdxTotal < numBarsRegular + numBarsExtra) {
+          targetBar = this.extraBars[barIdxTotal - numBarsRegular];
+        }
+
+        if (!targetBar) break;
 
         const filledInCurrentSeg = expenseOffset % 250;
         const availableInSeg = 250 - filledInCurrentSeg;
         const fillThisStep = Math.min(remainingExp, availableInSeg);
-
         const newPercentage = ((filledInCurrentSeg + fillThisStep) / 250) * 100;
 
-        // If a segment is fully overwriting an already existing valid percentage, taking the Max effectively paints the width logic correctly.
-        this.bars[barIdx].segments[segIdx].color = expColor;
-        this.bars[barIdx].segments[segIdx].fillPercentage = Math.max(
-          this.bars[barIdx].segments[segIdx].fillPercentage,
+        targetBar.segments[segIdx].color = expColor;
+        targetBar.segments[segIdx].fillPercentage = Math.max(
+          targetBar.segments[segIdx].fillPercentage,
           newPercentage
         );
 

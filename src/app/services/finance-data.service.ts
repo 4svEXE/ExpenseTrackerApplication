@@ -118,7 +118,13 @@ export class FinanceDataService {
           date = new Date(t.date || new Date());
         }
 
-        const amt = Number(t.amount) || Number(t.amountUah) || 0;
+        let amt = Number(t.amount) || Number(t.amountUah) || 0;
+        if (t.accountId) {
+          const match = this.accounts().find(a => a.id === t.accountId);
+          if (match && match.currency !== 'UAH') {
+            amt = amt * this.getExchangeRate(match.currency, 'UAH');
+          }
+        }
 
         return {
           ...t,
@@ -126,6 +132,7 @@ export class FinanceDataService {
           title: (t.description || t.title || t.category || 'Транзакція').toString(),
           date,
           amountUah: amt,
+          amountEur: amt / this.getExchangeRate('EUR', 'UAH'),
           type: (t.transactionType === 'income' || t.type === 'income') ? 'income' : 'expense',
           category: t.category || 'Інше',
           expenseColor: t.expenseColor || this.getThemeColor(t.category || ''),
@@ -178,6 +185,16 @@ export class FinanceDataService {
     return (r[f] || 1) / (r[t] || 1);
   }
 
+  getCurrencySymbol(currency: string): string {
+    const symbols: Record<string, string> = {
+      'UAH': '₴',
+      'USD': '$',
+      'EUR': '€',
+      'CZK': 'Kč'
+    };
+    return symbols[currency] || currency;
+  }
+
   addAccount(acc: Omit<AccountBalance, 'id'>) {
     const newAcc = {
       ...acc,
@@ -223,9 +240,10 @@ export class FinanceDataService {
 
   getMonthlyIncomeFactTotal(): number {
     const now = new Date();
-    return this.transactions()
+    const uah = this.transactions()
       .filter(t => t.type === 'income' && t.date.getMonth() === now.getMonth() && t.date.getFullYear() === now.getFullYear())
       .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
+    return uah * this.getExchangeRate('UAH', this.userSettings().currency);
   }
 
   getTaxAmount(): number {
@@ -253,9 +271,10 @@ export class FinanceDataService {
 
   getTotalExpensesThisMonth(): number {
     const now = new Date();
-    return this.transactions()
+    const uah = this.transactions()
       .filter(t => t.type === 'expense' && t.date.getMonth() === now.getMonth() && t.date.getFullYear() === now.getFullYear())
       .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
+    return uah * this.getExchangeRate('UAH', this.userSettings().currency);
   }
 
   getFinancialHistory(monthsCount: number = 6) {
@@ -266,13 +285,17 @@ export class FinanceDataService {
       const m = d.getMonth();
       const y = d.getFullYear();
 
-      const inc = this.transactions()
+      const incUah = this.transactions()
         .filter(t => t.type === 'income' && t.date.getMonth() === m && t.date.getFullYear() === y)
         .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
 
-      const exp = this.transactions()
+      const expUah = this.transactions()
         .filter(t => t.type === 'expense' && t.date.getMonth() === m && t.date.getFullYear() === y)
         .reduce((s, t) => s + (Number(t.amountUah) || 0), 0);
+
+      const rate = this.getExchangeRate('UAH', this.userSettings().currency);
+      const inc = incUah * rate;
+      const exp = expUah * rate;
 
       history.push({
         label: d.toLocaleDateString('uk-UA', { month: 'short' }),

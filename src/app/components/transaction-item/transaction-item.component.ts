@@ -40,6 +40,13 @@ export class TransactionItemComponent {
     return acct ? acct.name : 'Невідомий рахунок';
   }
 
+  get transactionCurrency() {
+    const accountId = this.item.accountId;
+    if (!accountId) return 'UAH';
+    const acct = this.financeData.accounts().find(a => a.id === accountId);
+    return acct ? acct.currency : 'UAH';
+  }
+
   openDetails() {
     this.showDetails = true;
     this.isAnimating = true;

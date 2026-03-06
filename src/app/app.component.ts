@@ -8,6 +8,8 @@ import { FinanceDataService } from './services/finance-data.service';
 import { inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { NotificationService } from './services/notification.service';
+
 const components = [
   HeaderComponent,
   NavComponent,
@@ -23,5 +25,6 @@ const components = [
 })
 export class AppComponent {
   financeData = inject(FinanceDataService);
+  notificationService = inject(NotificationService);
   title = 'ExpenseTrackerApplication';
 }

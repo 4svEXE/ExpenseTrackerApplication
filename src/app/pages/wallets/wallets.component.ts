@@ -21,8 +21,8 @@ import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePl
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          <app-accounts-list (accountClicked)="editAccount($event)"></app-accounts-list>
-          <app-subscriptions-list (subscriptionClicked)="editSubscription($event)"></app-subscriptions-list>
+          <app-accounts-list (accountClicked)="editAccount($event)" (addAccountClicked)="openAddAccountModal()"></app-accounts-list>
+          <app-subscriptions-list (subscriptionClicked)="editSubscription($event)" (addSubscriptionClicked)="openAddSubscriptionModal()"></app-subscriptions-list>
         </div>
 
         <!-- Керування планами -->

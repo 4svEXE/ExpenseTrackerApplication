@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FinanceDataService, UserSettings, IncomePlan, ExpensePlan } from '../../services/finance-data.service';
+import { FinanceDataService, UserSettings } from '../../services/finance-data.service';
 import { AudioService } from '../../services/audio.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-settings',
@@ -14,6 +15,7 @@ import { AudioService } from '../../services/audio.service';
 export class SettingsComponent implements OnInit {
   financeData = inject(FinanceDataService);
   audio = inject(AudioService);
+  notification = inject(NotificationService);
 
   // Local state for forms
   settings: UserSettings = {
@@ -49,6 +51,10 @@ export class SettingsComponent implements OnInit {
 
   playTestSound() {
     this.audio.playTest(this.settings.soundVolume);
+  }
+
+  testNotification() {
+    this.notification.showNotification('Тестове сповіщення', 'Якщо ви це бачите, сповіщення працюють! 🎉');
   }
 
   // --- Data Management ---

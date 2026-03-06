@@ -13,6 +13,9 @@ import { CommonModule } from '@angular/common';
           <h3 class="text-lg md:text-xl font-bold text-slate-800 drop-shadow-sm">Активні підписки</h3>
           <p class="text-[10px] md:text-sm text-slate-500">Регулярні платежі</p>
         </div>
+        <button (click)="addSubscriptionClicked.emit()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white transition-all active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        </button>
       </div>
       
       <div class="overflow-x-auto">
@@ -72,6 +75,7 @@ export class SubscriptionsListComponent {
   subscriptions = this.financeData.subscriptions;
 
   @Output() subscriptionClicked = new EventEmitter<Subscription>();
+  @Output() addSubscriptionClicked = new EventEmitter<void>();
 
   getDaysLeft(date: Date): number {
     const today = new Date();

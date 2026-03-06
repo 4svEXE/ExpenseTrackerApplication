@@ -159,6 +159,10 @@
                             <p class="font-bold text-slate-800 text-sm">Нагадування заповнити витрати</p>
                             <p class="text-[10px] text-slate-500 font-medium">Щоденне сповіщення у вибраний час</p>
                         </div>
+                        <button (click)="testNotification()"
+                            class="ml-auto mr-4 text-[10px] font-bold text-black bg-white px-2 py-1 rounded-md hover:bg-slate-100 transition-colors uppercase tracking-wider border border-slate-200">
+                            <i class="fa-solid fa-vial mr-1"></i> Тест
+                        </button>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" [(ngModel)]="settings.notificationEnabled" class="sr-only peer">
@@ -288,7 +292,7 @@
                         <div>
                             <p class="font-bold text-slate-800 text-sm">Розробник</p>
                             <p class="text-[11px] text-black font-black group-hover:underline">
-                                Иван Сташко &#64;sv.png
+                                Іван Сташко &#64;sv.png
                             </p>
                         </div>
                     </div>
@@ -305,7 +309,7 @@
                         <div>
                             <p class="font-bold text-slate-800 text-sm">Telegram Канал</p>
                             <p class="text-[11px] text-black font-black group-hover:underline">
-                                Приєднатися до спільноти
+                                Приєднатися до спільноти та запропонувати покращення
                             </p>
                         </div>
                     </div>
@@ -314,7 +318,7 @@
             </div>
 
             <p class="text-center text-[10px] text-slate-400 font-bold mt-10 uppercase tracking-widest">
-                Expense Tracker Application v1.2.0 • 2026
+                Expense Tracker Application v1.2.4 • 2026
             </p>
         </div>
 

@@ -7,10 +7,10 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="card-container h-full">
-      <div class="flex justify-between items-center mb-4 md:mb-6 pt-10">
+    <div class="card-container h-full pt-10">
+      <div class="flex justify-between items-center mb-4 md:mb-6">
         <h3 class="text-lg md:text-xl font-bold text-slate-800 drop-shadow-sm">Рахунки та Картки</h3>
-        <button (click)="onAddAccount()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white transition-all active:scale-95">
+        <button (click)="addAccountClicked.emit()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white transition-all active:scale-95">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         </button>
       </div>
@@ -66,6 +66,7 @@ export class AccountsListComponent {
   accounts = this.financeData.accounts;
 
   @Output() accountClicked = new EventEmitter<AccountBalance>();
+  @Output() addAccountClicked = new EventEmitter<void>();
 
   get userCurrency() {
     return this.financeData.userSettings().currency;

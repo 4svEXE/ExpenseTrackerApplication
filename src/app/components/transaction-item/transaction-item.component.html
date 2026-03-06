@@ -23,7 +23,8 @@
   <div class="text-right">
     <span class="text-sm font-bold"
       [ngClass]="item.transactionType === 'income' ? 'text-emerald-500' : 'text-slate-800'">
-      {{ item.transactionType === 'income' ? '+' : '-' }}{{ item.amount | number:'1.0-0' }} ₴
+      {{ item.transactionType === 'income' ? '+' : '-' }}{{ item.amount | number:'1.0-0' }} {{
+      financeData.getCurrencySymbol(transactionCurrency) }}
     </span>
   </div>
 </div>
@@ -48,7 +49,8 @@
       <h3 class="text-xl font-bold text-slate-800">{{ item.category }}</h3>
       <span class="text-3xl font-black mt-2"
         [ngClass]="item.transactionType === 'income' ? 'text-emerald-500' : 'text-slate-900'">
-        {{ item.transactionType === 'income' ? '+' : '-' }}{{ item.amount | number:'1.0-2' }} ₴
+        {{ item.transactionType === 'income' ? '+' : '-' }}{{ item.amount | number:'1.0-2' }} {{
+        financeData.getCurrencySymbol(transactionCurrency) }}
       </span>
       <p class="text-sm text-slate-400 font-medium mt-1">{{ item.date | date:'dd MMMM, EEEE, HH:mm':'':'uk-UA' }}</p>
     </div>
