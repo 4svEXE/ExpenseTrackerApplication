@@ -32,14 +32,15 @@ export class GamificationService {
     eventResult = signal<{ text: string, reward: number } | null>(null);
     nextEventTime = signal<number>(0);
 
-    activeAchievement = signal<{ text: string, reward: number, completed: boolean } | null>(null);
+    activeAchievement = signal<Achievement | null>(null);
     isInfoModalOpen = signal(false);
 
     toggleInfoModal() {
         this.isInfoModalOpen.set(!this.isInfoModalOpen());
     }
 
-    private readonly STORAGE_KEY = 'gamification_state_v2';
+    private readonly STORAGE_KEY = 'gamification_state_v3';
+    private notifiedPlans = new Set<string>();
 
     constructor() {
         this.loadState();
@@ -52,8 +53,17 @@ export class GamificationService {
             if (Date.now() >= this.nextEventTime() && !this.currentEvent() && !this.eventResult()) {
                 this.generateNewEvent();
             }
-            this.checkAchievements();
-        }, 60000);
+            this.updateAchievementProgress();
+        }, 30000); // Check more frequently for progress
+
+        // Watch for plan completions
+        effect(() => {
+            const iPlans = this.financeData.incomePlans();
+            const ePlans = this.financeData.expensePlans();
+            const txs = this.financeData.transactions(); // Trigger when transactions change
+
+            this.checkExternalProgress();
+        });
 
         effect(() => {
             this.saveState();
@@ -66,8 +76,11 @@ export class GamificationService {
             const state = JSON.parse(saved);
             this.currentEvent.set(state.currentEvent);
             this.eventResult.set(state.eventResult);
-            this.nextEventTime.set(state.nextEventTime);
+            this.nextEventTime.set(state.nextEventTime || 0);
             this.activeAchievement.set(state.activeAchievement);
+            if (state.notifiedPlans) {
+                this.notifiedPlans = new Set(state.notifiedPlans);
+            }
         }
     }
 
@@ -76,7 +89,8 @@ export class GamificationService {
             currentEvent: this.currentEvent(),
             eventResult: this.eventResult(),
             nextEventTime: this.nextEventTime(),
-            activeAchievement: this.activeAchievement()
+            activeAchievement: this.activeAchievement(),
+            notifiedPlans: Array.from(this.notifiedPlans)
         };
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
     }
@@ -85,8 +99,6 @@ export class GamificationService {
         if (!this.financeData.userSettings().eventsEnabled) return;
 
         const event = { ...FANTASY_EVENTS[Math.floor(Math.random() * FANTASY_EVENTS.length)] };
-
-        // Randomly generate character icon using DiceBear
         const seed = Math.random().toString(36).substring(7);
         event.iconUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
 
@@ -112,12 +124,8 @@ export class GamificationService {
             return;
         }
 
-        // Deduct cost
-        if (choice.cost > 0) {
-            this.financeData.addCoins(-choice.cost);
-        }
+        if (choice.cost > 0) this.financeData.addCoins(-choice.cost);
 
-        // Determine outcome
         const rand = Math.random();
         let cumulativeProb = 0;
         let selectedOutcome = choice.outcomes[choice.outcomes.length - 1];
@@ -130,27 +138,62 @@ export class GamificationService {
             }
         }
 
-        // Apply reward
         this.financeData.addCoins(selectedOutcome.reward);
+        if (selectedOutcome.reward > 0) this.audio.playIncome();
+        else if (selectedOutcome.reward < 0) this.audio.playOutcome();
 
-        // Sound effects for outcomes
-        if (selectedOutcome.reward > 0) {
-            this.audio.playIncome();
-        } else if (selectedOutcome.reward < 0) {
-            this.audio.playOutcome();
-        } else {
-            // Neutral outcome sound? Maybe just a subtle click or nothing
-        }
-
-        this.eventResult.set({
-            text: selectedOutcome.text,
-            reward: selectedOutcome.reward
-        });
+        this.eventResult.set({ text: selectedOutcome.text, reward: selectedOutcome.reward });
         this.currentEvent.set(null);
+
+        // Track choice for achievement
+        this.incrementAchievementProgress('choices');
     }
 
     finishEvent() {
         this.eventResult.set(null);
+    }
+
+    private checkExternalProgress() {
+        const now = new Date();
+        const m = now.getMonth();
+        const y = now.getFullYear();
+
+        // Income
+        this.financeData.incomePlans().forEach(plan => {
+            const planKey = `plan-inc-${plan.id}-${m}-${y}`;
+            if (this.notifiedPlans.has(planKey)) return;
+
+            const fact = this.financeData.transactions()
+                .filter(t => t.type === 'income' && t.date.getMonth() === m && t.date.getFullYear() === y &&
+                    (t.tags.some(tag => tag.toLowerCase() === plan.category.toLowerCase()) || t.category === plan.category))
+                .reduce((s, t) => s + (t.amountUah || 0), 0);
+
+            if (fact >= plan.planAmount && plan.planAmount > 0) {
+                this.onPlanCompleted(planKey);
+            }
+        });
+
+        // Expense
+        this.financeData.expensePlans().forEach(plan => {
+            const planKey = `plan-exp-${plan.id}-${m}-${y}`;
+            if (this.notifiedPlans.has(planKey)) return;
+
+            const fact = this.financeData.transactions()
+                .filter(t => t.type === 'expense' && t.date.getMonth() === m && t.date.getFullYear() === y &&
+                    (t.tags.some(tag => tag.toLowerCase() === plan.category.toLowerCase()) || t.category === plan.category))
+                .reduce((s, t) => s + (t.amountUah || 0), 0);
+
+            if (fact >= plan.amount && plan.amount > 0) {
+                this.onPlanCompleted(planKey);
+            }
+        });
+    }
+
+    private onPlanCompleted(key: string) {
+        this.notifiedPlans.add(key);
+        this.financeData.addCoins(10);
+        this.incrementAchievementProgress('plans');
+        this.saveState();
     }
 
     skipTime() {
@@ -166,25 +209,60 @@ export class GamificationService {
             this.financeData.addCoins(achiev.reward);
             this.audio.playChallengeComplete();
             this.activeAchievement.set(null);
-            this.checkAchievements();
+            this.initNewAchievement();
         }
     }
 
-    private checkAchievements() {
+    // Call this whenever a relevant action happens
+    incrementAchievementProgress(type: 'choices' | 'plans') {
+        const achiev = this.activeAchievement();
+        if (achiev && !achiev.completed && achiev.type === type) {
+            const nextVal = (achiev.current || 0) + 1;
+            this.activeAchievement.set({
+                ...achiev,
+                current: nextVal,
+                completed: nextVal >= achiev.target
+            });
+        }
+    }
+
+    private updateAchievementProgress() {
         if (!this.activeAchievement()) {
-            const pool = [
-                { text: 'Накопичити 200 монет', reward: 100, check: () => this.financeData.userSettings().coins! >= 200 },
-                { text: 'Зробити 3 вибори в подіях', reward: 30, check: () => true },
-                { text: 'Виграти золото у дракона', reward: 50, check: () => false }
-            ];
-            const selected = pool[Math.floor(Math.random() * pool.length)];
-            this.activeAchievement.set({ ...selected, completed: selected.check() });
-        } else {
-            const achiev = this.activeAchievement()!;
-            if (!achiev.completed) {
-                // Re-check logic if needed
+            this.initNewAchievement();
+            return;
+        }
+
+        const achiev = this.activeAchievement()!;
+        if (achiev.completed) return;
+
+        // Auto-check for coin-based achievements
+        if (achiev.type === 'coins') {
+            const currentCoins = this.financeData.userSettings().coins || 0;
+            if (currentCoins >= achiev.target) {
+                this.activeAchievement.set({ ...achiev, current: currentCoins, completed: true });
             }
         }
+    }
+
+    private initNewAchievement() {
+        const pool: Omit<Achievement, 'completed' | 'current'>[] = [
+            { id: 'a1', text: 'Накопичити 100 монет', reward: 50, type: 'coins', target: 100 },
+            { id: 'a2', text: 'Накопичити 500 монет', reward: 200, type: 'coins', target: 500 },
+            { id: 'a3', text: 'Зробити 5 виборів у подіях', reward: 30, type: 'choices', target: 5 },
+            { id: 'a4', text: 'Зробити 10 виборів у подіях', reward: 70, type: 'choices', target: 10 },
+            { id: 'a5', text: 'Виконати 3 фінансові плани', reward: 40, type: 'plans', target: 3 },
+            { id: 'a6', text: 'Виконати 10 фінансових планів', reward: 150, type: 'plans', target: 10 }
+        ];
+
+        const selected = pool[Math.floor(Math.random() * pool.length)];
+        this.activeAchievement.set({
+            ...selected,
+            current: selected.type === 'coins' ? (this.financeData.userSettings().coins || 0) : 0,
+            completed: false
+        });
+
+        // Final check immediately
+        this.updateAchievementProgress();
     }
 
     get timeUntilNext(): string {
@@ -195,6 +273,16 @@ export class GamificationService {
         const s = Math.floor((diff % 60000) / 1000);
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
+}
+
+export interface Achievement {
+    id: string;
+    text: string;
+    reward: number;
+    type: 'coins' | 'choices' | 'plans';
+    target: number;
+    current: number;
+    completed: boolean;
 }
 
 const FANTASY_EVENTS: GameEvent[] = [

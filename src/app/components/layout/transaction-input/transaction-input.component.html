@@ -105,9 +105,9 @@
           <i class="fa-solid fa-delete-left text-xl"></i>
         </button>
         <button type="submit" [disabled]="transactionForm.invalid" (click)="onSubmit($event)"
-          class="py-3 rounded-xl text-white shadow-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
+          class="py-3 rounded-xl text-white shadow-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:shadow-none font-black uppercase tracking-widest text-[10px] px-6"
           [ngClass]="transaction.transactionType === 'income' ? 'bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 disabled:bg-slate-300' : 'bg-black shadow-black/10 hover:bg-neutral-800 disabled:bg-slate-300'">
-          <i class="fa-solid fa-check text-xl"></i>
+          Зберегти
         </button>
       </div>
     </form>

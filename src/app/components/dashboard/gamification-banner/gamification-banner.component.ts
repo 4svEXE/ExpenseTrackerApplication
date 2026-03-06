@@ -82,7 +82,9 @@ import { FinanceDataService } from '../../../services/finance-data.service';
                 <i class="fa-solid fa-award text-xs"></i>
             </div>
             <div *ngIf="!isGoalHidden">
-              <p class="text-[8px] font-black uppercase tracking-widest text-slate-400">Активна ціль</p>
+              <p class="text-[8px] font-black uppercase tracking-widest text-slate-400">
+                Активна ціль <span *ngIf="achiev.target > 1">• {{ achiev.current }} / {{ achiev.target }}</span>
+              </p>
               <p class="text-xs font-black">{{ achiev.text }}</p>
             </div>
           </div>
