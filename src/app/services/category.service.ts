@@ -34,14 +34,6 @@ export class CategoryService {
         return cat;
       });
 
-      // Also check if there are any default categories missing in local storage entirely
-      for (const defaultCat of defaultCategories) {
-        if (!mergedCategories.some(cat => cat.name === defaultCat.name)) {
-          needsUpdate = true;
-          mergedCategories.push(defaultCat);
-        }
-      }
-
       if (needsUpdate) {
         this.localStorageService.set(this.StorageKey, mergedCategories);
       }
@@ -52,17 +44,12 @@ export class CategoryService {
     return this.initCategories();
   }
 
+  getCategoryByType(type: TransactionType | '', showHidden = false): TransactionCategory[] {
+    let categories: TransactionCategory[] = this.getCategories();
 
-  initCategories(): TransactionCategory[] {
-    const categories: TransactionCategory[] = Categories as TransactionCategory[];
-
-    this.localStorageService.set(this.StorageKey, categories);
-    return this.localStorageService.get(this.StorageKey);
-  }
-
-
-  getCategoryByType(type: TransactionType | ''): TransactionCategory[] {
-    const categories: TransactionCategory[] = this.getCategories();
+    if (!showHidden) {
+      categories = categories.filter(c => !c.isHidden);
+    }
 
     if (type === '') {
       return categories;
@@ -74,26 +61,34 @@ export class CategoryService {
 
     // Merge in planned items as categories if they don't exist
     if (type === 'income') {
-      const plans = this.financeData.incomePlans();
+      const plans = this.financeData.getIncomePlansWithFact();
       plans.forEach(p => {
+        const remaining = p.planAmount - p.factAmount;
+        // If it's a one-time plan and it's already covered, skip it
+        if (!p.isRecurring && remaining <= 0) return;
+
         if (!filtered.some(c => c.name.toLowerCase() === p.category.toLowerCase())) {
           filtered.push({
             name: p.category,
-            icon: 'fa-solid fa-bullseye', // Distinctive icon for plans
+            icon: 'fa-solid fa-bullseye',
             transactionType: 'income',
-            plannedAmount: p.planAmount
+            plannedAmount: remaining > 0 ? remaining : p.planAmount
           } as TransactionCategory);
         }
       });
     } else if (type === 'expense') {
-      const plans = this.financeData.expensePlans();
+      const plans = this.financeData.getExpensePlansWithFact();
       plans.forEach(p => {
+        const remaining = p.amount - p.factAmount;
+        // If it's a one-time plan and it's already covered, skip it
+        if (!p.isRecurring && remaining <= 0) return;
+
         if (!filtered.some(c => c.name.toLowerCase() === p.category.toLowerCase())) {
           filtered.push({
             name: p.category,
             icon: 'fa-solid fa-bullseye',
             transactionType: 'expense',
-            plannedAmount: p.amount
+            plannedAmount: remaining > 0 ? remaining : p.amount
           } as TransactionCategory);
         }
       });
@@ -124,6 +119,21 @@ export class CategoryService {
     const categories = this.getCategories();
     categories.push(category);
     this.localStorageService.set(this.StorageKey, categories);
+  }
+
+  toggleCategoryVisibility(category: TransactionCategory): void {
+    const categories = this.getCategories();
+    const idx = categories.findIndex(c => c.name === category.name && c.transactionType === category.transactionType);
+    if (idx !== -1) {
+      categories[idx].isHidden = !categories[idx].isHidden;
+      this.localStorageService.set(this.StorageKey, categories);
+    }
+  }
+
+  initCategories(): TransactionCategory[] {
+    const categories: TransactionCategory[] = Categories as TransactionCategory[];
+    this.localStorageService.set(this.StorageKey, categories);
+    return categories;
   }
 
   deleteCategory(category: TransactionCategory): void {

@@ -88,7 +88,9 @@ export class FinancialAssistantComponent {
   }
 
   get planTotal() {
-    return this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
+    const plansTotal = this.financeData.getMonthlyIncomePlanTotal();
+    const goal = Number(this.financeData.userSettings().monthlyIncomeGoal) || 0;
+    return Math.max(plansTotal, goal);
   }
 
   get factTotal() {

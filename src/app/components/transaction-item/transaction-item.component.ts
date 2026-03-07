@@ -68,6 +68,16 @@ export class TransactionItemComponent {
   async onDelete(event: Event) {
     event.stopPropagation();
     if (await this.confirmService.confirm('Видалити транзакцію?')) {
+      // Reverse the balance impact
+      const reverseType = this.item.transactionType === 'income' ? 'expense' : 'income';
+      if (this.item.accountId) {
+        this.financeData.adjustAccountBalance(
+          this.item.accountId,
+          this.item.amount,
+          reverseType
+        );
+      }
+
       this.transactionService.deleteTransaction(this.item);
       this.closeDetails();
     }

@@ -17,6 +17,12 @@
       {{ category.plannedAmount | currency:financeData.userSettings().currency:'symbol-narrow':'1.0-0' }}
     </div>
 
+    <!-- Visibility Toggle (Only in Edit Mode) -->
+    <button *ngIf="isEditMode()" (click)="toggleVisibility(category, $event)"
+      class="absolute top-0 left-0 z-10 w-6 h-6 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center shadow-sm hover:bg-slate-200 transition-all active:scale-90 border border-slate-200">
+      <i class="fa-solid" [ngClass]="category.isHidden ? 'fa-eye-slash text-rose-400' : 'fa-eye text-emerald-400'"></i>
+    </button>
+
     <!-- Delete Badge (Only in Edit Mode) -->
     <button *ngIf="isEditMode()" (click)="deleteCategory(category, $event)"
       class="absolute -top-1 -right-1 z-10 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-rose-600 hover:scale-110 transition-all active:scale-90 border-2 border-white">
@@ -27,12 +33,16 @@
       [ngClass]="[
            !isEditMode() && isSelectedCategory(category) ? 'bg-slate-800 text-white shadow-lg shadow-slate-300 border-2 border-transparent scale-105' : 'bg-white border-2 border-slate-100 text-slate-500',
            !isEditMode() ? 'hover:border-slate-300 hover:bg-slate-50 group-active:scale-95' : '',
-           isEditMode() ? 'opacity-80' : ''
+           isEditMode() ? 'opacity-80' : '',
+           category.isHidden ? 'grayscale opacity-30 scale-90' : ''
          ]">
-      <i [class]="category.icon" class="text-xl md:text-2xl" [class.text-rose-500]="isEditMode()"></i>
+      <i [class]="category.icon" class="text-xl md:text-2xl"
+        [class.text-rose-500]="isEditMode() && !category.isHidden"></i>
     </div>
-    <span class="text-[10px] md:text-xs font-bold text-center w-full truncate px-1 transition-colors"
-      [ngClass]="!isEditMode() && isSelectedCategory(category) ? 'text-slate-800' : 'text-slate-500'">
+    <span class="text-[10px] md:text-xs font-bold text-center w-full truncate px-1 transition-colors" [ngClass]="[
+        !isEditMode() && isSelectedCategory(category) ? 'text-slate-800' : 'text-slate-500',
+        category.isHidden ? 'opacity-40' : ''
+      ]">
       {{ category.name }}
     </span>
   </div>

@@ -5,4 +5,5 @@ export interface TransactionCategory {
   icon: string;
   transactionType: TransactionType;
   plannedAmount?: number;
+  isHidden?: boolean;
 }

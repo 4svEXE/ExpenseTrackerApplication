@@ -8,8 +8,16 @@ import { SupportService } from '../../../services/support.service';
   imports: [CommonModule],
   template: `
     <div *ngIf="supportService.config().isOpen" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-      <div class="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-300 border border-white/20">
+      <div class="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-300 border border-white/20 relative">
         
+        <!-- Close Button -->
+        <button 
+          (click)="supportService.close()"
+          class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all active:scale-90 z-10"
+        >
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
         <!-- Donation Request -->
         <div *ngIf="supportService.config().type === 'donation_request'" class="p-8 text-center">
           <div class="w-20 h-20 bg-amber-50 text-amber-500 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-inner ring-1 ring-amber-100">

@@ -62,8 +62,11 @@ import { RouterModule } from '@angular/router';
                   {{ p.factAmount | currency:userCurrency:'symbol-narrow':'1.0-0' }} / {{ p.amount | currency:userCurrency:'symbol-narrow':'1.0-0' }}
                 </div>
                 <!-- Optional overspending visual cue -->
-                <div class="text-xs md:text-sm font-bold mt-0.5" [ngClass]="p.amount && p.factAmount > p.amount ? 'text-rose-600' : 'text-slate-600'">
-                  {{ p.amount ? (p.factAmount / p.amount * 100) : 0 | number:'1.0-2' }}%
+                <div class="text-xs md:text-sm font-bold mt-0.5 flex items-center justify-between" [ngClass]="p.amount && p.factAmount > p.amount ? 'text-rose-600' : 'text-slate-600'">
+                  <span>{{ p.amount ? (p.factAmount / p.amount * 100) : 0 | number:'1.0-2' }}%</span>
+                  <span *ngIf="p.amount && p.factAmount < p.amount" class="text-[9px] opacity-70">
+                    Залишилось: {{ (p.amount - p.factAmount) | currency:userCurrency:'symbol-narrow':'1.0-0' }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -113,43 +116,11 @@ export class MonthPlanComponent {
     return this.financeData.userSettings().currency;
   }
 
-  computedIncomePlans = computed(() => {
-    const activeMonth = new Date().getMonth();
-    const activeYear = new Date().getFullYear();
-    const txs = this.financeData.transactions().filter(t => t.type === 'income' && t.date.getMonth() === activeMonth && t.date.getFullYear() === activeYear);
-
-    return this.financeData.incomePlans().map(plan => {
-      // Find matching tag or category
-      const planCat = (plan.category || '').toLowerCase();
-      const matched = txs.filter(t =>
-        (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
-        (t.title && t.title.toLowerCase().includes(planCat))
-      );
-      const fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
-      return { ...plan, factAmount: fact };
-    });
-  });
+  computedIncomePlans = computed(() => this.financeData.getIncomePlansWithFact());
 
   computedExpensePlans = computed(() => {
-    const activeMonth = new Date().getMonth();
-    const activeYear = new Date().getFullYear();
-    const txs = this.financeData.transactions().filter(t => t.type === 'expense' && t.date.getMonth() === activeMonth && t.date.getFullYear() === activeYear);
-
     // 1. Regular Expense Plans
-    const plans = this.financeData.expensePlans().map(plan => {
-      let fact = 0;
-      const planCat = (plan.category || '').toLowerCase();
-      if (planCat.includes('податки')) {
-        fact = this.financeData.getTaxAmount();
-      } else {
-        const matched = txs.filter(t =>
-          (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
-          (t.title && t.title.toLowerCase().includes(planCat))
-        );
-        fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
-      }
-      return { ...plan, factAmount: fact };
-    });
+    const plans = this.financeData.getExpensePlansWithFact().filter(p => !(!p.isRecurring && p.factAmount >= p.amount));
 
     // 2. Add Active Subscriptions as plans
     const subs = this.financeData.subscriptions().map(s => ({

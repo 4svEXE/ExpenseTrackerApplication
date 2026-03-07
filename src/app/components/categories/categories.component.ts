@@ -54,6 +54,13 @@ export class CategoriesComponent implements OnInit {
 
   toggleEditMode() {
     this.isEditMode.set(!this.isEditMode());
+    this.loadCategories();
+  }
+
+  toggleVisibility(category: TransactionCategory, event: Event) {
+    event.stopPropagation();
+    this.categoryService.toggleCategoryVisibility(category);
+    this.loadCategories();
   }
 
   async deleteCategory(category: TransactionCategory, event: Event) {
@@ -95,7 +102,7 @@ export class CategoriesComponent implements OnInit {
   }
 
   loadCategories() {
-    this.categories = this.categoryService.getCategoryByType(this.transactionType);
+    this.categories = this.categoryService.getCategoryByType(this.transactionType, this.isEditMode());
   }
 
   onSelectCategory(category: TransactionCategory) {

@@ -431,4 +431,48 @@ export class FinanceDataService {
       this.toasts.show('Помилка при імпорті даних!', 'error');
     }
   }
+  getExpensePlansWithFact() {
+    const now = new Date();
+    const txs = this.transactions().filter(t =>
+      t.type === 'expense' &&
+      t.date.getMonth() === now.getMonth() &&
+      t.date.getFullYear() === now.getFullYear()
+    );
+
+    return this.expensePlans().map(plan => {
+      let fact = 0;
+      const planCat = (plan.category || '').toLowerCase();
+      if (planCat.includes('податки')) {
+        fact = this.getTaxAmount();
+      } else {
+        const matched = txs.filter(t =>
+          (t.category && t.category.toLowerCase() === planCat) ||
+          (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
+          (t.title && t.title.toLowerCase().includes(planCat))
+        );
+        fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
+      }
+      return { ...plan, factAmount: fact };
+    });
+  }
+
+  getIncomePlansWithFact() {
+    const now = new Date();
+    const txs = this.transactions().filter(t =>
+      t.type === 'income' &&
+      t.date.getMonth() === now.getMonth() &&
+      t.date.getFullYear() === now.getFullYear()
+    );
+
+    return this.incomePlans().map(plan => {
+      const planCat = (plan.category || '').toLowerCase();
+      const matched = txs.filter(t =>
+        (t.category && t.category.toLowerCase() === planCat) ||
+        (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
+        (t.title && t.title.toLowerCase().includes(planCat))
+      );
+      const fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
+      return { ...plan, factAmount: fact };
+    });
+  }
 }
