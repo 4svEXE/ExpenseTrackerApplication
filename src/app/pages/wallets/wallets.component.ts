@@ -244,7 +244,7 @@ import { ConfirmService } from '../../services/confirm.service';
                             </div>
                         </div>
                         <div class="flex gap-1">
-                            <button (click)="saveDebts()" title="Зберегти"
+                            <button (click)="payoffDebt(i)" title="Виконати борг"
                                     class="w-8 h-8 rounded-lg bg-white/10 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center justify-center active:scale-90">
                                 <i class="fa-solid fa-check"></i>
                             </button>
@@ -715,6 +715,23 @@ export class WalletsComponent implements OnInit {
 
   saveDebts() {
     this.financeData.saveDebts(this.debts());
+  }
+
+  payoffDebt(index: number) {
+    const d = this.debts()[index];
+    const accountId = localStorage.getItem('lastAccountId') || (this.financeData.accounts().length > 0 ? this.financeData.accounts()[0].id : null);
+
+    if (!accountId) {
+      this.financeData.toasts.show('Створіть рахунок спочатку!', 'error');
+      return;
+    }
+
+    const acc = this.financeData.accounts().find(a => a.id === accountId);
+    if (!acc) return;
+
+    if (confirm(`Виконати борг "${d.name}" (${Math.abs(d.amount)} ₴) через рахунок "${acc.name}"?`)) {
+      this.financeData.executeDebt(d.id, accountId);
+    }
   }
 
   toggleDebtType(index: number) {

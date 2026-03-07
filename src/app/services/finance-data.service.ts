@@ -91,7 +91,7 @@ export class FinanceDataService {
   private settingsService = inject(SettingsService);
   private ts = inject(TransactionService);
   private audio = inject(AudioService);
-  private toasts = inject(ToastService);
+  public toasts = inject(ToastService);
   private currencyService = inject(CurrencyService);
 
   userSettings = this.settingsService.userSettings;
@@ -321,6 +321,44 @@ export class FinanceDataService {
     if (i !== -1) {
       accs[i].balance = (Number(accs[i].balance) || 0) + (type === 'income' ? amt : -amt);
       this.saveAccounts(accs);
+    }
+  }
+
+  executeDebt(debtId: string, accountId: string, customAmount?: number) {
+    const debt = this.debts().find(d => d.id === debtId);
+    if (!debt) return;
+
+    // Use absolute amount for the transaction
+    const finalAmount = customAmount !== undefined ? Math.abs(customAmount) : Math.abs(debt.amount);
+    const type = debt.amount < 0 ? 'expense' : 'income';
+
+    // 1. Add Transaction
+    this.ts.addTransaction({
+      amount: finalAmount,
+      category: 'Борг: ' + debt.name,
+      date: new Date().toISOString(),
+      description: 'Виконання боргу ' + debt.name,
+      transactionType: type,
+      accountId: accountId,
+      debtId: debt.id,
+      debtName: debt.name,
+      debtAmount: debt.amount
+    });
+
+    // 2. Adjust Balance
+    this.adjustAccountBalance(accountId, finalAmount, type);
+
+    // 3. Remove Debt (or partial payment? User said "disappears after full payoff", but let's assume one-shot for now as per "disappears")
+    const remaining = this.debts().filter(d => d.id !== debtId);
+    this.saveDebts(remaining);
+
+    this.toasts.show('Борг виконано!', 'success');
+
+    // 4. Audio Feedback
+    if (type === 'income') {
+      this.audio.playIncome();
+    } else {
+      this.audio.playOutcome();
     }
   }
 

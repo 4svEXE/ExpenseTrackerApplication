@@ -109,45 +109,41 @@ export class TransactionInputComponent implements OnInit {
         finalAmount = formValue.amount * this.financeData.getExchangeRate(formValue.currency, targetAccount.currency);
       }
 
-      // 1. Add Transaction
-      this.transactionService.addTransaction({
-        ...this.transaction,
-        amount: finalAmount,
-        description: formValue.description,
-        accountId: formValue.accountId,
-        date: new Date().toISOString(),
-      });
-
-      // 2. Adjust Balance
-      this.financeData.adjustAccountBalance(
-        formValue.accountId,
-        finalAmount,
-        tType as 'income' | 'expense'
-      );
-
-      // 2.5 Handle Debt if applicable
       if (this.transaction.debtId) {
-        const remainingDebts = this.financeData.debts().filter(d => d.id !== this.transaction.debtId);
-        this.financeData.saveDebts(remainingDebts);
-      }
-
-      // 3. Audio & Haptic feedback
-      if (tType === 'income') {
-        this.audio.playIncome();
+        // Use the new centralized method
+        this.financeData.executeDebt(this.transaction.debtId, formValue.accountId, finalAmount);
       } else {
-        this.audio.playOutcome();
+        // Regular Transaction
+        this.transactionService.addTransaction({
+          ...this.transaction,
+          amount: finalAmount,
+          description: formValue.description,
+          accountId: formValue.accountId,
+          date: new Date().toISOString(),
+        });
+
+        this.financeData.adjustAccountBalance(
+          formValue.accountId,
+          finalAmount,
+          tType as 'income' | 'expense'
+        );
+
+        if (tType === 'income') {
+          this.audio.playIncome();
+        } else {
+          this.audio.playOutcome();
+        }
+
+        if (tType === 'income') {
+          this.supportService.showDonationRequest();
+        }
       }
 
-      // 4. Gamification Animation
+      // Shared logic
       if (event && this.financeData.userSettings().gamificationEnabled) {
         this.coinService.animate(event.clientX, event.clientY);
       }
 
-      // 4.5. Support Reminder for Income
-      if (tType === 'income') {
-        this.supportService.showDonationRequest();
-      }
-      // 5. Show Plan Popup? (Only for income if enabled)
       if (this.financeData.userSettings().showPlanPostTransaction && tType === 'income') {
         setTimeout(() => {
           this.financeData.showPlanPopup.set(true);

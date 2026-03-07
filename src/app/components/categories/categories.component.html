@@ -48,6 +48,25 @@
   </div>
   }
 
+  <!-- Debts as One-time Categories -->
+  <ng-container *ngFor="let debt of filteredDebts">
+    <div class="relative flex flex-col items-center justify-start cursor-pointer group" (click)="onSelectDebt(debt)">
+
+      <div
+        class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-2xl mb-2 transition-all duration-200"
+        [ngClass]="[
+             isSelectedDebt(debt) ? 'bg-slate-800 text-white shadow-lg border-2 border-transparent scale-105' : 'bg-rose-50 border-2 border-rose-100 text-rose-500 hover:bg-rose-100 hover:border-rose-200'
+           ]">
+        <i class="fa-solid fa-hand-holding-dollar text-xl md:text-2xl"></i>
+      </div>
+      <span class="text-[10px] md:text-xs font-bold text-center w-full truncate px-1 transition-colors"
+        [ngStyle]="{'color': isSelectedDebt(debt) ? '#1e293b' : '#f43f5e'}">
+        {{ debt.name }}
+      </span>
+      <div class="text-[8px] font-black uppercase tracking-tighter text-rose-400 mt-[-2px]">Борг</div>
+    </div>
+  </ng-container>
+
   <!-- Add New Button -->
   <div class="flex flex-col items-center justify-start group" [class.cursor-pointer]="!isEditMode()"
     [class.opacity-50]="isEditMode()" (click)="!isEditMode() && toggleAddNew()">
@@ -60,24 +79,6 @@
       [ngClass]="!isEditMode() ? 'group-hover:text-slate-700' : ''">
       Додати
     </span>
-  </div>
-</div>
-
-<!-- Debts Section -->
-<div *ngIf="filteredDebts.length > 0" class="mt-8 px-2 transition-all">
-  <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Борги</h3>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-    <div *ngFor="let debt of filteredDebts" (click)="onSelectDebt(debt)"
-      class="flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all active:scale-95"
-      [ngClass]="isSelectedDebt(debt) ? 'bg-slate-800 text-white border-transparent shadow-lg' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300'">
-      <div class="flex items-center gap-2 mb-1">
-        <i class="fa-solid"
-          [ngClass]="debt.amount < 0 ? 'fa-arrow-left text-rose-400' : 'fa-arrow-right text-emerald-400'"></i>
-        <span class="text-[10px] md:text-xs font-black truncate">{{ debt.name }}</span>
-      </div>
-      <div class="text-xs md:text-sm font-bold">{{ Math.abs(debt.amount) |
-        currency:financeData.userSettings().currency:'symbol-narrow':'1.0-0' }}</div>
-    </div>
   </div>
 </div>
 
