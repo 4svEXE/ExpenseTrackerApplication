@@ -63,6 +63,24 @@
   </div>
 </div>
 
+<!-- Debts Section -->
+<div *ngIf="filteredDebts.length > 0" class="mt-8 px-2 transition-all">
+  <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Борги</h3>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div *ngFor="let debt of filteredDebts" (click)="onSelectDebt(debt)"
+      class="flex flex-col p-3 rounded-2xl border-2 cursor-pointer transition-all active:scale-95"
+      [ngClass]="isSelectedDebt(debt) ? 'bg-slate-800 text-white border-transparent shadow-lg' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300'">
+      <div class="flex items-center gap-2 mb-1">
+        <i class="fa-solid"
+          [ngClass]="debt.amount < 0 ? 'fa-arrow-left text-rose-400' : 'fa-arrow-right text-emerald-400'"></i>
+        <span class="text-[10px] md:text-xs font-black truncate">{{ debt.name }}</span>
+      </div>
+      <div class="text-xs md:text-sm font-bold">{{ Math.abs(debt.amount) |
+        currency:financeData.userSettings().currency:'symbol-narrow':'1.0-0' }}</div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal / Overlay for Adding New Category -->
 <div *ngIf="isAddingNew()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
   <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in duration-200">

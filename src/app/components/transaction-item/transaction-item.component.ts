@@ -85,6 +85,20 @@ export class TransactionItemComponent {
         );
       }
 
+      // Restore Debt if it was a debt execution
+      if (this.item.debtId && this.item.debtName) {
+        const currentDebts = [...this.financeData.debts()];
+        const alreadyExists = currentDebts.some(d => d.id === this.item.debtId);
+        if (!alreadyExists) {
+          currentDebts.unshift({
+            id: this.item.debtId,
+            name: this.item.debtName,
+            amount: this.item.debtAmount || 0
+          });
+          this.financeData.saveDebts(currentDebts);
+        }
+      }
+
       this.transactionService.deleteTransaction(this.item);
       this.closeDetails();
     }

@@ -8,4 +8,7 @@ export type Transaction = {
   category: string;
   transactionType: TransactionType;
   accountId?: string;
+  debtId?: string;
+  debtName?: string;
+  debtAmount?: number;
 };

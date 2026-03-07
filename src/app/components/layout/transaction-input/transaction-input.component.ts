@@ -125,6 +125,12 @@ export class TransactionInputComponent implements OnInit {
         tType as 'income' | 'expense'
       );
 
+      // 2.5 Handle Debt if applicable
+      if (this.transaction.debtId) {
+        const remainingDebts = this.financeData.debts().filter(d => d.id !== this.transaction.debtId);
+        this.financeData.saveDebts(remainingDebts);
+      }
+
       // 3. Audio & Haptic feedback
       if (tType === 'income') {
         this.audio.playIncome();

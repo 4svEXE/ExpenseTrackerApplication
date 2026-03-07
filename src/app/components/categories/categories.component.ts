@@ -31,6 +31,7 @@ const AVAILABLE_ICONS = [
   styleUrl: './categories.component.scss',
 })
 export class CategoriesComponent implements OnInit {
+  Math = Math;
   @Input() transactionType: TransactionType = 'income';
   categories: TransactionCategory[] = [];
   transaction!: Transaction;
@@ -105,8 +106,33 @@ export class CategoriesComponent implements OnInit {
     this.transactionService.setTransaction({
       ...this.transaction,
       category: category.name,
-      amount: category.plannedAmount || 0
+      amount: category.plannedAmount || 0,
+      debtId: undefined
     });
+  }
+
+  get filteredDebts() {
+    return this.financeData.debts().filter(d => {
+      if (this.transactionType === 'income') return d.amount > 0;
+      if (this.transactionType === 'expense') return d.amount < 0;
+      return false;
+    });
+  }
+
+  onSelectDebt(debt: any) {
+    this.transactionService.setTransaction({
+      ...this.transaction,
+      category: 'Борг: ' + debt.name,
+      amount: Math.abs(debt.amount),
+      description: 'Виконання боргу ' + debt.name,
+      debtId: debt.id,
+      debtName: debt.name,
+      debtAmount: debt.amount
+    });
+  }
+
+  isSelectedDebt(debt: any) {
+    return this.transaction?.debtId === debt.id;
   }
 
   isSelectedCategory(category: TransactionCategory) {

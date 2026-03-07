@@ -112,11 +112,16 @@ export class IncomeVisualizerComponent {
   }
 
   get planTotal() {
-    return this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
+    const total = this.financeData.getMonthlyIncomePlanTotal();
+    const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
+
+    // If we have plans, use their sum. Otherwise fallback to the global goal.
+    const rawGoal = total > 0 ? total : (this.financeData.userSettings().monthlyIncomeGoal || 10000);
+    return rawGoal * rateToUser;
   }
 
   calculateBars() {
-    const incomeGoal = this.planTotal || 10000;
+    const incomeGoal = this.planTotal;
     const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
 
     const currentMonth = new Date().getMonth();
