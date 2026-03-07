@@ -414,7 +414,7 @@ export class FinanceDataService {
         );
         fact = matched.reduce((acc, t) => acc + ((t.amountUah || 0) * rateToUser), 0);
       }
-      return { ...plan, amount: plan.amount * rateToUser, factAmount: fact };
+      return { ...plan, factAmount: fact };
     });
   }
 
@@ -436,7 +436,7 @@ export class FinanceDataService {
         (t.title && t.title.toLowerCase().includes(planCat))
       );
       const fact = matched.reduce((acc, t) => acc + ((t.amountUah || 0) * rateToUser), 0);
-      return { ...plan, planAmount: plan.planAmount * rateToUser, factAmount: fact };
+      return { ...plan, factAmount: fact };
     });
   }
 }

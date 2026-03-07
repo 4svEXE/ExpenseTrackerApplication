@@ -20,10 +20,10 @@ interface Bar {
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h3 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Візуалізація бюджету</h3>
-          <p class="text-xs md:text-sm text-slate-500 font-medium">Кожна паличка — це 1000 одиниць. Поділки — по 250 одиниць.</p>
+          <p class="text-xs md:text-sm text-slate-500 font-medium">Кожна паличка — це {{ unitSize | number:'1.0-0' }} {{ userCurrencySymbol }}. Поділки — по {{ (unitSize / 4) | number:'1.0-0' }}.</p>
         </div>
         <div class="flex items-center gap-3 px-4 py-2 bg-slate-100/50 rounded-2xl border border-slate-200/60">
-           <span class="text-[10px] font-bold text-slate-400 uppercase">Ціль:</span>
+           <span class="text-[10px] font-bold text-slate-400 uppercase">Ціль (плани):</span>
            <span class="text-sm font-black text-slate-700">{{ planTotal | number:'1.0-0' }} {{ userCurrencySymbol }}</span>
         </div>
       </div>
@@ -42,7 +42,7 @@ interface Bar {
                 </div>
               </div>
             </div>
-            <div class="text-center text-[9px] font-bold text-slate-400 mt-0.5">{{ (i + 1) * 1000 }}</div>
+            <div class="text-center text-[9px] font-bold text-slate-400 mt-0.5">{{ (i + 1) * unitSize | number:'1.0-0' }}</div>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@ interface Bar {
                 </div>
               </div>
             </div>
-            <div class="text-center text-[9px] font-bold text-emerald-400 mt-0.5">{{ (bars.length + i + 1) * 1000 }}</div>
+            <div class="text-center text-[9px] font-bold text-emerald-400 mt-0.5">{{ (bars.length + i + 1) * unitSize | number:'1.0-0' }}</div>
           </div>
         </div>
       </div>
@@ -111,17 +111,23 @@ export class IncomeVisualizerComponent {
     return this.financeData.getCurrencySymbol(this.financeData.userSettings().currency);
   }
 
-  get planTotal() {
-    const total = this.financeData.getMonthlyIncomePlanTotal();
+  get unitSize() {
     const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
+    return 1000 * rateToUser;
+  }
 
-    // If we have plans, use their sum. Otherwise fallback to the global goal.
-    const rawGoal = total > 0 ? total : (this.financeData.userSettings().monthlyIncomeGoal || 10000);
-    return rawGoal * rateToUser;
+  get planTotal() {
+    const plansTotal = this.financeData.getMonthlyIncomePlanTotal();
+    if (plansTotal > 0) return plansTotal;
+
+    const goalRaw = this.financeData.userSettings().monthlyIncomeGoal || 10000;
+    const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
+    return goalRaw * rateToUser;
   }
 
   calculateBars() {
     const incomeGoal = this.planTotal;
+    const unit = this.unitSize;
     const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
 
     const currentMonth = new Date().getMonth();
@@ -132,14 +138,14 @@ export class IncomeVisualizerComponent {
       .reduce((acc, t) => acc + (t.amountUah * rateToUser), 0);
 
     // 1. Regular Bars (up to Goal)
-    const numBarsRegular = Math.max(1, Math.ceil(incomeGoal / 1000));
+    const numBarsRegular = Math.max(1, Math.ceil(incomeGoal / unit));
     this.bars = Array.from({ length: numBarsRegular }, () => ({
       segments: Array.from({ length: 4 }, () => ({ fillPercentage: 0, color: 'transparent' }))
     }));
 
     // 2. Extra Bars (Surplus)
     const surplus = Math.max(0, totalActualIncome - incomeGoal);
-    const numBarsExtra = surplus > 0 ? Math.ceil(surplus / 1000) : 0;
+    const numBarsExtra = surplus > 0 ? Math.ceil(surplus / unit) : 0;
     this.extraBars = Array.from({ length: numBarsExtra }, () => ({
       segments: Array.from({ length: 4 }, () => ({ fillPercentage: 0, color: 'transparent' }))
     }));
@@ -150,9 +156,9 @@ export class IncomeVisualizerComponent {
     // Fill regular bars first
     for (let i = 0; i < numBarsRegular; i++) {
       for (let s = 0; s < 4; s++) {
-        const amountToFill = Math.min(250, remainingIncome);
+        const amountToFill = Math.min(unit / 4, remainingIncome);
         if (amountToFill > 0) {
-          this.bars[i].segments[s] = { fillPercentage: (amountToFill / 250) * 100, color: '#10b981' };
+          this.bars[i].segments[s] = { fillPercentage: (amountToFill / (unit / 4)) * 100, color: '#10b981' };
           remainingIncome -= amountToFill;
         }
       }
@@ -161,15 +167,15 @@ export class IncomeVisualizerComponent {
     // Fill extra bars if any income left
     for (let i = 0; i < numBarsExtra; i++) {
       for (let s = 0; s < 4; s++) {
-        const amountToFill = Math.min(250, remainingIncome);
+        const amountToFill = Math.min(unit / 4, remainingIncome);
         if (amountToFill > 0) {
-          this.extraBars[i].segments[s] = { fillPercentage: (amountToFill / 250) * 100, color: '#10b981' };
+          this.extraBars[i].segments[s] = { fillPercentage: (amountToFill / (unit / 4)) * 100, color: '#10b981' };
           remainingIncome -= amountToFill;
         }
       }
     }
 
-    // 4. Overlay Expenses (Usually only makes sense against planned income, but we'll apply it globally)
+    // 4. Overlay Expenses
     const expenses = this.financeData.transactions()
       .filter(t => t.type === 'expense' && t.date.getMonth() === currentMonth && t.date.getFullYear() === currentYear);
 
@@ -179,8 +185,8 @@ export class IncomeVisualizerComponent {
       const expColor = exp.expenseColor || '#fbbf24';
 
       while (remainingExp > 0) {
-        const barIdxTotal = Math.floor(expenseOffset / 1000);
-        const segIdx = Math.floor((expenseOffset % 1000) / 250);
+        const barIdxTotal = Math.floor(expenseOffset / unit);
+        const segIdx = Math.floor((expenseOffset % unit) / (unit / 4));
 
         let targetBar: Bar | null = null;
         if (barIdxTotal < numBarsRegular) {
@@ -191,10 +197,10 @@ export class IncomeVisualizerComponent {
 
         if (!targetBar) break;
 
-        const filledInCurrentSeg = expenseOffset % 250;
-        const availableInSeg = 250 - filledInCurrentSeg;
+        const filledInCurrentSeg = expenseOffset % (unit / 4);
+        const availableInSeg = (unit / 4) - filledInCurrentSeg;
         const fillThisStep = Math.min(remainingExp, availableInSeg);
-        const newPercentage = ((filledInCurrentSeg + fillThisStep) / 250) * 100;
+        const newPercentage = ((filledInCurrentSeg + fillThisStep) / (unit / 4)) * 100;
 
         targetBar.segments[segIdx].color = expColor;
         targetBar.segments[segIdx].fillPercentage = Math.max(
