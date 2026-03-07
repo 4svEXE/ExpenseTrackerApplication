@@ -1,7 +1,8 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
+import { Injectable, signal, inject, computed, effect } from '@angular/core';
 import { TransactionService } from './transaction.service';
 import { AudioService } from './audio.service';
 import { ToastService } from './toast.service';
+import { CurrencyService } from './currency.service';
 import { SettingsService, UserSettings } from './settings.service';
 
 export type { UserSettings };
@@ -91,6 +92,7 @@ export class FinanceDataService {
   private ts = inject(TransactionService);
   private audio = inject(AudioService);
   private toasts = inject(ToastService);
+  private currencyService = inject(CurrencyService);
 
   userSettings = this.settingsService.userSettings;
 
@@ -111,13 +113,12 @@ export class FinanceDataService {
     }, 0);
   });
 
-  private notifiedGoals = new Set<string>();
-
   constructor() {
     this.loadData();
 
-    this.ts.allTransactions$.subscribe(txs => {
-      const parsed = (txs || []).map((t: any, i) => {
+    effect(() => {
+      const txs = this.ts.allTransactions();
+      const parsed = (txs || []).map((t: any, i: number) => {
         let acc = t.account || 'Картка';
         if (t.accountId) {
           const match = this.accounts().find(a => a.id === t.accountId);
@@ -158,7 +159,6 @@ export class FinanceDataService {
       });
 
       this.transactions.set(parsed);
-      this.checkGoalCompletion();
     });
   }
 
@@ -173,40 +173,12 @@ export class FinanceDataService {
     return colors[category] || '#94a3b8';
   }
 
-  private checkGoalCompletion() {
-    const now = new Date();
-    const period = `goal-${now.getMonth()}-${now.getFullYear()}`;
-    const total = this.getMonthlyIncomeFactTotal();
-    const goal = Number(this.userSettings().monthlyIncomeGoal) || 0;
-
-    if (goal > 0 && total >= goal) {
-      if (!this.notifiedGoals.has(period)) {
-        this.toasts.show('Вітаємо! Ви досягли місячної цілі доходу! 🚀', 'success');
-        this.audio.playChallengeComplete();
-        this.notifiedGoals.add(period);
-        this.saveNotifiedGoals();
-      }
-    }
-  }
-
-  private saveNotifiedGoals() {
-    localStorage.setItem(this.NOTIFIED_GOALS_KEY, JSON.stringify(Array.from(this.notifiedGoals)));
-  }
-
   getExchangeRate(f: string, t: string) {
-    if (f === t) return 1;
-    const r: any = { 'UAH': 1, 'USD': 38.5, 'EUR': 41.5, 'CZK': 1.6 };
-    return (r[f] || 1) / (r[t] || 1);
+    return this.currencyService.getExchangeRate(f, t);
   }
 
   getCurrencySymbol(currency: string): string {
-    const symbols: Record<string, string> = {
-      'UAH': '₴',
-      'USD': '$',
-      'EUR': '€',
-      'CZK': 'Kč'
-    };
-    return symbols[currency] || currency;
+    return this.currencyService.getCurrencySymbol(currency);
   }
 
   addAccount(acc: Omit<AccountBalance, 'id'>) {
@@ -252,11 +224,6 @@ export class FinanceDataService {
       currency: s.currency || 'UAH',
       period: s.period || 'monthly'
     })));
-
-    const savedNotified = localStorage.getItem(this.NOTIFIED_GOALS_KEY);
-    if (savedNotified) {
-      this.notifiedGoals = new Set(JSON.parse(savedNotified));
-    }
   }
 
   getMonthlyIncomeFactTotal(): number {
@@ -357,13 +324,6 @@ export class FinanceDataService {
     }
   }
 
-  addCoins(amount: number = 1) {
-    if (!this.userSettings().gamificationEnabled) return;
-    const settings = { ...this.userSettings() };
-    settings.coins = (settings.coins || 0) + amount;
-    this.saveSettings(settings);
-  }
-
   showPlanPopup = signal(false);
 
   moveWishToPlan(wish: WishItem) {
@@ -439,6 +399,8 @@ export class FinanceDataService {
       t.date.getFullYear() === now.getFullYear()
     );
 
+    const rateToUser = this.getExchangeRate('UAH', this.userSettings().currency);
+
     return this.expensePlans().map(plan => {
       let fact = 0;
       const planCat = (plan.category || '').toLowerCase();
@@ -450,7 +412,7 @@ export class FinanceDataService {
           (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
           (t.title && t.title.toLowerCase().includes(planCat))
         );
-        fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
+        fact = matched.reduce((acc, t) => acc + ((t.amountUah || 0) * rateToUser), 0);
       }
       return { ...plan, factAmount: fact };
     });
@@ -464,6 +426,8 @@ export class FinanceDataService {
       t.date.getFullYear() === now.getFullYear()
     );
 
+    const rateToUser = this.getExchangeRate('UAH', this.userSettings().currency);
+
     return this.incomePlans().map(plan => {
       const planCat = (plan.category || '').toLowerCase();
       const matched = txs.filter(t =>
@@ -471,7 +435,7 @@ export class FinanceDataService {
         (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
         (t.title && t.title.toLowerCase().includes(planCat))
       );
-      const fact = matched.reduce((acc, t) => acc + (t.amountUah || 0), 0);
+      const fact = matched.reduce((acc, t) => acc + ((t.amountUah || 0) * rateToUser), 0);
       return { ...plan, factAmount: fact };
     });
   }

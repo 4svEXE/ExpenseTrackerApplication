@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { Transaction } from '../types/transaction.interface';
 import { TransactionService } from './transaction.service';
-import { Injectable } from '@angular/core';
+import { Injectable, effect } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
@@ -12,9 +12,9 @@ export class AmountService {
   transactions: Transaction[] = [];
 
   constructor(private transactionService: TransactionService) {
-    // Підписка на потік транзакцій
-    this.transactionService.transactions$.subscribe((transactions) => {
-      this.transactions = transactions;
+    // Реактивне оновлення при зміні транзакцій
+    effect(() => {
+      this.transactions = this.transactionService.transactions();
       this.updateAmounts(); // Оновлюємо суми, коли змінюються транзакції
     });
   }

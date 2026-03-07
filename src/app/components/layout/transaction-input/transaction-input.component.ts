@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -7,7 +7,6 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { TransactionService } from '../../../services/transaction.service';
 import { ErrorMessageComponent } from '../../error-message/error-message.component';
@@ -25,7 +24,6 @@ import { SupportService } from '../../../services/support.service';
 })
 export class TransactionInputComponent implements OnInit {
   transactionForm!: FormGroup;
-  transactionSub!: Subscription;
   transaction: Transaction = {
     amount: 0,
     category: '',
@@ -45,7 +43,15 @@ export class TransactionInputComponent implements OnInit {
     private router: Router,
     private coinService: CoinAnimationService,
     private supportService: SupportService
-  ) { }
+  ) {
+    effect(() => {
+      const transaction = this.transactionService.transaction();
+      this.transaction = transaction;
+      if (this.transactionForm && transaction && transaction.amount > 0) {
+        this.transactionForm.patchValue({ amount: transaction.amount }, { emitEvent: false });
+      }
+    });
+  }
 
   ngOnInit(): void {
     const lastAccountId = localStorage.getItem('lastAccountId') || (this.accounts().length > 0 ? this.accounts()[0].id : '');
@@ -63,15 +69,6 @@ export class TransactionInputComponent implements OnInit {
       ],
       description: ['', [Validators.maxLength(50)]],
     });
-
-    this.transactionSub = this.transactionService.transaction$.subscribe(
-      (transaction) => {
-        this.transaction = transaction;
-        if (transaction && transaction.amount > 0) {
-          this.transactionForm.patchValue({ amount: transaction.amount });
-        }
-      }
-    );
   }
 
   clearAmount(): void {

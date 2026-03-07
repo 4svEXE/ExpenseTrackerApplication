@@ -74,6 +74,14 @@ import { SupportService } from '../../../services/support.service';
           <p *ngIf="supportService.config().upsetCount > 0" class="mt-4 text-[10px] text-rose-500 font-black uppercase tracking-tighter animate-bounce">
             Ой! З балансу знято 5 монеток... ({{ supportService.config().upsetCount }}/5)
           </p>
+          <div class="mt-4 text-center">
+            <button 
+              (click)="supportService.close()" 
+              class="w-full py-4 font-black text-slate-400 hover:text-slate-600 transition-colors text-[10px] uppercase tracking-widest"
+            >
+              Закрити
+            </button>
+          </div>
         </div>
 
         <!-- Gratitude (Links) -->

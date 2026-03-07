@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal, computed } from '@angular/core';
 import { LocalStorageService } from './local-storage.service';
 import { Transaction } from '../types/transaction.interface';
 import { Transactions } from '../db/transactions-list.data';
@@ -10,10 +9,10 @@ import { TransactionType } from '../types/transaction-type.enum';
 })
 export class TransactionService {
   private readonly StorageKey = 'Transactions';
-  private transactionsSubject = new BehaviorSubject<Transaction[]>([]);
-  private allTransactionsSubject = new BehaviorSubject<Transaction[]>([]);
-  private currentViewDateSubject = new BehaviorSubject<Date>(new Date());
-  private transactionSubject = new BehaviorSubject<Transaction>({
+  transactions = signal<Transaction[]>([]);
+  allTransactions = signal<Transaction[]>([]);
+  currentViewDate = signal<Date>(new Date());
+  transaction = signal<Transaction>({
     amount: 0,
     category: '',
     date: '',
@@ -23,30 +22,22 @@ export class TransactionService {
 
   constructor(private localStorageService: LocalStorageService) {
     const initialTransactions = this.getTransactions();
-    this.allTransactionsSubject.next(initialTransactions);
-    this.applyFilters(initialTransactions, this.currentViewDateSubject.value);
-  }
-
-  get currentViewDate$() {
-    return this.currentViewDateSubject.asObservable();
-  }
-
-  get allTransactions$(): Observable<Transaction[]> {
-    return this.allTransactionsSubject.asObservable();
+    this.allTransactions.set(initialTransactions);
+    this.applyFilters(initialTransactions, this.currentViewDate());
   }
 
   setCurrentViewDate(date: Date) {
-    this.currentViewDateSubject.next(date);
+    this.currentViewDate.set(date);
     this.applyFilters(this.getTransactions(), date);
   }
 
   private applyFilters(allTransactions: Transaction[], viewDate: Date) {
-    this.allTransactionsSubject.next(allTransactions);
+    this.allTransactions.set(allTransactions);
     const filtered = allTransactions.filter(t => {
       const d = new Date(t.date);
       return d.getMonth() === viewDate.getMonth() && d.getFullYear() === viewDate.getFullYear();
     });
-    this.transactionsSubject.next(this.sortByDate(filtered));
+    this.transactions.set(this.sortByDate(filtered));
   }
 
   getTransactions(): Transaction[] {
@@ -60,7 +51,7 @@ export class TransactionService {
   }
 
   setTransactions(transactions: Transaction[]): void {
-    this.transactionsSubject.next(transactions);
+    this.transactions.set(transactions);
   }
 
   sortByDate(transactions: Transaction[], byLatest = true): Transaction[] {
@@ -79,28 +70,28 @@ export class TransactionService {
     const transactions = this.getTransactions();
 
     if (type === '') {
-      this.applyFilters(transactions, this.currentViewDateSubject.value);
+      this.applyFilters(transactions, this.currentViewDate());
       return;
     }
 
     const filteredTransactions = transactions.filter(
       (transaction) => transaction.transactionType === type
     );
-    this.transactionsSubject.next(filteredTransactions);
+    this.transactions.set(filteredTransactions);
   }
 
   setTransactionByCategory(category: string): void {
     const transactions = this.getTransactions();
 
     if (category === '') {
-      this.applyFilters(transactions, this.currentViewDateSubject.value);
+      this.applyFilters(transactions, this.currentViewDate());
       return;
     }
 
     const filteredTransactions = transactions.filter(
       (transaction) => transaction.category === category
     );
-    this.transactionsSubject.next(filteredTransactions);
+    this.transactions.set(filteredTransactions);
   }
 
   getTansactionsByCategory(category: string): Transaction[] {
@@ -113,20 +104,16 @@ export class TransactionService {
   initTransactions(): Transaction[] {
     const transactions: Transaction[] = Transactions as Transaction[];
     this.localStorageService.set(this.StorageKey, transactions);
-    this.allTransactionsSubject.next(transactions);
-    this.applyFilters(transactions, this.currentViewDateSubject.value);
+    this.allTransactions.set(transactions);
+    this.applyFilters(transactions, this.currentViewDate());
     return transactions;
-  }
-
-  get transactions$(): Observable<Transaction[]> {
-    return this.transactionsSubject.asObservable();
   }
 
   addTransaction(newTransaction: Transaction): void {
     const allStored = this.getTransactions();
     const updated = this.sortByDate([...allStored, newTransaction]);
     this.localStorageService.set(this.StorageKey, updated);
-    this.applyFilters(updated, this.currentViewDateSubject.value);
+    this.applyFilters(updated, this.currentViewDate());
   }
 
   deleteTransaction(transaction: Transaction): void {
@@ -138,21 +125,17 @@ export class TransactionService {
         item.description === transaction.description)
     );
     this.localStorageService.set(this.StorageKey, updated);
-    this.applyFilters(updated, this.currentViewDateSubject.value);
+    this.applyFilters(updated, this.currentViewDate());
   }
 
   setTransaction(transaction: Transaction): void {
     if (transaction.transactionType) {
       localStorage.setItem('lastTransactionType', transaction.transactionType);
     }
-    this.transactionSubject.next(transaction);
-  }
-
-  get transaction$() {
-    return this.transactionSubject.asObservable();
+    this.transaction.set(transaction);
   }
 
   get currentTransaction(): Transaction {
-    return this.transactionSubject.value;
+    return this.transaction();
   }
 }

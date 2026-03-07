@@ -112,8 +112,7 @@ export class IncomeVisualizerComponent {
   }
 
   get planTotal() {
-    const goal = this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
-    return goal * this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
+    return this.financeData.getMonthlyIncomePlanTotal() || this.financeData.userSettings().monthlyIncomeGoal;
   }
 
   calculateBars() {

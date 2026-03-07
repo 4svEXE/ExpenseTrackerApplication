@@ -1,12 +1,11 @@
 import { Transaction } from './../../types/transaction.interface';
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit, effect, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TransactionType } from '../../types/transaction-type.enum';
 import { TransactionCategory } from '../../types/transaction-category.interface';
 import { CategoryService } from '../../services/category.service';
 import { TransactionService } from '../../services/transaction.service';
 import { FinanceDataService } from '../../services/finance-data.service';
-import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
@@ -34,7 +33,6 @@ const AVAILABLE_ICONS = [
 export class CategoriesComponent implements OnInit {
   @Input() transactionType: TransactionType = 'income';
   categories: TransactionCategory[] = [];
-  transactionSub!: Subscription;
   transaction!: Transaction;
 
   // Add category state
@@ -50,7 +48,11 @@ export class CategoriesComponent implements OnInit {
     private transactionService: TransactionService,
     private confirmService: ConfirmService,
     public financeData: FinanceDataService
-  ) { }
+  ) {
+    effect(() => {
+      this.transaction = this.transactionService.transaction();
+    });
+  }
 
   toggleEditMode() {
     this.isEditMode.set(!this.isEditMode());
@@ -93,12 +95,6 @@ export class CategoriesComponent implements OnInit {
         category: '',
       });
     });
-
-    this.transactionSub = this.transactionService.transaction$.subscribe(
-      (transaction) => {
-        this.transaction = transaction;
-      }
-    );
   }
 
   loadCategories() {

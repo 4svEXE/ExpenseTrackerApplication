@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { FinanceDataService } from './finance-data.service';
+import { GamificationService } from './gamification.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CoinAnimationService {
     private financeData = inject(FinanceDataService);
+    private gamification = inject(GamificationService);
 
     animate(startX: number, startY: number) {
         if (!this.financeData.userSettings().gamificationEnabled) return;
@@ -54,7 +56,7 @@ export class CoinAnimationService {
             setTimeout(() => target.style.transform = 'scale(1)', 200);
 
             // Add count
-            this.financeData.addCoins(1);
+            this.gamification.addCoins(1);
         }, 800);
     }
 }

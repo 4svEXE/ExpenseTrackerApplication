@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { TransactionService } from '../../services/transaction.service';
 import { Transaction } from '../../types/transaction.interface';
 import { TransactionItemComponent } from '../transaction-item/transaction-item.component';
@@ -17,14 +17,13 @@ interface GroupedTransactions {
   templateUrl: './transaction-list.component.html',
   styleUrls: ['./transaction-list.component.scss']
 })
-export class TransactionListComponent implements OnInit {
+export class TransactionListComponent {
   groupedTransactions: GroupedTransactions[] = [];
   financeData = inject(FinanceDataService);
 
-  constructor(private transactionService: TransactionService) { }
-
-  ngOnInit(): void {
-    this.transactionService.transactions$.subscribe((data) => {
+  constructor(private transactionService: TransactionService) {
+    effect(() => {
+      const data = this.transactionService.transactions();
       this.groupedTransactions = this.groupTransactionsByDate(data);
     });
   }

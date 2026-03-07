@@ -1,6 +1,6 @@
 import { Transaction } from './../../../types/transaction.interface';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { FilterByTypeComponent } from './filter-by-type/filter-by-type.component';
 import { FilterByCategoryComponent } from './filter-by-category/filter-by-category.component';
 import { TransactionService } from '../../../services/transaction.service';
@@ -18,8 +18,8 @@ export class FiltersComponent {
   currentDate: Date = new Date();
 
   constructor(private transactionService: TransactionService) {
-    this.transactionService.currentViewDate$.subscribe(date => {
-      this.currentDate = date;
+    effect(() => {
+      this.currentDate = this.transactionService.currentViewDate();
     });
   }
 

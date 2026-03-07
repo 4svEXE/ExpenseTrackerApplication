@@ -1,6 +1,8 @@
 import { Injectable, signal, inject, computed, effect } from '@angular/core';
 import { FinanceDataService } from './finance-data.service';
 import { AudioService } from './audio.service';
+import { SettingsService } from './settings.service';
+import { ToastService } from './toast.service';
 
 export interface GameOutcome {
     text: string;
@@ -27,6 +29,8 @@ export interface GameEvent {
 export class GamificationService {
     private financeData = inject(FinanceDataService);
     private audio = inject(AudioService);
+    private settingsService = inject(SettingsService);
+    private toasts = inject(ToastService);
 
     currentEvent = signal<GameEvent | null>(null);
     eventResult = signal<{ text: string, reward: number } | null>(null);
@@ -124,7 +128,7 @@ export class GamificationService {
             return;
         }
 
-        if (choice.cost > 0) this.financeData.addCoins(-choice.cost);
+        if (choice.cost > 0) this.addCoins(-choice.cost);
 
         const rand = Math.random();
         let cumulativeProb = 0;
@@ -138,7 +142,7 @@ export class GamificationService {
             }
         }
 
-        this.financeData.addCoins(selectedOutcome.reward);
+        this.addCoins(selectedOutcome.reward);
         if (selectedOutcome.reward > 0) this.audio.playIncome();
         else if (selectedOutcome.reward < 0) this.audio.playOutcome();
 
@@ -157,6 +161,18 @@ export class GamificationService {
         const now = new Date();
         const m = now.getMonth();
         const y = now.getFullYear();
+
+        // Check Monthly Income Goal
+        const goal = Number(this.financeData.userSettings().monthlyIncomeGoal) || 0;
+        const totalFactIncome = this.financeData.getMonthlyIncomeFactTotal();
+        const goalPeriod = `goal-${m}-${y}`;
+
+        if (goal > 0 && totalFactIncome >= goal && !this.notifiedPlans.has(goalPeriod)) {
+            this.toasts.show('Вітаємо! Ви досягли місячної цілі доходу! 🚀', 'success');
+            this.audio.playChallengeComplete();
+            this.notifiedPlans.add(goalPeriod);
+            this.saveState();
+        }
 
         // Income
         this.financeData.incomePlans().forEach(plan => {
@@ -191,21 +207,21 @@ export class GamificationService {
 
     private onPlanCompleted(key: string) {
         this.notifiedPlans.add(key);
-        this.financeData.addCoins(10);
+        this.addCoins(10);
         this.incrementAchievementProgress('plans');
         this.saveState();
     }
 
     skipTime() {
         if (this.financeData.userSettings().coins! >= 10) {
-            this.financeData.addCoins(-10);
+            this.addCoins(-10);
             this.generateNewEvent();
         }
     }
 
     speedUp() {
         if (this.financeData.userSettings().coins! >= 1) {
-            this.financeData.addCoins(-1);
+            this.addCoins(-1);
             // 20 minutes in ms = 1,200,000
             this.nextEventTime.update(val => val - 1200000);
             this.saveState();
@@ -215,7 +231,7 @@ export class GamificationService {
     claimAchievement() {
         const achiev = this.activeAchievement();
         if (achiev && achiev.completed) {
-            this.financeData.addCoins(achiev.reward);
+            this.addCoins(achiev.reward);
             this.audio.playChallengeComplete();
             this.activeAchievement.set(null);
             this.initNewAchievement();
@@ -281,6 +297,15 @@ export class GamificationService {
         const m = Math.floor((diff % 3600000) / 60000);
         const s = Math.floor((diff % 60000) / 1000);
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    addCoins(amount: number = 1) {
+        const userSettings = this.settingsService.userSettings();
+        if (!userSettings.gamificationEnabled) return;
+
+        const settings = { ...userSettings };
+        settings.coins = (settings.coins || 0) + amount;
+        this.settingsService.saveSettings(settings);
     }
 }
 

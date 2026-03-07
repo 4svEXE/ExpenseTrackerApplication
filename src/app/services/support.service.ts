@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { FinanceDataService } from './finance-data.service';
 import { AudioService } from './audio.service';
+import { GamificationService } from './gamification.service';
 
 export interface SupportModalConfig {
     isOpen: boolean;
@@ -14,6 +15,7 @@ export interface SupportModalConfig {
 export class SupportService {
     private financeData = inject(FinanceDataService);
     private audio = inject(AudioService);
+    private gamification = inject(GamificationService);
 
     config = signal<SupportModalConfig>({
         isOpen: false,
@@ -35,7 +37,7 @@ export class SupportService {
         const newCount = current.upsetCount + 1;
 
         // Remove coins
-        this.financeData.addCoins(-5);
+        this.gamification.addCoins(-5);
         this.audio.playOutcome(); // Use existsing outcome sound for penalty
 
         if (newCount >= 5) {
