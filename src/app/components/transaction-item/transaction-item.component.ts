@@ -70,9 +70,16 @@ export class TransactionItemComponent {
     if (await this.confirmService.confirm('Видалити транзакцію?')) {
       // Reverse the balance impact
       const reverseType = this.item.transactionType === 'income' ? 'expense' : 'income';
-      if (this.item.accountId) {
+
+      // Use assigned accountId or fallback to first account
+      let targetAccountId = this.item.accountId;
+      if (!targetAccountId && this.financeData.accounts().length > 0) {
+        targetAccountId = this.financeData.accounts()[0].id;
+      }
+
+      if (targetAccountId) {
         this.financeData.adjustAccountBalance(
-          this.item.accountId,
+          targetAccountId,
           this.item.amount,
           reverseType
         );

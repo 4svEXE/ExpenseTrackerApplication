@@ -11,10 +11,11 @@
         </div>
 
         <!-- Menu/Page Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 lg:gap-6"
+            [ngClass]="activeCategory === 'menu' ? 'lg:flex lg:justify-center' : 'lg:grid-cols-4'">
 
             <!-- Category Navigation (Menu) -->
-            <div class="lg:col-span-1 space-y-2" *ngIf="activeCategory === 'menu'">
+            <div class="lg:col-span-1 space-y-4 w-full max-w-xl mx-auto" *ngIf="activeCategory === 'menu'">
                 <button (click)="setCategory('profile')"
                     class="w-full flex items-center justify-between px-6 py-5 rounded-3xl bg-white shadow-sm border border-slate-100 hover:border-black transition-all group active:scale-95">
                     <div class="flex items-center gap-4">
