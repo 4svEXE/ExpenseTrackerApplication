@@ -112,8 +112,7 @@ export class IncomeVisualizerComponent {
   }
 
   get unitSize() {
-    const rateToUser = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
-    return 1000 * rateToUser;
+    return 1000;
   }
 
   get planTotal() {
