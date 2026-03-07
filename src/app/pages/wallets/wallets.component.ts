@@ -431,6 +431,7 @@ import { ConfirmService } from '../../services/confirm.service';
   `]
 })
 export class WalletsComponent implements OnInit {
+  Math = Math;
   financeData = inject(FinanceDataService);
   confirmService = inject(ConfirmService);
 
