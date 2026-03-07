@@ -31,7 +31,7 @@ interface Bar {
       <!-- Regular Income Bars -->
       <div class="space-y-4">
         <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Планові надходження</h4>
-        <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
+        <div class="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
           <div *ngFor="let bar of bars; let i = index" class="bar-wrapper flex flex-col gap-1.5 min-w-0">
             <div class="bar-container flex h-7 md:h-9 rounded-xl overflow-hidden bg-slate-100/80 shadow-inner border border-slate-200/50">
               <div *ngFor="let seg of bar.segments" class="segment flex-1 border-r last:border-r-0 border-white/40 relative overflow-hidden">
@@ -53,7 +53,7 @@ interface Bar {
           <h4 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Надлишкові доходи 🔥</h4>
           <div class="h-px bg-emerald-100 flex-1"></div>
         </div>
-        <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
+        <div class="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
           <div *ngFor="let bar of extraBars; let i = index" class="bar-wrapper flex flex-col gap-1.5 min-w-0 animate-in slide-in-from-bottom-2 duration-500">
             <div class="bar-container flex h-7 md:h-9 rounded-xl overflow-hidden bg-emerald-50/50 shadow-inner border border-emerald-100/50">
               <div *ngFor="let seg of bar.segments" class="segment flex-1 border-r last:border-r-0 border-white/40 relative overflow-hidden">
