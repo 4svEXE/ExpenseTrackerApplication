@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 
 // Import all subcomponents
 import { FinancialAssistantComponent } from '../../components/dashboard/financial-assistant/financial-assistant.component';
@@ -11,18 +13,22 @@ import { MonthAnalyticsComponent } from '../../components/dashboard/month-analyt
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
 import { GamificationBannerComponent } from '../../components/dashboard/gamification-banner/gamification-banner.component';
+import { FinanceDataService, Subscription } from '../../services/finance-data.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
+    RouterModule,
     FinancialAssistantComponent,
     IncomeVisualizerComponent,
     GrowthChartComponent,
     TransactionsTableComponent,
     MonthPlanComponent,
     MonthAnalyticsComponent,
+    SubscriptionsListComponent,
     GamificationBannerComponent
   ],
   template: `
@@ -53,6 +59,12 @@ import { GamificationBannerComponent } from '../../components/dashboard/gamifica
               <app-transactions-table class="block h-full"></app-transactions-table>
             </div>
           </div>
+
+          <!-- Subscriptions List -->
+          <app-subscriptions-list
+            (subscriptionClicked)="openSubDetail($event)"
+            (addSubscriptionClicked)="openAddSubRoute()">
+          </app-subscriptions-list>
         </section>
 
         <!-- Planning & Analytics Section (B) -->
@@ -75,6 +87,66 @@ import { GamificationBannerComponent } from '../../components/dashboard/gamifica
 
       </div>
     </div>
+
+    <!-- Subscription Detail / Edit Popup -->
+    @if (selectedSub()) {
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+         (click)="closeSubDetail()">
+      <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+          <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-lg font-black">
+              {{ selectedSub()!.name.charAt(0) }}
+            </div>
+            {{ selectedSub()!.name }}
+          </h3>
+          <button (click)="closeSubDetail()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Details -->
+        <div class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ціна</div>
+              <div class="text-xl font-black text-slate-900">{{ selectedSub()!.price | currency:selectedSub()!.currency:'symbol-narrow':'1.0-2' }}</div>
+              @if (selectedSub()!.currency !== userCurrency) {
+                <div class="text-xs text-slate-400 mt-0.5">≈ {{ getPriceInUserCurrency(selectedSub()!) | currency:userCurrency:'symbol-narrow':'1.0-2' }}</div>
+              }
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Наступна оплата</div>
+              <div class="text-base font-bold text-slate-800">{{ selectedSub()!.nextPaymentDate | date:'d MMMM':'':'uk-UA' }}</div>
+              <div class="text-xs mt-0.5" [ngClass]="getDaysLeft(selectedSub()!.nextPaymentDate) <= 3 ? 'text-rose-500 font-bold' : 'text-slate-400'">
+                через {{ getDaysLeft(selectedSub()!.nextPaymentDate) }} дн.
+              </div>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-4">
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Період</div>
+              <div class="text-base font-bold text-slate-800">{{ getPeriodLabel(selectedSub()!.period) }}</div>
+            </div>
+            <div class="bg-purple-50 rounded-2xl p-4">
+              <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">Витрачено всього</div>
+              <div class="text-base font-bold text-purple-700">{{ getTotalSpentInUserCurrency(selectedSub()!) | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="p-6 bg-slate-50 flex gap-3">
+          <button (click)="closeSubDetail()" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">
+            Закрити
+          </button>
+          <a routerLink="/wallets" (click)="closeSubDetail()"
+            class="flex-1 py-3 rounded-xl font-bold bg-black text-white text-center hover:bg-neutral-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-pen text-xs"></i> Редагувати
+          </a>
+        </div>
+      </div>
+    </div>
+    }
   `,
   styles: [`
     :host {
@@ -83,4 +155,48 @@ import { GamificationBannerComponent } from '../../components/dashboard/gamifica
   `]
 })
 export class DashboardComponent {
+  financeData = inject(FinanceDataService);
+  router = inject(Router);
+  selectedSub = signal<Subscription | null>(null);
+
+  get userCurrency() {
+    return this.financeData.userSettings().currency;
+  }
+
+  openSubDetail(sub: Subscription) {
+    this.selectedSub.set(sub);
+  }
+
+  closeSubDetail() {
+    this.selectedSub.set(null);
+  }
+
+  openAddSubRoute() {
+    this.router.navigate(['/wallets']);
+  }
+
+  getPriceInUserCurrency(s: Subscription): number {
+    return s.priceUah * this.financeData.getExchangeRate('UAH', this.userCurrency);
+  }
+
+  getTotalSpentInUserCurrency(s: Subscription): number {
+    return s.totalSpent * this.financeData.getExchangeRate(s.currency, this.userCurrency);
+  }
+
+  getDaysLeft(date: Date): number {
+    const today = new Date();
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }
+
+  getPeriodLabel(period: string): string {
+    const labels: Record<string, string> = {
+      'monthly': 'Раз в місяць',
+      '3months': 'Раз в 3 місяці',
+      'yearly': 'Раз в рік',
+      'custom': 'Кастомно'
+    };
+    return labels[period] || period;
+  }
 }

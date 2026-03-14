@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
+import { FinancialLiteracyComponent } from '../../components/dashboard/financial-literacy/financial-literacy.component';
 import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePlan, SubscriptionPeriod } from '../../services/finance-data.service';
 import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-wallets',
   standalone: true,
-  imports: [CommonModule, FormsModule, AccountsListComponent, SubscriptionsListComponent],
+  imports: [CommonModule, FormsModule, AccountsListComponent, SubscriptionsListComponent, FinancialLiteracyComponent],
   template: `
     <div class="wallets-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 font-sans pb-24 pt-10">
       <div class="max-w-[1200px] mx-auto space-y-6 md:space-y-8 pb-10">
@@ -240,7 +241,10 @@ import { ConfirmService } from '../../services/confirm.service';
                                        (ngModelChange)="updateDebtAmount(i, $event)"
                                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                        class="bg-transparent border-none text-white font-black p-1 w-20 text-sm focus:ring-0">
-                                <span class="text-[10px] font-bold text-white/40">₴</span>
+                                <select [ngModel]="debt.currency || 'UAH'" (ngModelChange)="updateDebtCurrency(i, $event)"
+                                        class="bg-transparent border-none text-white/60 font-bold text-[10px] focus:ring-0 cursor-pointer p-1 w-14">
+                                  <option *ngFor="let c of currencies" [value]="c" class="bg-slate-800 text-white">{{ c }}</option>
+                                </select>
                             </div>
                         </div>
                         <div class="flex gap-1">
@@ -262,6 +266,9 @@ import { ConfirmService } from '../../services/confirm.service';
                 </div>
             </div>
         </div>
+
+        <!-- Фінансова Грамотність -->
+        <app-financial-literacy class="mt-8 block"></app-financial-literacy>
 
         <div class="p-8 bg-neutral-900 hidden rounded-3xl text-white shadow-2xl relative overflow-hidden group">
           <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
@@ -699,7 +706,8 @@ export class WalletsComponent implements OnInit {
     d.unshift({
       id: Date.now().toString(),
       name: '',
-      amount: 0
+      amount: 0,
+      currency: 'UAH'
     });
     this.financeData.saveDebts(d);
   }
@@ -744,6 +752,12 @@ export class WalletsComponent implements OnInit {
     const d = [...this.debts()];
     const isNegative = d[index].amount < 0;
     d[index].amount = isNegative ? -Math.abs(val) : Math.abs(val);
+    this.financeData.saveDebts(d);
+  }
+
+  updateDebtCurrency(index: number, currency: string) {
+    const d = [...this.debts()];
+    d[index].currency = currency;
     this.financeData.saveDebts(d);
   }
 

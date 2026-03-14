@@ -41,7 +41,9 @@ export interface DebtItem {
   id: string;
   name: string;
   amount: number;
+  currency?: string; // валюта боргу, default UAH
 }
+
 
 export interface ExpensePlan {
   id: string;

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, effect, inject } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { TransactionService } from '../../../services/transaction.service';
 import { ErrorMessageComponent } from '../../error-message/error-message.component';
 import { Transaction } from '../../../types/transaction.interface';
-import { FinanceDataService } from '../../../services/finance-data.service';
+import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../../services/finance-data.service';
 import { AudioService } from '../../../services/audio.service';
 import { CoinAnimationService } from '../../../services/coin-animation.service';
 import { SupportService } from '../../../services/support.service';
@@ -32,10 +32,22 @@ export class TransactionInputComponent implements OnInit {
     transactionType: 'income'
   };
 
+  // Error messages as component property to avoid apostrophe issues in template
+  amountErrors = {
+    required: 'Поле суми обов\u2019язкове.',
+    min: 'Сума має бути більше 0.01.',
+    pattern: 'До 2 знаків після коми.'
+  };
+
   financeData = inject(FinanceDataService);
   accounts = this.financeData.accounts;
-
   audio = inject(AudioService);
+
+  // Subscription fields
+  isSubscription = signal(false);
+  subPeriod = signal<SubscriptionPeriod>('monthly');
+  subNextDate = signal(new Date().toISOString().split('T')[0]);
+  subCustomDays = signal(30);
 
   constructor(
     private fb: FormBuilder,
@@ -76,6 +88,7 @@ export class TransactionInputComponent implements OnInit {
   }
 
   closeTransaction(): void {
+    this.isSubscription.set(false);
     this.transactionService.setTransaction({
       amount: 0,
       category: '',
@@ -98,6 +111,10 @@ export class TransactionInputComponent implements OnInit {
     });
   }
 
+  toggleSubscription() {
+    this.isSubscription.set(!this.isSubscription());
+  }
+
   onSubmit(event?: MouseEvent | PointerEvent): void {
     if (this.transactionForm.valid) {
       const formValue = this.transactionForm.value;
@@ -110,7 +127,6 @@ export class TransactionInputComponent implements OnInit {
       }
 
       if (this.transaction.debtId) {
-        // Use the new centralized method
         this.financeData.executeDebt(this.transaction.debtId, formValue.accountId, finalAmount);
       } else {
         // Regular Transaction
@@ -120,6 +136,11 @@ export class TransactionInputComponent implements OnInit {
           description: formValue.description,
           accountId: formValue.accountId,
           date: new Date().toISOString(),
+          isSubscription: this.isSubscription(),
+          subscriptionPeriod: this.isSubscription() ? this.subPeriod() : undefined,
+          subscriptionNextDate: this.isSubscription() ? this.subNextDate() : undefined,
+          subscriptionName: this.isSubscription() ? (this.transaction.category || formValue.description) : undefined,
+          subscriptionCustomDays: this.isSubscription() && this.subPeriod() === 'custom' ? this.subCustomDays() : undefined,
         });
 
         this.financeData.adjustAccountBalance(
@@ -127,6 +148,27 @@ export class TransactionInputComponent implements OnInit {
           finalAmount,
           tType as 'income' | 'expense'
         );
+
+        // If marked as subscription — also add to subscriptions list
+        if (this.isSubscription()) {
+          const currency = formValue.currency;
+          const priceUah = finalAmount * this.financeData.getExchangeRate(targetAccount?.currency || currency, 'UAH');
+          const newSub: Subscription = {
+            id: Date.now().toString(),
+            name: this.transaction.category || formValue.description || 'Підписка',
+            price: formValue.amount,
+            currency: currency,
+            priceUah: priceUah,
+            priceEur: priceUah * this.financeData.getExchangeRate('UAH', 'EUR'),
+            period: this.subPeriod(),
+            customDays: this.subPeriod() === 'custom' ? this.subCustomDays() : undefined,
+            nextPaymentDate: new Date(this.subNextDate()),
+            totalSpent: formValue.amount
+          };
+          const subs = [...this.financeData.subscriptions(), newSub];
+          this.financeData.saveSubscriptions(subs);
+          this.financeData.toasts.show('Підписку додано до списку!', 'success');
+        }
 
         if (tType === 'income') {
           this.audio.playIncome();
@@ -152,6 +194,7 @@ export class TransactionInputComponent implements OnInit {
 
       localStorage.setItem('lastAccountId', formValue.accountId);
 
+      this.isSubscription.set(false);
       this.transactionForm.reset();
       this.router.navigate(['/home']);
     } else {

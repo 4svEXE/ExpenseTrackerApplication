@@ -34,7 +34,6 @@ import { CommonModule } from '@angular/common';
                 class="hover:bg-slate-50/50 transition-colors group cursor-pointer">
               <td class="px-3 md:px-5 py-3 md:py-4 font-bold text-slate-800 flex items-center gap-2 md:gap-3 text-xs md:text-sm">
                 <div class="w-6 h-6 md:w-8 md:h-8 rounded bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors text-[10px] md:text-sm">
-                  <!-- First letter of service as icon -->
                   {{ s.name.charAt(0) }}
                 </div>
                 {{ s.name }}
@@ -42,9 +41,11 @@ import { CommonModule } from '@angular/common';
               <td class="px-3 md:px-5 py-3 md:py-4 text-slate-600 font-medium text-xs md:text-sm">
                 <div class="font-bold text-slate-900">{{ s.price | currency:s.currency:'symbol-narrow':'1.0-2' }}</div>
                 <div class="text-[9px] md:text-[10px] text-slate-400">
-                    {{ s.priceUah | currency:'UAH':'symbol-narrow':'1.0-0' }}
+                  @if (s.currency !== userCurrency) {
+                    ≈ {{ getPriceInUserCurrency(s) | currency:userCurrency:'symbol-narrow':'1.0-2' }}
                     <span class="mx-1">•</span>
-                    {{ getPeriodLabel(s.period) }}
+                  }
+                  {{ getPeriodLabel(s.period) }}
                 </div>
               </td>
               <td class="px-3 md:px-5 py-3 md:py-4">
@@ -57,7 +58,7 @@ import { CommonModule } from '@angular/common';
                 </div>
               </td>
               <td class="px-5 py-4 text-right font-bold text-slate-800">
-                {{ s.totalSpent | currency:'UAH':'symbol-narrow':'1.0-0' }}
+                {{ getTotalSpentInUserCurrency(s) | currency:userCurrency:'symbol-narrow':'1.0-0' }}
               </td>
             </tr>
           </tbody>
@@ -80,6 +81,18 @@ export class SubscriptionsListComponent {
 
   @Output() subscriptionClicked = new EventEmitter<Subscription>();
   @Output() addSubscriptionClicked = new EventEmitter<void>();
+
+  get userCurrency() {
+    return this.financeData.userSettings().currency;
+  }
+
+  getPriceInUserCurrency(s: Subscription): number {
+    return s.priceUah * this.financeData.getExchangeRate('UAH', this.userCurrency);
+  }
+
+  getTotalSpentInUserCurrency(s: Subscription): number {
+    return s.totalSpent * this.financeData.getExchangeRate(s.currency, this.userCurrency);
+  }
 
   getDaysLeft(date: Date): number {
     const today = new Date();

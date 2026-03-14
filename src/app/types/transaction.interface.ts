@@ -11,4 +11,11 @@ export type Transaction = {
   debtId?: string;
   debtName?: string;
   debtAmount?: number;
+  // Subscription support
+  isSubscription?: boolean;
+  subscriptionPeriod?: 'monthly' | '3months' | 'yearly' | 'custom';
+  subscriptionNextDate?: string;
+  subscriptionName?: string;
+  subscriptionCustomDays?: number;
 };
+

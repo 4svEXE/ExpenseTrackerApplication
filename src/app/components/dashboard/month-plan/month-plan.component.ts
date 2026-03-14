@@ -123,14 +123,18 @@ export class MonthPlanComponent {
     const plans = this.financeData.getExpensePlansWithFact().filter(p => !(!p.isRecurring && p.factAmount >= p.amount));
 
     // 2. Add Active Subscriptions as plans
-    const subs = this.financeData.subscriptions().map(s => ({
-      id: s.id,
-      category: `Sub: ${s.name}`,
-      amount: s.priceUah,
-      factAmount: s.totalSpent > 0 ? s.priceUah : 0, // Simplified: if paid this month? 
-      type: 'mandatory' as const,
-      isRecurring: true
-    }));
+    const rate = this.financeData.getExchangeRate('UAH', this.financeData.userSettings().currency);
+    const subs = this.financeData.subscriptions().map(s => {
+      const priceInUserCurrency = s.priceUah * rate;
+      return {
+        id: s.id,
+        category: `Sub: ${s.name}`,
+        amount: priceInUserCurrency,
+        factAmount: s.totalSpent > 0 ? priceInUserCurrency : 0,
+        type: 'mandatory' as const,
+        isRecurring: true
+      };
+    });
 
     return [...plans, ...subs];
   });
