@@ -14,6 +14,7 @@ export class TransactionService {
   currentViewDate = signal<Date>(new Date());
   transaction = signal<Transaction>({
     amount: 0,
+    currency: '',
     category: '',
     date: '',
     description: '',

@@ -26,6 +26,7 @@ export class TransactionInputComponent implements OnInit {
   transactionForm!: FormGroup;
   transaction: Transaction = {
     amount: 0,
+    currency: '',
     category: '',
     date: '',
     description: '',
@@ -49,6 +50,10 @@ export class TransactionInputComponent implements OnInit {
   subNextDate = signal(new Date().toISOString().split('T')[0]);
   subCustomDays = signal(30);
 
+  // Details & Debt
+  isDetailsOpen = signal(false);
+  isDebt = signal(false);
+
   constructor(
     private fb: FormBuilder,
     private transactionService: TransactionService,
@@ -59,8 +64,16 @@ export class TransactionInputComponent implements OnInit {
     effect(() => {
       const transaction = this.transactionService.transaction();
       this.transaction = transaction;
-      if (this.transactionForm && transaction && transaction.amount > 0) {
-        this.transactionForm.patchValue({ amount: transaction.amount }, { emitEvent: false });
+      if (this.transactionForm && transaction && (transaction.amount > 0 || transaction.category)) {
+        this.transactionForm.patchValue({ 
+          amount: transaction.amount > 0 ? transaction.amount : null,
+          currency: transaction.currency || this.financeData.userSettings().currency
+        }, { emitEvent: false });
+        if (transaction.isSubscription) {
+          this.isSubscription.set(true);
+          if (transaction.subscriptionPeriod) this.subPeriod.set(transaction.subscriptionPeriod);
+          if (transaction.subscriptionNextDate) this.subNextDate.set(transaction.subscriptionNextDate);
+        }
       }
     });
   }
@@ -91,6 +104,7 @@ export class TransactionInputComponent implements OnInit {
     this.isSubscription.set(false);
     this.transactionService.setTransaction({
       amount: 0,
+      currency: this.financeData.userSettings().currency,
       category: '',
       date: '',
       description: '',
@@ -113,6 +127,18 @@ export class TransactionInputComponent implements OnInit {
 
   toggleSubscription() {
     this.isSubscription.set(!this.isSubscription());
+    if (this.isSubscription()) {
+      this.isDebt.set(false);
+      this.isDetailsOpen.set(true);
+    }
+  }
+
+  toggleDetails() {
+    this.isDetailsOpen.set(!this.isDetailsOpen());
+  }
+
+  toggleDebt() {
+    this.isDebt.set(!this.isDebt());
   }
 
   onSubmit(event?: MouseEvent | PointerEvent): void {
@@ -132,7 +158,8 @@ export class TransactionInputComponent implements OnInit {
         // Regular Transaction
         this.transactionService.addTransaction({
           ...this.transaction,
-          amount: finalAmount,
+          amount: formValue.amount,
+          currency: formValue.currency,
           description: formValue.description,
           accountId: formValue.accountId,
           date: new Date().toISOString(),
@@ -168,6 +195,20 @@ export class TransactionInputComponent implements OnInit {
           const subs = [...this.financeData.subscriptions(), newSub];
           this.financeData.saveSubscriptions(subs);
           this.financeData.toasts.show('Підписку додано до списку!', 'success');
+        }
+
+        // If marked as debt
+        if (this.isDebt()) {
+          const currency = formValue.currency;
+          const debtAmount = tType === 'expense' ? -formValue.amount : formValue.amount;
+          const newDebt = {
+            id: Date.now().toString(),
+            name: this.transaction.category || formValue.description || 'Борг',
+            amount: debtAmount,
+            currency: currency
+          };
+          this.financeData.saveDebts([newDebt, ...this.financeData.debts()]);
+          this.financeData.toasts.show('Запис додано до боргів!', 'success');
         }
 
         if (tType === 'income') {

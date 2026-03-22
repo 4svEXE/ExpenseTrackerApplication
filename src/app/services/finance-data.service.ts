@@ -135,21 +135,23 @@ export class FinanceDataService {
           date = new Date(t.date || new Date());
         }
 
-        let amt = Number(t.amount) || Number(t.amountUah) || 0;
-        if (t.accountId) {
+        let amt = Number(t.amount) || 0;
+        let txCurrency = t.currency || 'UAH';
+        if (!t.currency && t.accountId) {
           const match = this.accounts().find(a => a.id === t.accountId);
-          if (match && match.currency !== 'UAH') {
-            amt = amt * this.getExchangeRate(match.currency, 'UAH');
-          }
+          if (match) txCurrency = match.currency;
         }
+
+        const amtUah = amt * this.getExchangeRate(txCurrency, 'UAH');
 
         return {
           ...t,
           id: (t.id || i).toString(),
           title: (t.description || t.title || t.category || 'Транзакція').toString(),
           date,
-          amountUah: amt,
-          amountEur: amt / this.getExchangeRate('EUR', 'UAH'),
+          amountUah: amtUah,
+          currency: txCurrency,
+          amountEur: amtUah / this.getExchangeRate('EUR', 'UAH'),
           type: (t.transactionType === 'income' || t.type === 'income') ? 'income' : 'expense',
           category: t.category || 'Інше',
           expenseColor: t.expenseColor || this.getThemeColor(t.category || ''),
@@ -337,6 +339,7 @@ export class FinanceDataService {
     // 1. Add Transaction
     this.ts.addTransaction({
       amount: finalAmount,
+      currency: debt.currency || 'UAH',
       category: 'Борг: ' + debt.name,
       date: new Date().toISOString(),
       description: 'Виконання боргу ' + debt.name,

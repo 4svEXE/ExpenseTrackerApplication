@@ -43,6 +43,7 @@ export class TransactionItemComponent {
   }
 
   get transactionCurrency() {
+    if (this.item.currency) return this.item.currency;
     const accountId = this.item.accountId;
     if (!accountId) return 'UAH';
     const acct = this.financeData.accounts().find(a => a.id === accountId);

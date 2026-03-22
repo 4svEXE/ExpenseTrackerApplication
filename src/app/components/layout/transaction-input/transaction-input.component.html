@@ -77,62 +77,113 @@
         </div>
       </div>
 
-      <!-- Subscription Toggle (only for expenses) -->
-      @if (transaction.transactionType === 'expense') {
-      <div>
-        <button type="button" (click)="toggleSubscription()"
-          class="w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-200"
-          [ngClass]="isSubscription() ? 'border-purple-500 bg-purple-50' : 'border-slate-100 bg-slate-50 hover:border-slate-200'">
+      <!-- Details Collapsible -->
+      <div class="border border-slate-100 rounded-2xl overflow-hidden transition-all duration-300"
+           [ngClass]="isDetailsOpen() ? 'bg-slate-50' : 'bg-white'">
+        <button type="button" (click)="toggleDetails()"
+          class="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 transition-colors">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-              [ngClass]="isSubscription() ? 'bg-purple-500 text-white' : 'bg-slate-200 text-slate-500'">
-              <i class="fa-solid fa-rotate text-xs"></i>
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-500">
+              <i class="fa-solid fa-layer-group text-xs"></i>
             </div>
-            <div class="text-left">
-              <div class="text-sm font-bold text-slate-700">Це підписка</div>
-              <div class="text-[10px] text-slate-400">Буде додано до списку підписок</div>
-            </div>
+            <span class="text-sm font-bold text-slate-700">Детальніше</span>
           </div>
-          <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
-            [ngClass]="isSubscription() ? 'border-purple-500 bg-purple-500' : 'border-slate-300'">
-            @if (isSubscription()) {
-              <i class="fa-solid fa-check text-white text-[8px]"></i>
-            }
+          <div class="flex items-center gap-2">
+            <!-- Active indicators -->
+            <div *ngIf="isSubscription() || isDebt()" class="flex gap-1">
+              <span *ngIf="isSubscription()" class="w-2 h-2 rounded-full bg-purple-500"></span>
+              <span *ngIf="isDebt()" class="w-2 h-2 rounded-full bg-rose-500"></span>
+            </div>
+            <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-300"
+               [style.transform]="isDetailsOpen() ? 'rotate(180deg)' : ''"></i>
           </div>
         </button>
 
-        <!-- Subscription Details (expanded) -->
-        @if (isSubscription()) {
-        <div class="mt-3 p-4 bg-purple-50 rounded-2xl border border-purple-100 flex flex-col gap-3">
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Період</label>
-              <select [ngModel]="subPeriod()" (ngModelChange)="subPeriod.set($event)" [ngModelOptions]="{standalone: true}"
-                class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-sm font-bold text-slate-700 outline-none focus:border-purple-400 cursor-pointer">
-                <option value="monthly">Щомісяця</option>
-                <option value="3months">Раз в 3 міс.</option>
-                <option value="yearly">Щорічно</option>
-                <option value="custom">Кастом (дні)</option>
-              </select>
-            </div>
-            @if (subPeriod() === 'custom') {
-            <div>
-              <label class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Кількість днів</label>
-              <input type="number" [ngModel]="subCustomDays()" (ngModelChange)="subCustomDays.set($event)" [ngModelOptions]="{standalone: true}"
-                class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-sm font-bold text-slate-700 outline-none focus:border-purple-400"
-                placeholder="30" min="1">
+        <div *ngIf="isDetailsOpen()" class="p-4 pt-1 space-y-4 animate-in slide-in-from-top-2 duration-300">
+          
+          <!-- Subscription Toggle -->
+          @if (transaction.transactionType === 'expense') {
+          <div>
+            <button type="button" (click)="toggleSubscription()"
+              class="w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-200"
+              [ngClass]="isSubscription() ? 'border-purple-500 bg-purple-50' : 'border-slate-100 bg-white hover:border-slate-200'">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
+                  [ngClass]="isSubscription() ? 'bg-purple-500 text-white' : 'bg-slate-100 text-slate-500'">
+                  <i class="fa-solid fa-rotate text-xs"></i>
+                </div>
+                <div class="text-left">
+                  <div class="text-sm font-bold text-slate-700">Це підписка</div>
+                  <div class="text-[10px] text-slate-400">Додати в список підписок</div>
+                </div>
+              </div>
+              <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+                [ngClass]="isSubscription() ? 'border-purple-500 bg-purple-500' : 'border-slate-300'">
+                @if (isSubscription()) {
+                  <i class="fa-solid fa-check text-white text-[8px]"></i>
+                }
+              </div>
+            </button>
+
+            <!-- Subscription Details (nested) -->
+            @if (isSubscription()) {
+            <div class="mt-2 p-3 bg-white rounded-xl border border-purple-100 flex flex-col gap-3">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[9px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Період</label>
+                  <select [ngModel]="subPeriod()" (ngModelChange)="subPeriod.set($event)" [ngModelOptions]="{standalone: true}"
+                    class="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-purple-100 text-xs font-bold text-slate-700 outline-none focus:border-purple-300">
+                    <option value="monthly">Щомісяця</option>
+                    <option value="3months">Раз в 3 міс.</option>
+                    <option value="yearly">Щорічно</option>
+                    <option value="custom">Кастом (дні)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Наступна дата</label>
+                  <input type="date" [ngModel]="subNextDate()" (ngModelChange)="subNextDate.set($event)" [ngModelOptions]="{standalone: true}"
+                    class="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-purple-100 text-xs font-bold text-slate-700 outline-none focus:border-purple-300">
+                </div>
+                @if (subPeriod() === 'custom') {
+                <div class="col-span-2">
+                  <label class="text-[9px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Кількість днів</label>
+                  <input type="number" [ngModel]="subCustomDays()" (ngModelChange)="subCustomDays.set($event)" [ngModelOptions]="{standalone: true}"
+                    class="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-purple-100 text-xs font-bold text-slate-700 outline-none focus:border-purple-300"
+                    placeholder="30" min="1">
+                </div>
+                }
+              </div>
             </div>
             }
           </div>
+          }
+
+          <!-- Debt Toggle -->
           <div>
-            <label class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Наступна дата оплати</label>
-            <input type="date" [ngModel]="subNextDate()" (ngModelChange)="subNextDate.set($event)" [ngModelOptions]="{standalone: true}"
-              class="w-full px-3 py-2 rounded-xl bg-white border border-purple-200 text-sm font-bold text-slate-700 outline-none focus:border-purple-400">
+            <button type="button" (click)="toggleDebt()"
+              class="w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-200"
+              [ngClass]="isDebt() ? 'border-rose-500 bg-rose-50' : 'border-slate-100 bg-white hover:border-slate-200'">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
+                  [ngClass]="isDebt() ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500'">
+                  <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
+                </div>
+                <div class="text-left">
+                  <div class="text-sm font-bold text-slate-700">Це {{ transaction.transactionType === 'income' ? 'повернення боргу' : 'новий борг' }}</div>
+                  <div class="text-[10px] text-slate-400">Додати в список боргів</div>
+                </div>
+              </div>
+              <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+                [ngClass]="isDebt() ? 'border-rose-500 bg-rose-500' : 'border-slate-300'">
+                @if (isDebt()) {
+                  <i class="fa-solid fa-check text-white text-[8px]"></i>
+                }
+              </div>
+            </button>
           </div>
+
         </div>
-        }
       </div>
-      }
 
       <!-- Description -->
       <div>

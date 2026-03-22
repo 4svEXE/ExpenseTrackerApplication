@@ -1,4 +1,4 @@
-import { Component, inject, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Output, EventEmitter, signal } from '@angular/core';
 import { FinanceDataService, AccountBalance } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 
@@ -27,13 +27,23 @@ import { CommonModule } from '@angular/common';
           <div class="relative z-10">
             <div class="flex justify-between items-start mb-4">
               <div class="font-bold tracking-wide text-white drop-shadow-sm">{{ acc.name }}</div>
-              <div class="flex gap-1" *ngIf="acc.currency !== userCurrency">
-                <span class="text-[10px] bg-white/20 backdrop-blur-md px-1.5 py-0.5 rounded text-white font-medium uppercase">{{ acc.currency }}</span>
+                <div class="flex items-center gap-1.5" *ngIf="acc.currency !== userCurrency">
+                  <span class="text-[10px] bg-white/20 backdrop-blur-md px-1.5 py-0.5 rounded text-white font-medium uppercase transition-colors">{{ acc.currency }}</span>
+                  <button (click)="toggleConversion(acc.id, $event)" 
+                          class="w-6 h-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-all active:scale-90"
+                          title="Конвертувати у {{ userCurrency }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M7 15l-4-4 4-4M17 9l4 4-4 4"/>
+                      <path d="M21 13H3M3 11h18"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
 
             <div class="flex flex-col gap-1">
-              <div class="text-2xl font-extrabold text-white">{{ acc.balance | currency:acc.currency:'symbol-narrow':'1.0-0' }}</div>
+              <div class="text-2xl font-extrabold text-white">
+                {{ getDisplayBalance(acc) | currency:getDisplayCurrency(acc):'symbol-narrow':'1.0-2' }}
+              </div>
             </div>
 
             <div class="mt-4 flex gap-1">
@@ -64,6 +74,8 @@ import { CommonModule } from '@angular/common';
 export class AccountsListComponent {
   financeData = inject(FinanceDataService);
   accounts = this.financeData.accounts;
+  convertedAccountIds = signal<Set<string>>(new Set());
+
 
   @Output() accountClicked = new EventEmitter<AccountBalance>();
   @Output() addAccountClicked = new EventEmitter<void>();
@@ -74,6 +86,29 @@ export class AccountsListComponent {
 
   onAccountClick(acc: AccountBalance) {
     this.accountClicked.emit(acc);
+  }
+
+  toggleConversion(accId: string, event: Event) {
+    event.stopPropagation();
+    const current = new Set(this.convertedAccountIds());
+    if (current.has(accId)) {
+      current.delete(accId);
+    } else {
+      current.add(accId);
+    }
+    this.convertedAccountIds.set(current);
+  }
+
+  getDisplayBalance(acc: AccountBalance) {
+    if (this.convertedAccountIds().has(acc.id)) {
+      const rate = this.financeData.getExchangeRate(acc.currency, this.userCurrency);
+      return acc.balance * rate;
+    }
+    return acc.balance;
+  }
+
+  getDisplayCurrency(acc: AccountBalance) {
+    return this.convertedAccountIds().has(acc.id) ? this.userCurrency : acc.currency;
   }
 
   onAddAccount() {

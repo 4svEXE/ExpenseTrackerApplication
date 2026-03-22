@@ -5,7 +5,7 @@ import { TransactionType } from '../../types/transaction-type.enum';
 import { TransactionCategory } from '../../types/transaction-category.interface';
 import { CategoryService } from '../../services/category.service';
 import { TransactionService } from '../../services/transaction.service';
-import { FinanceDataService } from '../../services/finance-data.service';
+import { FinanceDataService, SubscriptionPeriod } from '../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
@@ -40,6 +40,8 @@ export class CategoriesComponent implements OnInit {
   isAddingNew = signal(false);
   isEditMode = signal(false);
   newCategoryName = '';
+  newCategoryIsSub = signal(false);
+  newCategorySubPeriod = signal<SubscriptionPeriod>('monthly');
   selectedIcon = AVAILABLE_ICONS[0];
   availableIcons = AVAILABLE_ICONS;
 
@@ -107,6 +109,9 @@ export class CategoriesComponent implements OnInit {
       ...this.transaction,
       category: category.name,
       amount: category.plannedAmount || 0,
+      currency: category.plannedCurrency || this.financeData.userSettings().currency,
+      isSubscription: category.isSubscription || false,
+      subscriptionPeriod: category.subscriptionPeriod as any,
       debtId: undefined
     });
   }
@@ -156,7 +161,9 @@ export class CategoriesComponent implements OnInit {
     const newCategory: TransactionCategory = {
       name: this.newCategoryName.trim(),
       icon: this.selectedIcon,
-      transactionType: this.transactionType
+      transactionType: this.transactionType,
+      isSubscription: this.newCategoryIsSub(),
+      subscriptionPeriod: this.newCategoryIsSub() ? this.newCategorySubPeriod() : undefined
     };
 
     this.categoryService.addCategory(newCategory);
@@ -166,6 +173,8 @@ export class CategoriesComponent implements OnInit {
 
   resetNewCategoryForm() {
     this.newCategoryName = '';
+    this.newCategoryIsSub.set(false);
+    this.newCategorySubPeriod.set('monthly');
     this.selectedIcon = AVAILABLE_ICONS[0];
   }
 }

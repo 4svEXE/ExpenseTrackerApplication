@@ -13,7 +13,8 @@ import { MonthAnalyticsComponent } from '../../components/dashboard/month-analyt
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
 import { GamificationBannerComponent } from '../../components/dashboard/gamification-banner/gamification-banner.component';
-import { FinanceDataService, Subscription } from '../../services/finance-data.service';
+import { FinancialLiteracyComponent } from '../../components/dashboard/financial-literacy/financial-literacy.component';
+import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../services/finance-data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +30,8 @@ import { FinanceDataService, Subscription } from '../../services/finance-data.se
     MonthPlanComponent,
     MonthAnalyticsComponent,
     SubscriptionsListComponent,
-    GamificationBannerComponent
+    GamificationBannerComponent,
+    FinancialLiteracyComponent
   ],
   template: `
     <div class="dashboard-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 pt-[52px] md:pt-[72px] font-sans">
@@ -49,6 +51,9 @@ import { FinanceDataService, Subscription } from '../../services/finance-data.se
 
           <!-- Gamification Events & Achievements -->
           <app-gamification-banner></app-gamification-banner>
+          
+          <!-- Financial Literacy Cards -->
+          <app-financial-literacy></app-financial-literacy>
 
           <!-- Middle Row: Income Visualizer + Transactions Context -->
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
@@ -106,43 +111,96 @@ import { FinanceDataService, Subscription } from '../../services/finance-data.se
           </button>
         </div>
 
-        <!-- Details -->
+        <!-- Details / Edit Form -->
         <div class="p-6 space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-slate-50 rounded-2xl p-4">
-              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ціна</div>
-              <div class="text-xl font-black text-slate-900">{{ selectedSub()!.price | currency:selectedSub()!.currency:'symbol-narrow':'1.0-2' }}</div>
-              @if (selectedSub()!.currency !== userCurrency) {
-                <div class="text-xs text-slate-400 mt-0.5">≈ {{ getPriceInUserCurrency(selectedSub()!) | currency:userCurrency:'symbol-narrow':'1.0-2' }}</div>
-              }
-            </div>
-            <div class="bg-slate-50 rounded-2xl p-4">
-              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Наступна оплата</div>
-              <div class="text-base font-bold text-slate-800">{{ selectedSub()!.nextPaymentDate | date:'d MMMM':'':'uk-UA' }}</div>
-              <div class="text-xs mt-0.5" [ngClass]="getDaysLeft(selectedSub()!.nextPaymentDate) <= 3 ? 'text-rose-500 font-bold' : 'text-slate-400'">
-                через {{ getDaysLeft(selectedSub()!.nextPaymentDate) }} дн.
+          @if (!isEditingSub()) {
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-slate-50 rounded-2xl p-4">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Ціна</div>
+                <div class="text-xl font-black text-slate-900">{{ selectedSub()!.price | currency:selectedSub()!.currency:'symbol-narrow':'1.0-2' }}</div>
+                @if (selectedSub()!.currency !== userCurrency) {
+                  <div class="text-xs text-slate-400 mt-0.5">≈ {{ getPriceInUserCurrency(selectedSub()!) | currency:userCurrency:'symbol-narrow':'1.0-2' }}</div>
+                }
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-4">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Наступна оплата</div>
+                <div class="text-base font-bold text-slate-800">{{ selectedSub()!.nextPaymentDate | date:'d MMMM':'':'uk-UA' }}</div>
+                <div class="text-xs mt-0.5" [ngClass]="getDaysLeft(selectedSub()!.nextPaymentDate) <= 3 ? 'text-rose-500 font-bold' : 'text-slate-400'">
+                  через {{ getDaysLeft(selectedSub()!.nextPaymentDate) }} дн.
+                </div>
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-4">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Період</div>
+                <div class="text-base font-bold text-slate-800">{{ getPeriodLabel(selectedSub()!.period) }}</div>
+              </div>
+              <div class="bg-purple-50 rounded-2xl p-4">
+                <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">Витрачено всього</div>
+                <div class="text-base font-bold text-purple-700">{{ getTotalSpentInUserCurrency(selectedSub()!) | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
               </div>
             </div>
-            <div class="bg-slate-50 rounded-2xl p-4">
-              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Період</div>
-              <div class="text-base font-bold text-slate-800">{{ getPeriodLabel(selectedSub()!.period) }}</div>
+          } @else {
+            <div class="space-y-4">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Назва сервісу</label>
+                <input [ngModel]="editSubName()" (ngModelChange)="editSubName.set($event)" type="text"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-purple-500 text-black">
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Ціна</label>
+                  <input [ngModel]="editSubPrice()" (ngModelChange)="editSubPrice.set($event)" type="number"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-purple-500 text-black">
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Валюта</label>
+                  <select [ngModel]="editSubCurrency()" (ngModelChange)="editSubCurrency.set($event)"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-purple-500 text-black">
+                    <option value="UAH">UAH</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="CZK">CZK</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Період</label>
+                  <select [ngModel]="editSubPeriod()" (ngModelChange)="editSubPeriod.set($event)"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-purple-500 text-black">
+                    <option value="monthly">Місяць</option>
+                    <option value="3months">3 місяці</option>
+                    <option value="yearly">Рік</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Наступна дата</label>
+                  <input [ngModel]="editSubNextDate()" (ngModelChange)="editSubNextDate.set($event)" type="date"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-purple-500 text-black">
+                </div>
+              </div>
             </div>
-            <div class="bg-purple-50 rounded-2xl p-4">
-              <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">Витрачено всього</div>
-              <div class="text-base font-bold text-purple-700">{{ getTotalSpentInUserCurrency(selectedSub()!) | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
-            </div>
-          </div>
+          }
         </div>
 
         <!-- Actions -->
         <div class="p-6 bg-slate-50 flex gap-3">
-          <button (click)="closeSubDetail()" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">
-            Закрити
-          </button>
-          <a routerLink="/wallets" (click)="closeSubDetail()"
-            class="flex-1 py-3 rounded-xl font-bold bg-black text-white text-center hover:bg-neutral-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-pen text-xs"></i> Редагувати
-          </a>
+          @if (!isEditingSub()) {
+            <button (click)="closeSubDetail()" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">
+              Закрити
+            </button>
+            <button (click)="toggleEditingSub()"
+              class="flex-1 py-3 rounded-xl font-bold bg-black text-white text-center hover:bg-neutral-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-pen text-xs"></i> Редагувати
+            </button>
+          } @else {
+            <button (click)="toggleEditingSub()" class="flex-1 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">
+              Скасувати
+            </button>
+            <button (click)="saveEditSub()"
+              class="flex-1 py-3 rounded-xl font-bold bg-purple-600 text-white text-center hover:bg-purple-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-save text-xs"></i> Зберегти
+            </button>
+          }
         </div>
       </div>
     </div>
@@ -158,6 +216,14 @@ export class DashboardComponent {
   financeData = inject(FinanceDataService);
   router = inject(Router);
   selectedSub = signal<Subscription | null>(null);
+  
+  // Edit Sub State
+  isEditingSub = signal(false);
+  editSubName = signal('');
+  editSubPrice = signal(0);
+  editSubCurrency = signal('');
+  editSubNextDate = signal('');
+  editSubPeriod = signal<SubscriptionPeriod>('monthly');
 
   get userCurrency() {
     return this.financeData.userSettings().currency;
@@ -165,10 +231,52 @@ export class DashboardComponent {
 
   openSubDetail(sub: Subscription) {
     this.selectedSub.set(sub);
+    this.isEditingSub.set(false);
+    // Sync edit fields
+    this.editSubName.set(sub.name);
+    this.editSubPrice.set(sub.price);
+    this.editSubCurrency.set(sub.currency);
+    this.editSubNextDate.set(new Date(sub.nextPaymentDate).toISOString().split('T')[0]);
+    this.editSubPeriod.set(sub.period);
   }
 
   closeSubDetail() {
     this.selectedSub.set(null);
+    this.isEditingSub.set(false);
+  }
+
+  toggleEditingSub() {
+    this.isEditingSub.set(!this.isEditingSub());
+  }
+
+  saveEditSub() {
+    const sub = this.selectedSub();
+    if (!sub) return;
+
+    const price = this.editSubPrice();
+    const currency = this.editSubCurrency();
+    const priceUah = price * this.financeData.getExchangeRate(currency, 'UAH');
+
+    const updatedSub: Subscription = {
+      ...sub,
+      name: this.editSubName(),
+      price: price,
+      currency: currency,
+      priceUah: priceUah,
+      priceEur: priceUah * this.financeData.getExchangeRate('UAH', 'EUR'),
+      nextPaymentDate: new Date(this.editSubNextDate()),
+      period: this.editSubPeriod()
+    };
+
+    const subs = [...this.financeData.subscriptions()];
+    const idx = subs.findIndex(s => s.id === sub.id);
+    if (idx !== -1) {
+      subs[idx] = updatedSub;
+      this.financeData.saveSubscriptions(subs);
+      this.selectedSub.set(updatedSub);
+      this.isEditingSub.set(false);
+      this.financeData.toasts.show('Підписку оновлено!', 'success');
+    }
   }
 
   openAddSubRoute() {

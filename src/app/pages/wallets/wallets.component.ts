@@ -250,7 +250,7 @@ import { ConfirmService } from '../../services/confirm.service';
                         <div class="flex gap-1">
                             <button (click)="payoffDebt(i)" title="Виконати борг"
                                     class="w-8 h-8 rounded-lg bg-white/10 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center justify-center active:scale-90">
-                                <i class="fa-solid fa-check"></i>
+                                <i class="fa-solid fa-arrow-up"></i>
                             </button>
                             <button (click)="removeDebt(i)" title="Видалити"
                                     class="w-8 h-8 rounded-lg bg-white/5 text-white/30 hover:bg-white/20 hover:text-white/60 transition-colors flex items-center justify-center">
