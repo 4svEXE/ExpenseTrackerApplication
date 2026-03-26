@@ -13,6 +13,8 @@ export interface Transaction {
   tags: string[];
   paymentType: string;
   date: Date;
+  amount: number;
+  currency: string;
   amountUah: number;
   amountEur: number;
   account: string;
@@ -160,6 +162,7 @@ export class FinanceDataService {
           id: (t.id || i).toString(),
           title: (t.description || t.title || t.category || 'Транзакція').toString(),
           date,
+          amount: amt,
           amountUah: amtUah,
           currency: txCurrency,
           amountEur: amtUah / this.getExchangeRate('EUR', 'UAH'),
