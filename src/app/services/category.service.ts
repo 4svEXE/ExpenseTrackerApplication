@@ -101,7 +101,10 @@ export class CategoryService {
             name: `Sub: ${s.name}`,
             icon: 'fa-solid fa-calendar-check',
             transactionType: 'expense',
-            plannedAmount: s.priceUah
+            plannedAmount: s.price,
+            plannedCurrency: s.currency,
+            isSubscription: true,
+            subscriptionPeriod: s.period
           } as TransactionCategory);
         }
       });

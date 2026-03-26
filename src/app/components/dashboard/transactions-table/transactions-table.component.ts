@@ -37,8 +37,13 @@ import { RouterModule } from '@angular/router';
           <table class="w-full text-left text-sm whitespace-nowrap" *ngIf="recentTransactions.length > 0; else emptyTxs">
             <tbody class="divide-y divide-slate-50">
               <tr *ngFor="let t of recentTransactions" class="hover:bg-slate-50/50 transition-colors">
-                <td class="py-3 font-bold text-xs md:text-sm" [ngClass]="t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'">
-                  {{ t.type === 'income' ? '+' : '-' }}{{ (t.amountUah * financeData.getExchangeRate('UAH', userCurrency)) | currency:userCurrency:'symbol-narrow':'1.0-0' }}
+                <td class="py-3 px-2">
+                  <div class="font-bold text-xs md:text-sm" [ngClass]="t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'">
+                    {{ t.type === 'income' ? '+' : '-' }}{{ t.amount | currency:(t.currency || 'UAH'):'symbol-narrow':'1.0-2' }}
+                  </div>
+                  <div class="text-[9px] text-slate-400 font-bold" *ngIf="(t.currency || 'UAH') !== userCurrency">
+                    ≈ {{ (t.amountUah * financeData.getExchangeRate('UAH', userCurrency)) | currency:userCurrency:'symbol-narrow':'1.0-2' }}
+                  </div>
                 </td>
                 <td class="py-3 px-2">
                   <span class="text-[10px] md:text-xs font-bold text-slate-500">{{ t.account }}</span>

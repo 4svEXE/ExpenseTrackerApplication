@@ -8,6 +8,7 @@ export interface GameOutcome {
     text: string;
     reward: number;
     probability: number;
+    unlockFlashcard?: boolean;
 }
 
 export interface GameChoice {
@@ -146,11 +147,37 @@ export class GamificationService {
         if (selectedOutcome.reward > 0) this.audio.playIncome();
         else if (selectedOutcome.reward < 0) this.audio.playOutcome();
 
+        if (selectedOutcome.unlockFlashcard) {
+            this.unlockRandomCard();
+        }
+
         this.eventResult.set({ text: selectedOutcome.text, reward: selectedOutcome.reward });
         this.currentEvent.set(null);
 
         // Track choice for achievement
         this.incrementAchievementProgress('choices');
+    }
+
+    unlockRandomCard() {
+        const settings = this.financeData.userSettings();
+        const unlocked = settings.unlockedCards || [1];
+        // Assume maximum 15 cards
+        if (unlocked.length >= 15) {
+            this.addCoins(10);
+            this.toasts.show('Всі картки вже відкриті! Ви отримали 10 монет як компенсацію.', 'success');
+            return;
+        }
+        
+        let randomId;
+        do {
+            randomId = Math.floor(Math.random() * 15) + 1;
+        } while (unlocked.includes(randomId));
+        
+        this.settingsService.saveSettings({
+            ...settings,
+            unlockedCards: [...unlocked, randomId]
+        });
+        this.toasts.show('🎁 Ви розблокували нову картку фінансової грамотності!', 'success');
     }
 
     finishEvent() {
@@ -558,7 +585,8 @@ for (let i = 201; i <= 300; i++) {
         text: 'Дати йому 1 монету за мудрість',
         cost: 1,
         outcomes: [
-          { text: `"${advice}" — На знак вдячності він дарує вам щасливий талісман!`, reward: 5, probability: 0.4 },
+          { text: `"${advice}" — На знак вдячності він дарує вам мудру книгу (розблоковує картку)!`, reward: 0, probability: 0.1, unlockFlashcard: true },
+          { text: `"${advice}" — На знак вдячності він дарує вам щасливий талісман!`, reward: 5, probability: 0.3 },
           { text: `"${advice}" — Він забрав монету і зник у тумані.`, reward: 0, probability: 0.6 }
         ]
       }

@@ -12,6 +12,7 @@ export type Transaction = {
   debtId?: string;
   debtName?: string;
   debtAmount?: number;
+  id?: string;
   // Subscription support
   isSubscription?: boolean;
   subscriptionPeriod?: 'monthly' | '3months' | 'yearly' | 'custom';

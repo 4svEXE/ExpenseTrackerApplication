@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { FinanceDataService, ExpensePlan } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -8,7 +8,15 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+    <div class="flex justify-end mb-4 md:mb-6">
+       <button (click)="toggleCollapse()" class="text-xs font-bold text-slate-500 hover:text-black flex items-center gap-2 transition-colors">
+          {{ isCollapsed() ? 'Розгорнути бюджет' : 'Згорнути бюджет' }}
+          <i class="fa-solid" [ngClass]="isCollapsed() ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+       </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 transition-all duration-300" 
+         [ngClass]="isCollapsed() ? 'hidden' : 'grid'">
       
       <!-- Income Plans -->
       <div class="card-container border-t-4 border-t-neutral-900 flex flex-col h-full">
@@ -108,9 +116,23 @@ import { RouterModule } from '@angular/router';
     }
   `]
 })
-export class MonthPlanComponent {
+export class MonthPlanComponent implements OnInit {
   Math = Math;
   financeData = inject(FinanceDataService);
+
+  isCollapsed = signal<boolean>(false);
+
+  ngOnInit() {
+    const saved = localStorage.getItem('isMonthPlanCollapsed');
+    if (saved !== null) {
+      this.isCollapsed.set(JSON.parse(saved));
+    }
+  }
+
+  toggleCollapse() {
+    this.isCollapsed.set(!this.isCollapsed());
+    localStorage.setItem('isMonthPlanCollapsed', JSON.stringify(this.isCollapsed()));
+  }
 
   get userCurrency() {
     return this.financeData.userSettings().currency;

@@ -16,12 +16,8 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
-  ]
+  ],
+  "background_color": "#ffffff",
+  "theme_color": "#000000"
 }

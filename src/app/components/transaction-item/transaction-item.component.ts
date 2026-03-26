@@ -66,6 +66,12 @@ export class TransactionItemComponent {
     }, 300);
   }
 
+  onEdit(event: Event) {
+    event.stopPropagation();
+    this.closeDetails();
+    this.transactionService.setTransaction(this.item);
+  }
+
   async onDelete(event: Event) {
     event.stopPropagation();
     if (await this.confirmService.confirm('Видалити транзакцію?')) {
@@ -79,9 +85,16 @@ export class TransactionItemComponent {
       }
 
       if (targetAccountId) {
+        const targetAccount = this.financeData.accounts().find(a => a.id === targetAccountId);
+        let amountToReverse = this.item.amount;
+        
+        if (targetAccount && this.item.currency && this.item.currency !== targetAccount.currency) {
+          amountToReverse = this.item.amount * this.financeData.getExchangeRate(this.item.currency, targetAccount.currency);
+        }
+
         this.financeData.adjustAccountBalance(
           targetAccountId,
-          this.item.amount,
+          amountToReverse,
           reverseType
         );
       }

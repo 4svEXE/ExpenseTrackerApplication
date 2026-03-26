@@ -111,6 +111,9 @@ export class TransactionService {
   }
 
   addTransaction(newTransaction: Transaction): void {
+    if (!newTransaction.id) {
+      newTransaction.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    }
     const allStored = this.getTransactions();
     const updated = this.sortByDate([...allStored, newTransaction]);
     this.localStorageService.set(this.StorageKey, updated);
@@ -119,12 +122,15 @@ export class TransactionService {
 
   deleteTransaction(transaction: Transaction): void {
     const allStored = this.getTransactions();
-    const updated = allStored.filter(item =>
-      !(item.date === transaction.date &&
+    const updated = allStored.filter(item => {
+      if (item.id && transaction.id) {
+        return item.id !== transaction.id;
+      }
+      return !(item.date === transaction.date &&
         item.amount === transaction.amount &&
         item.category === transaction.category &&
-        item.description === transaction.description)
-    );
+        item.description === transaction.description);
+    });
     this.localStorageService.set(this.StorageKey, updated);
     this.applyFilters(updated, this.currentViewDate());
   }

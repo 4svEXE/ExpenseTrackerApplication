@@ -5,7 +5,7 @@ import { TransactionType } from '../../types/transaction-type.enum';
 import { TransactionCategory } from '../../types/transaction-category.interface';
 import { CategoryService } from '../../services/category.service';
 import { TransactionService } from '../../services/transaction.service';
-import { FinanceDataService, SubscriptionPeriod } from '../../services/finance-data.service';
+import { FinanceDataService, SubscriptionPeriod, Subscription } from '../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
@@ -42,6 +42,10 @@ export class CategoriesComponent implements OnInit {
   newCategoryName = '';
   newCategoryIsSub = signal(false);
   newCategorySubPeriod = signal<SubscriptionPeriod>('monthly');
+  newCategorySubPrice = signal<number>(0);
+  newCategorySubCurrency = signal<string>('UAH');
+  newCategorySubDate = signal<string>(new Date().toISOString().split('T')[0]);
+  
   selectedIcon = AVAILABLE_ICONS[0];
   availableIcons = AVAILABLE_ICONS;
 
@@ -158,6 +162,26 @@ export class CategoriesComponent implements OnInit {
   saveNewCategory() {
     if (!this.newCategoryName.trim()) return;
 
+    if (this.newCategoryIsSub() && this.newCategorySubPrice() > 0) {
+      const price = this.newCategorySubPrice();
+      const currency = this.newCategorySubCurrency();
+      const priceUah = price * this.financeData.getExchangeRate(currency, 'UAH');
+
+      const newSub: Subscription = {
+        id: Date.now().toString(),
+        name: this.newCategoryName.trim(),
+        price: price,
+        currency: currency,
+        priceUah: priceUah,
+        priceEur: priceUah * this.financeData.getExchangeRate('UAH', 'EUR'),
+        period: this.newCategorySubPeriod(),
+        nextPaymentDate: new Date(this.newCategorySubDate()),
+        totalSpent: 0
+      };
+      
+      this.financeData.saveSubscriptions([...this.financeData.subscriptions(), newSub]);
+    }
+
     const newCategory: TransactionCategory = {
       name: this.newCategoryName.trim(),
       icon: this.selectedIcon,
@@ -175,6 +199,9 @@ export class CategoriesComponent implements OnInit {
     this.newCategoryName = '';
     this.newCategoryIsSub.set(false);
     this.newCategorySubPeriod.set('monthly');
+    this.newCategorySubPrice.set(0);
+    this.newCategorySubCurrency.set(this.financeData.userSettings().currency);
+    this.newCategorySubDate.set(new Date().toISOString().split('T')[0]);
     this.selectedIcon = AVAILABLE_ICONS[0];
   }
 }

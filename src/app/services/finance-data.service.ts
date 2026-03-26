@@ -44,6 +44,15 @@ export interface DebtItem {
   currency?: string; // валюта боргу, default UAH
 }
 
+export interface ExpectedEvent {
+  id: string;
+  title: string;
+  amount: number;
+  type: 'income' | 'expense';
+  date: string; // YYYY-MM-DD
+  currency: string;
+}
+
 
 export interface ExpensePlan {
   id: string;
@@ -89,6 +98,7 @@ export class FinanceDataService {
   private readonly NOTIFIED_GOALS_KEY = 'notifiedGoals';
   private readonly WISHLIST_KEY = 'wishlist';
   private readonly DEBTS_KEY = 'debts';
+  private readonly EXPECTED_EVENTS_KEY = 'expectedEvents';
 
   private settingsService = inject(SettingsService);
   private ts = inject(TransactionService);
@@ -105,6 +115,7 @@ export class FinanceDataService {
   debts = signal<DebtItem[]>([]);
   accounts = signal<AccountBalance[]>([]);
   subscriptions = signal<Subscription[]>([]);
+  expectedEvents = signal<ExpectedEvent[]>([]);
 
   totalBalance = computed(() => {
     const curr = this.userSettings().currency;
@@ -218,6 +229,7 @@ export class FinanceDataService {
     ]));
     this.wishlist.set(load(this.WISHLIST_KEY, []));
     this.debts.set(load(this.DEBTS_KEY, []));
+    this.expectedEvents.set(load(this.EXPECTED_EVENTS_KEY, []));
     this.accounts.set(load(this.ACCOUNTS_KEY, [
       { id: '1', name: 'Картка', balance: 5000, currency: 'UAH', tags: [] }
     ]));
@@ -318,6 +330,7 @@ export class FinanceDataService {
   saveSubscriptions(s: Subscription[]) { this.subscriptions.set(s); localStorage.setItem(this.SUBS_KEY, JSON.stringify(s)); }
   saveWishlist(w: WishItem[]) { this.wishlist.set(w); localStorage.setItem(this.WISHLIST_KEY, JSON.stringify(w)); }
   saveDebts(d: DebtItem[]) { this.debts.set(d); localStorage.setItem(this.DEBTS_KEY, JSON.stringify(d)); }
+  saveExpectedEvents(e: ExpectedEvent[]) { this.expectedEvents.set(e); localStorage.setItem(this.EXPECTED_EVENTS_KEY, JSON.stringify(e)); }
 
   adjustAccountBalance(id: string, amt: number, type: 'income' | 'expense') {
     const accs = [...this.accounts()];
@@ -353,11 +366,22 @@ export class FinanceDataService {
     // 2. Adjust Balance
     this.adjustAccountBalance(accountId, finalAmount, type);
 
-    // 3. Remove Debt (or partial payment? User said "disappears after full payoff", but let's assume one-shot for now as per "disappears")
-    const remaining = this.debts().filter(d => d.id !== debtId);
-    this.saveDebts(remaining);
-
-    this.toasts.show('Борг виконано!', 'success');
+    // 3. Remove Debt or reduce its amount
+    if (finalAmount >= Math.abs(debt.amount)) {
+      const remaining = this.debts().filter(d => d.id !== debtId);
+      this.saveDebts(remaining);
+      this.toasts.show('Борг виконано!', 'success');
+    } else {
+      const remaining = this.debts().map(d => {
+        if (d.id === debtId) {
+          const sign = d.amount < 0 ? -1 : 1;
+          return { ...d, amount: d.amount - (sign * finalAmount) };
+        }
+        return d;
+      });
+      this.saveDebts(remaining);
+      this.toasts.show('Частину боргу сплачено!', 'success');
+    }
 
     // 4. Audio Feedback
     if (type === 'income') {
@@ -401,7 +425,7 @@ export class FinanceDataService {
     const keys = [
       this.INCOME_PLANS_KEY, this.ACCOUNTS_KEY, this.EXPENSE_PLANS_KEY,
       this.SUBS_KEY, this.NOTIFIED_GOALS_KEY, this.WISHLIST_KEY,
-      this.DEBTS_KEY, 'userSettings', 'Transactions', 'Categories'
+      this.DEBTS_KEY, this.EXPECTED_EVENTS_KEY, 'userSettings', 'Transactions', 'Categories'
     ];
 
     keys.forEach(key => {

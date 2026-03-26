@@ -21,6 +21,8 @@ export interface UserSettings {
     colorBlindMode?: boolean;
     coins?: number;
     avatarUrl?: string;
+    geminiApiKey?: string;
+    unlockedCards?: number[];
 }
 
 @Injectable({
@@ -49,7 +51,9 @@ export class SettingsService {
         visualImpairmentMode: false,
         colorBlindMode: false,
         coins: 0,
-        avatarUrl: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Lucky'
+        avatarUrl: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Lucky',
+        geminiApiKey: '',
+        unlockedCards: [1]
     });
 
     constructor() {

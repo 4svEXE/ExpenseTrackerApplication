@@ -37,7 +37,8 @@ export class TransactionInputComponent implements OnInit {
   amountErrors = {
     required: 'Поле суми обов\u2019язкове.',
     min: 'Сума має бути більше 0.01.',
-    pattern: 'До 2 знаків після коми.'
+    max: 'Сума занадто велика.',
+    pattern: 'Некоректний формат числа (макс. 2 знаки).'
   };
 
   financeData = inject(FinanceDataService);
@@ -65,9 +66,20 @@ export class TransactionInputComponent implements OnInit {
       const transaction = this.transactionService.transaction();
       this.transaction = transaction;
       if (this.transactionForm && transaction && (transaction.amount > 0 || transaction.category)) {
+        let formDate = '';
+        if (transaction.date) {
+           formDate = new Date(transaction.date).toISOString().slice(0, 16);
+        } else {
+           const now = new Date();
+           formDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        }
+
         this.transactionForm.patchValue({ 
           amount: transaction.amount > 0 ? transaction.amount : null,
-          currency: transaction.currency || this.financeData.userSettings().currency
+          currency: transaction.currency || this.financeData.userSettings().currency,
+          description: transaction.description || '',
+          date: formDate,
+          accountId: transaction.accountId || this.transactionForm.get('accountId')?.value
         }, { emitEvent: false });
         if (transaction.isSubscription) {
           this.isSubscription.set(true);
@@ -81,14 +93,19 @@ export class TransactionInputComponent implements OnInit {
   ngOnInit(): void {
     const lastAccountId = localStorage.getItem('lastAccountId') || (this.accounts().length > 0 ? this.accounts()[0].id : '');
 
+    const now = new Date();
+    const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
     this.transactionForm = this.fb.group({
       accountId: [lastAccountId, [Validators.required]],
+      date: [localNow, [Validators.required]],
       currency: [this.financeData.userSettings().currency, [Validators.required]],
       amount: [
         null,
         [
           Validators.required,
           Validators.min(0.01),
+          Validators.max(999999999),
           Validators.pattern(/^\d+(\.\d{1,2})?$/),
         ],
       ],
@@ -147,6 +164,11 @@ export class TransactionInputComponent implements OnInit {
       const tType = this.transaction.transactionType || 'expense';
       const targetAccount = this.accounts().find(a => a.id === formValue.accountId);
 
+      if (!targetAccount) {
+        this.financeData.toasts.show('Будь ласка, оберіть існуючий рахунок.', 'error');
+        return;
+      }
+
       let finalAmount = formValue.amount;
       if (targetAccount && formValue.currency !== targetAccount.currency) {
         finalAmount = formValue.amount * this.financeData.getExchangeRate(formValue.currency, targetAccount.currency);
@@ -155,14 +177,31 @@ export class TransactionInputComponent implements OnInit {
       if (this.transaction.debtId) {
         this.financeData.executeDebt(this.transaction.debtId, formValue.accountId, finalAmount);
       } else {
-        // Regular Transaction
+        // If EDITING an existing transaction
+        if (this.transaction.id) {
+          const reverseType = this.transaction.transactionType === 'income' ? 'expense' : 'income';
+          let oldAccountId = this.transaction.accountId;
+          if (!oldAccountId && this.accounts().length > 0) oldAccountId = this.accounts()[0].id;
+
+          if (oldAccountId) {
+            const oldAccount = this.accounts().find(a => a.id === oldAccountId);
+            let amountToReverse = this.transaction.amount;
+            if (oldAccount && this.transaction.currency && this.transaction.currency !== oldAccount.currency) {
+              amountToReverse = this.transaction.amount * this.financeData.getExchangeRate(this.transaction.currency, oldAccount.currency);
+            }
+            this.financeData.adjustAccountBalance(oldAccountId, amountToReverse, reverseType);
+          }
+          this.transactionService.deleteTransaction(this.transaction);
+        }
+
+        // Regular Transaction Addition / Update
         this.transactionService.addTransaction({
           ...this.transaction,
           amount: formValue.amount,
           currency: formValue.currency,
           description: formValue.description,
           accountId: formValue.accountId,
-          date: new Date().toISOString(),
+          date: new Date(formValue.date).toISOString(),
           isSubscription: this.isSubscription(),
           subscriptionPeriod: this.isSubscription() ? this.subPeriod() : undefined,
           subscriptionNextDate: this.isSubscription() ? this.subNextDate() : undefined,
@@ -176,31 +215,12 @@ export class TransactionInputComponent implements OnInit {
           tType as 'income' | 'expense'
         );
 
-        // If marked as subscription — also add to subscriptions list
-        if (this.isSubscription()) {
-          const currency = formValue.currency;
-          const priceUah = finalAmount * this.financeData.getExchangeRate(targetAccount?.currency || currency, 'UAH');
-          const newSub: Subscription = {
-            id: Date.now().toString(),
-            name: this.transaction.category || formValue.description || 'Підписка',
-            price: formValue.amount,
-            currency: currency,
-            priceUah: priceUah,
-            priceEur: priceUah * this.financeData.getExchangeRate('UAH', 'EUR'),
-            period: this.subPeriod(),
-            customDays: this.subPeriod() === 'custom' ? this.subCustomDays() : undefined,
-            nextPaymentDate: new Date(this.subNextDate()),
-            totalSpent: formValue.amount
-          };
-          const subs = [...this.financeData.subscriptions(), newSub];
-          this.financeData.saveSubscriptions(subs);
-          this.financeData.toasts.show('Підписку додано до списку!', 'success');
-        }
+        // Removed dynamic subscription creation from single transactions
 
         // If marked as debt
         if (this.isDebt()) {
           const currency = formValue.currency;
-          const debtAmount = tType === 'expense' ? -formValue.amount : formValue.amount;
+          const debtAmount = tType === 'expense' ? formValue.amount : -formValue.amount;
           const newDebt = {
             id: Date.now().toString(),
             name: this.transaction.category || formValue.description || 'Борг',

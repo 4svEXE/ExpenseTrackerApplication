@@ -38,7 +38,8 @@ export class SettingsComponent implements OnInit {
     gamificationEnabled: true,
     supportDonationReminder: true,
     coins: 0,
-    avatarUrl: ''
+    avatarUrl: '',
+    geminiApiKey: ''
   };
 
   activeCategory: 'menu' | 'profile' | 'notifications' | 'gamification' | 'accessibility' | 'data' = 'menu';

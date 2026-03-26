@@ -35,20 +35,30 @@
         </div>
       </div>
 
-      <!-- Account -->
-      <div>
-        <label for="accountId"
-          class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Рахунок</label>
-        <div class="relative">
-          <select id="accountId" formControlName="accountId"
-            class="appearance-none w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-2 focus:ring-slate-100 outline-none font-semibold text-sm text-slate-700 transition-all cursor-pointer">
-            <option *ngFor="let acc of accounts()" [value]="acc.id">
-              {{ acc.name }} ({{ acc.balance | currency:acc.currency:'symbol-narrow':'1.0-0' }})
-            </option>
-          </select>
-          <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-            <i class="fa-solid fa-chevron-down text-xs"></i>
+      <!-- Account & Date -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Account -->
+        <div>
+          <label for="accountId"
+            class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Рахунок</label>
+          <div class="relative">
+            <select id="accountId" formControlName="accountId"
+              class="appearance-none w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-2 focus:ring-slate-100 outline-none font-semibold text-sm text-slate-700 transition-all cursor-pointer">
+              <option *ngFor="let acc of accounts()" [value]="acc.id">
+                {{ acc.name }}
+              </option>
+            </select>
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <i class="fa-solid fa-chevron-down text-xs"></i>
+            </div>
           </div>
+        </div>
+
+        <!-- Date -->
+        <div>
+          <label for="date" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Дата</label>
+          <input id="date" type="datetime-local" formControlName="date"
+            class="w-full px-3 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black outline-none font-bold text-sm text-slate-700 transition-all" />
         </div>
       </div>
 
@@ -90,9 +100,8 @@
           </div>
           <div class="flex items-center gap-2">
             <!-- Active indicators -->
-            <div *ngIf="isSubscription() || isDebt()" class="flex gap-1">
-              <span *ngIf="isSubscription()" class="w-2 h-2 rounded-full bg-purple-500"></span>
-              <span *ngIf="isDebt()" class="w-2 h-2 rounded-full bg-rose-500"></span>
+            <div *ngIf="isDebt()" class="flex gap-1">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
             </div>
             <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-300"
                [style.transform]="isDetailsOpen() ? 'rotate(180deg)' : ''"></i>
@@ -101,63 +110,6 @@
 
         <div *ngIf="isDetailsOpen()" class="p-4 pt-1 space-y-4 animate-in slide-in-from-top-2 duration-300">
           
-          <!-- Subscription Toggle -->
-          @if (transaction.transactionType === 'expense') {
-          <div>
-            <button type="button" (click)="toggleSubscription()"
-              class="w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-200"
-              [ngClass]="isSubscription() ? 'border-purple-500 bg-purple-50' : 'border-slate-100 bg-white hover:border-slate-200'">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-                  [ngClass]="isSubscription() ? 'bg-purple-500 text-white' : 'bg-slate-100 text-slate-500'">
-                  <i class="fa-solid fa-rotate text-xs"></i>
-                </div>
-                <div class="text-left">
-                  <div class="text-sm font-bold text-slate-700">Це підписка</div>
-                  <div class="text-[10px] text-slate-400">Додати в список підписок</div>
-                </div>
-              </div>
-              <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
-                [ngClass]="isSubscription() ? 'border-purple-500 bg-purple-500' : 'border-slate-300'">
-                @if (isSubscription()) {
-                  <i class="fa-solid fa-check text-white text-[8px]"></i>
-                }
-              </div>
-            </button>
-
-            <!-- Subscription Details (nested) -->
-            @if (isSubscription()) {
-            <div class="mt-2 p-3 bg-white rounded-xl border border-purple-100 flex flex-col gap-3">
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="text-[9px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Період</label>
-                  <select [ngModel]="subPeriod()" (ngModelChange)="subPeriod.set($event)" [ngModelOptions]="{standalone: true}"
-                    class="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-purple-100 text-xs font-bold text-slate-700 outline-none focus:border-purple-300">
-                    <option value="monthly">Щомісяця</option>
-                    <option value="3months">Раз в 3 міс.</option>
-                    <option value="yearly">Щорічно</option>
-                    <option value="custom">Кастом (дні)</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="text-[9px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Наступна дата</label>
-                  <input type="date" [ngModel]="subNextDate()" (ngModelChange)="subNextDate.set($event)" [ngModelOptions]="{standalone: true}"
-                    class="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-purple-100 text-xs font-bold text-slate-700 outline-none focus:border-purple-300">
-                </div>
-                @if (subPeriod() === 'custom') {
-                <div class="col-span-2">
-                  <label class="text-[9px] font-bold text-purple-400 uppercase tracking-wider mb-1 block">Кількість днів</label>
-                  <input type="number" [ngModel]="subCustomDays()" (ngModelChange)="subCustomDays.set($event)" [ngModelOptions]="{standalone: true}"
-                    class="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-purple-100 text-xs font-bold text-slate-700 outline-none focus:border-purple-300"
-                    placeholder="30" min="1">
-                </div>
-                }
-              </div>
-            </div>
-            }
-          </div>
-          }
-
           <!-- Debt Toggle -->
           <div>
             <button type="button" (click)="toggleDebt()"
