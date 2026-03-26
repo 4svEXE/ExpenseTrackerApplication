@@ -11,16 +11,45 @@ import { FormsModule } from '@angular/forms';
 import { ConfirmService } from '../../services/confirm.service';
 
 const AVAILABLE_ICONS = [
-  'fa-solid fa-money-bill-wave', 'fa-solid fa-gift', 'fa-solid fa-chart-line', 'fa-solid fa-house-chimney-user',
-  'fa-solid fa-laptop-code', 'fa-solid fa-cart-shopping', 'fa-solid fa-house-chimney', 'fa-solid fa-mask',
-  'fa-solid fa-faucet-detergent', 'fa-solid fa-car', 'fa-solid fa-utensils', 'fa-solid fa-coffee',
+  // Finance & Shopping
+  'fa-solid fa-money-bill-wave', 'fa-solid fa-wallet', 'fa-solid fa-piggy-bank', 'fa-solid fa-coins',
+  'fa-solid fa-credit-card', 'fa-solid fa-vault', 'fa-solid fa-hand-holding-dollar', 'fa-solid fa-receipt',
+  'fa-solid fa-cart-shopping', 'fa-solid fa-bag-shopping', 'fa-solid fa-basket-shopping', 'fa-solid fa-gift',
+  'fa-solid fa-chart-line',
+  
+  // Home & Utilities
+  'fa-solid fa-house-chimney', 'fa-solid fa-house-chimney-user', 'fa-solid fa-faucet-detergent', 
+  'fa-solid fa-plug', 'fa-solid fa-lightbulb', 'fa-solid fa-water', 'fa-solid fa-trash',
+  'fa-solid fa-wifi', 'fa-solid fa-phone', 'fa-solid fa-tv', 'fa-solid fa-laptop-code',
+  
+  // Transport
+  'fa-solid fa-car', 'fa-solid fa-gas-pump', 'fa-solid fa-bus', 'fa-solid fa-train', 
+  'fa-solid fa-bicycle', 'fa-solid fa-plane', 'fa-solid fa-hotel',
+  
+  // Food & Drinks
+  'fa-solid fa-utensils', 'fa-solid fa-burger', 'fa-solid fa-pizza-slice', 'fa-solid fa-ice-cream',
+  'fa-solid fa-cake-candles', 'fa-solid fa-apple-whole', 'fa-solid fa-carrot',
+  'fa-solid fa-coffee', 'fa-solid fa-mug-hot', 'fa-solid fa-wine-glass', 'fa-solid fa-beer-mug-empty',
+  
+  // Leisure, Health & Hobby
   'fa-solid fa-film', 'fa-solid fa-gamepad', 'fa-solid fa-dumbbell', 'fa-solid fa-briefcase-medical',
-  'fa-solid fa-graduation-cap', 'fa-solid fa-plane', 'fa-solid fa-hotel', 'fa-solid fa-gas-pump',
-  'fa-solid fa-bus', 'fa-solid fa-train', 'fa-solid fa-bicycle', 'fa-solid fa-walkie-talkie',
-  'fa-solid fa-wifi', 'fa-solid fa-phone', 'fa-solid fa-tv', 'fa-solid fa-plug',
-  'fa-solid fa-lightbulb', 'fa-solid fa-water', 'fa-solid fa-trash', 'fa-solid fa-bag-shopping',
-  'fa-solid fa-basket-shopping', 'fa-solid fa-credit-card', 'fa-solid fa-wallet', 'fa-solid fa-piggy-bank',
-  'fa-solid fa-coins', 'fa-solid fa-vault', 'fa-solid fa-hand-holding-dollar', 'fa-solid fa-receipt'
+  'fa-solid fa-graduation-cap', 'fa-solid fa-book', 'fa-solid fa-pen', 'fa-solid fa-paintbrush',
+  'fa-solid fa-guitar', 'fa-solid fa-music', 'fa-solid fa-camera', 'fa-solid fa-scissors', 'fa-solid fa-hammer',
+  
+  // Clothing & Accessories
+  'fa-solid fa-shirt', 'fa-solid fa-shoe-prints', 'fa-solid fa-socks', 'fa-solid fa-glasses',
+  'fa-solid fa-ring', 'fa-solid fa-gem',
+  
+  // People & Faces
+  'fa-solid fa-user', 'fa-solid fa-users', 'fa-solid fa-child-reaching', 'fa-solid fa-baby',
+  'fa-solid fa-face-smile', 'fa-solid fa-face-laugh', 'fa-solid fa-mask', 
+  'fa-solid fa-ghost', 'fa-solid fa-robot', 'fa-solid fa-skull',
+  
+  // Animals & Nature
+  'fa-solid fa-paw', 'fa-solid fa-dog', 'fa-solid fa-cat', 'fa-solid fa-horse', 
+  'fa-solid fa-bug', 'fa-solid fa-spider', 'fa-solid fa-crow', 'fa-solid fa-dove', 
+  'fa-solid fa-dragon', 'fa-solid fa-fish', 'fa-solid fa-frog', 'fa-solid fa-otter',
+  'fa-solid fa-tree', 'fa-solid fa-leaf', 'fa-solid fa-fire', 'fa-solid fa-snowflake', 'fa-solid fa-bolt'
 ];
 
 @Component({

@@ -407,12 +407,26 @@
                         <h3 class="text-sm font-black text-indigo-500 mb-6 uppercase tracking-widest flex items-center gap-2">
                            <i class="fa-solid fa-robot"></i> AI Фінансовий Консультант
                         </h3>
-                        <div>
+                        
+                        <div *ngIf="!settings.geminiApiKey" class="mb-6 p-5 bg-indigo-50 rounded-2xl border border-indigo-100 text-slate-700">
+                           <h4 class="font-bold mb-2">Як отримати ключ:</h4>
+                           <ol class="list-decimal text-xs space-y-2 ml-4 font-medium">
+                              <li>Перейдіть на сторінку <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 font-bold hover:underline">Google AI Studio</a>.</li>
+                              <li>Увійдіть за допомогою свого Google акаунта.</li>
+                              <li>Натисніть кнопку <strong>"Create API Key"</strong>.</li>
+                              <li>Скопіюйте згенерований ключ і вставте його в поле нижче.</li>
+                           </ol>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Gemini 2.5 API Key</label>
                             <input type="password" [(ngModel)]="settings.geminiApiKey" placeholder="AIzaSy..."
+                                (blur)="saveSettings()"
                                 class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-800">
                             <p class="text-[10px] text-slate-400 font-bold mt-3 px-1">Асистент матиме доступ до ваших транзакцій для аналізу та порад. Ключ зберігається лише на вашому пристрої.</p>
                         </div>
+                        
+                        <app-ai-consultant *ngIf="settings.geminiApiKey"></app-ai-consultant>
                     </div>
 
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">

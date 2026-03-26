@@ -13,7 +13,7 @@ import { MonthAnalyticsComponent } from '../../components/dashboard/month-analyt
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
 import { GamificationBannerComponent } from '../../components/dashboard/gamification-banner/gamification-banner.component';
-import { FinancialLiteracyComponent } from '../../components/dashboard/financial-literacy/financial-literacy.component';
+
 import { ExpectedCalendarComponent } from '../../components/dashboard/expected-calendar/expected-calendar.component';
 import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../services/finance-data.service';
 
@@ -31,9 +31,7 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
     MonthPlanComponent,
     MonthAnalyticsComponent,
     SubscriptionsListComponent,
-    GamificationBannerComponent,
-    FinancialLiteracyComponent,
-    ExpectedCalendarComponent
+    GamificationBannerComponent
   ],
   template: `
     <div class="dashboard-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 pt-[52px] md:pt-[72px] font-sans">
@@ -88,16 +86,12 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
           <div class="pb-4">
             <app-month-analytics></app-month-analytics>
           </div>
-          <app-expected-calendar></app-expected-calendar>
           <div class="mt-4 md:mt-6">
             <app-month-plan></app-month-plan>
           </div>
         </section>
 
-        <!-- Financial Literacy Cards -->
-        <div class="mt-8">
-          <app-financial-literacy></app-financial-literacy>
-        </div>
+
 
       </div>
     </div>

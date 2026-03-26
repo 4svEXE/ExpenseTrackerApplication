@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, signal, effect, ViewChild, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FinanceDataService } from '../../../services/finance-data.service';
@@ -14,15 +14,8 @@ interface ChatMessage {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <!-- Floating Button -->
-    <button *ngIf="!isOpen()" (click)="toggleChat()"
-      class="fixed bottom-24 right-4 md:bottom-8 md:right-8 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-[0_8px_30px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group">
-      <i class="fa-solid fa-robot text-xl group-hover:animate-bounce"></i>
-    </button>
-
     <!-- Chat Window -->
-    <div *ngIf="isOpen()" 
-      class="fixed inset-0 md:inset-auto md:bottom-28 md:right-8 md:w-[400px] md:h-[600px] md:rounded-[2rem] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.1)] z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-full md:slide-in-from-bottom-8 duration-300">
+    <div class="bg-white rounded-[2rem] border border-indigo-100 flex flex-col overflow-hidden h-[500px] mt-2 mb-6 shadow-sm">
       
       <!-- Header -->
       <div class="px-6 py-4 bg-indigo-600 text-white flex items-center justify-between shrink-0">
@@ -35,20 +28,8 @@ interface ChatMessage {
             <p class="text-[10px] text-indigo-200 font-bold">GEMINI 2.5 FLASH</p>
           </div>
         </div>
-        <button (click)="toggleChat()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-          <i class="fa-solid fa-xmark text-sm block"></i>
-        </button>
       </div>
 
-      <!-- Api key warning -->
-      <div *ngIf="!hasApiKey" class="flex-1 p-6 flex flex-col items-center justify-center text-center bg-slate-50">
-        <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mb-4 text-2xl">
-          <i class="fa-solid fa-key block"></i>
-        </div>
-        <h4 class="font-bold text-slate-800 mb-2">Ключ API не знайдено</h4>
-        <p class="text-xs text-slate-500 mb-6 px-4">Щоб користуватись ШІ-асистентом, будь ласка, додайте ваш Gemini 2.5 API ключ у вкладці "Дані" в налаштуваннях.</p>
-        <button (click)="toggleChat()" class="px-6 py-3 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors block">Зрозуміло</button>
-      </div>
 
       <!-- Messages -->
       <div *ngIf="hasApiKey" #messagesContainer class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 scroll-smooth">
@@ -93,11 +74,10 @@ interface ChatMessage {
     :host { display: block; }
   `]
 })
-export class AiConsultantComponent implements AfterViewChecked {
+export class AiConsultantComponent implements AfterViewChecked, OnInit {
   financeData = inject(FinanceDataService);
   ts = inject(TransactionService);
 
-  isOpen = signal(false);
   isLoading = signal(false);
   messages = signal<ChatMessage[]>([{ role: 'model', text: 'Привіт! Я твій особистий фінансовий AI консультант. Я бачу всі твої транзакції та бюджети. Чим можу допомогти?' }]);
   currentInput = '';
@@ -108,9 +88,8 @@ export class AiConsultantComponent implements AfterViewChecked {
     return !!this.financeData.userSettings().geminiApiKey;
   }
 
-  toggleChat() {
-    this.isOpen.set(!this.isOpen());
-    if (this.isOpen() && this.messages().length === 1 && this.hasApiKey) {
+  ngOnInit() {
+    if (this.hasApiKey) {
       this.buildSystemContext();
     }
   }

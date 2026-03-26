@@ -7,7 +7,6 @@ import { SpendingPlanPopupComponent } from './components/layout/spending-plan-po
 import { ConfirmDialogComponent } from './components/ui/confirm-dialog/confirm-dialog.component';
 import { SupportModalComponent } from './components/ui/support-modal/support-modal.component';
 import { GamificationModalComponent } from './components/ui/gamification-modal/gamification-modal.component';
-import { AiConsultantComponent } from './components/ui/ai-consultant/ai-consultant.component';
 import { FinanceDataService } from './services/finance-data.service';
 import { CommonModule } from '@angular/common';
 
@@ -23,7 +22,6 @@ import { CommonModule } from '@angular/common';
     ConfirmDialogComponent,
     SupportModalComponent,
     GamificationModalComponent,
-    AiConsultantComponent,
     CommonModule,
   ],
   templateUrl: './app.component.html',

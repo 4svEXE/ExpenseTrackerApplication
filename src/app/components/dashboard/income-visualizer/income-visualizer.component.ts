@@ -1,6 +1,8 @@
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, signal } from '@angular/core';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
+import { ExpectedCalendarComponent } from '../expected-calendar/expected-calendar.component';
+import { MonthBalanceChartComponent } from '../month-balance-chart/month-balance-chart.component';
 
 interface Segment {
   fillPercentage: number;
@@ -14,21 +16,50 @@ interface Bar {
 @Component({
   selector: 'app-income-visualizer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ExpectedCalendarComponent, MonthBalanceChartComponent],
   template: `
-    <div class="visualizer-container animate-fade-in">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div class="visualizer-container animate-fade-in" 
+        [class.p-0]="viewMode() === 'calendar' || viewMode() === 'line-chart'" 
+        [class.bg-transparent]="viewMode() === 'calendar' || viewMode() === 'line-chart'" 
+        [class.shadow-none]="viewMode() === 'calendar' || viewMode() === 'line-chart'" 
+        [class.border-transparent]="viewMode() === 'calendar' || viewMode() === 'line-chart'">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4" 
+           [class.mb-8]="viewMode() === 'chart'"
+           [class.px-4]="viewMode() !== 'chart'"
+           [class.md:px-0]="viewMode() !== 'chart'">
         <div>
-          <h3 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Візуалізація бюджету</h3>
-          <p class="text-xs md:text-sm text-slate-500 font-medium">Кожна паличка — це {{ unitSize | number:'1.0-0' }} {{ userCurrencySymbol }}. Поділки — по {{ (unitSize / 4) | number:'1.0-0' }}.</p>
+          <h3 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight flex flex-wrap items-center gap-3">
+            Візуалізація бюджету
+            <div class="flex p-1 bg-slate-100/80 rounded-xl border border-slate-200/50 shadow-inner">
+              <button (click)="setViewMode('chart')" 
+                class="w-10 h-8 rounded-lg flex items-center justify-center transition-all text-sm"
+                [ngClass]="viewMode() === 'chart' ? 'bg-white shadow-sm text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'" title="Графік надходжень">
+                <i class="fa-solid fa-chart-simple"></i>
+              </button>
+              <button (click)="setViewMode('line-chart')" 
+                class="w-10 h-8 rounded-lg flex items-center justify-center transition-all text-sm"
+                [ngClass]="viewMode() === 'line-chart' ? 'bg-white shadow-sm text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'" title="Тренд балансу">
+                <i class="fa-solid fa-chart-line"></i>
+              </button>
+              <button (click)="setViewMode('calendar')" 
+                class="w-10 h-8 rounded-lg flex items-center justify-center transition-all text-sm"
+                [ngClass]="viewMode() === 'calendar' ? 'bg-white shadow-sm text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'" title="Календар очікувань">
+                <i class="fa-solid fa-calendar-days"></i>
+              </button>
+            </div>
+          </h3>
+          <p class="text-xs md:text-sm text-slate-500 font-medium mt-2" *ngIf="viewMode() === 'chart'">Кожна паличка — це {{ unitSize | number:'1.0-0' }} {{ userCurrencySymbol }}. Поділки — по {{ (unitSize / 4) | number:'1.0-0' }}.</p>
         </div>
-        <div class="flex items-center gap-3 px-4 py-2 bg-slate-100/50 rounded-2xl border border-slate-200/60">
+        <div class="flex items-center gap-3 px-4 py-2 bg-slate-100/50 rounded-2xl border border-slate-200/60" *ngIf="viewMode() === 'chart'">
            <span class="text-[10px] font-bold text-slate-400 uppercase">Ціль (плани):</span>
            <span class="text-sm font-black text-slate-700">{{ planTotal | number:'1.0-0' }} {{ userCurrencySymbol }}</span>
         </div>
       </div>
       
-      <!-- Regular Income Bars -->
+      
+      <div *ngIf="viewMode() === 'chart'" class="animate-in fade-in duration-300">
+        <!-- Regular Income Bars -->
       <div class="space-y-4">
         <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Планові надходження</h4>
         <div class="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-2 md:gap-3">
@@ -83,6 +114,15 @@ interface Bar {
           <span class="text-xs font-bold text-slate-600">Заплановано</span>
         </div>
       </div>
+      </div>
+      
+      <div *ngIf="viewMode() === 'calendar'" class="animate-in fade-in duration-300 mt-2 md:mt-6 -mx-2 md:mx-0">
+         <app-expected-calendar class="block"></app-expected-calendar>
+      </div>
+
+      <div *ngIf="viewMode() === 'line-chart'" class="animate-in fade-in duration-300 mt-2 md:mt-6 -mx-2 md:mx-0">
+         <app-month-balance-chart class="block"></app-month-balance-chart>
+      </div>
     </div>
   `,
   styles: [`
@@ -101,10 +141,24 @@ export class IncomeVisualizerComponent {
   bars: Bar[] = [];
   extraBars: Bar[] = [];
 
+  viewMode = signal<'chart' | 'calendar' | 'line-chart'>('chart');
+
   constructor() {
+    const saved = localStorage.getItem('budget-visualizer-viewmode');
+    if (saved === 'calendar' || saved === 'chart' || saved === 'line-chart') {
+      this.viewMode.set(saved);
+    }
+
     effect(() => {
-      this.calculateBars();
+      if (this.viewMode() === 'chart') {
+        this.calculateBars();
+      }
     });
+  }
+
+  setViewMode(mode: 'chart' | 'calendar' | 'line-chart') {
+    this.viewMode.set(mode);
+    localStorage.setItem('budget-visualizer-viewmode', mode);
   }
 
   get userCurrencySymbol() {

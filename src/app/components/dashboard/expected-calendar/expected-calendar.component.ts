@@ -19,7 +19,7 @@ interface CalendarDay {
   providers: [DatePipe],
   template: `
     <div class="card-container border-t-4 border-t-indigo-600 flex flex-col h-full bg-white rounded-3xl p-4 md:p-6 shadow-sm border border-slate-100 mt-4 md:mt-8">
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-6">
         <h3 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-calendar-days text-indigo-500"></i> Календар очікуваних подій
         </h3>
@@ -43,7 +43,8 @@ interface CalendarDay {
         </div>
         <div class="grid grid-cols-7 gap-1 md:gap-2">
           <div *ngFor="let day of calendarDays()" 
-               class="min-h-[60px] md:min-h-[80px] p-1 md:p-2 rounded-xl flex flex-col justify-start border border-slate-50/50 transition-colors"
+               (click)="openAddEventForDate(day.date)"
+               class="min-h-[60px] md:min-h-[80px] p-1 md:p-2 rounded-xl flex flex-col justify-start border border-slate-50/50 transition-colors cursor-pointer active:scale-95"
                [ngClass]="{
                  'opacity-40 bg-slate-50/30': !day.isCurrentMonth,
                  'bg-white hover:bg-slate-50 shadow-sm border border-slate-100': day.isCurrentMonth && !day.isToday,
@@ -68,64 +69,96 @@ interface CalendarDay {
         </div>
       </div>
 
-      <!-- Add Event Form -->
-      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-6">
-        <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest mb-4">Додати подію</h4>
-        <form (ngSubmit)="addEvent()" class="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <input type="text" [(ngModel)]="newEvent.title" name="title" placeholder="Назва події" required
-            class="md:col-span-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none">
-          
-          <input type="number" [(ngModel)]="newEvent.amount" name="amount" placeholder="Сума" required
-            class="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none">
-          
-          <input type="date" [(ngModel)]="newEvent.date" name="date" required
-            class="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none text-slate-600">
-          
-          <div class="flex gap-2">
-            <button type="button" (click)="newEvent.type = 'expense'"
-              class="flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-colors"
-              [ngClass]="newEvent.type === 'expense' ? 'bg-rose-500 text-white' : 'bg-white text-slate-400 border border-slate-200'">Витрата</button>
-            <button type="button" (click)="newEvent.type = 'income'"
-              class="flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-colors"
-              [ngClass]="newEvent.type === 'income' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 border border-slate-200'">Дохід</button>
-          </div>
-          
-          <div class="md:col-span-5 flex justify-end">
-            <button type="submit" [disabled]="!newEvent.title || !newEvent.amount || !newEvent.date"
-              class="px-6 py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-              Зберегти
-            </button>
-          </div>
-        </form>
+      <!-- Actions Row -->
+      <div class="flex gap-3 mt-4">
+        <button (click)="openAddEventForDate()" class="flex-1 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-indigo-100/50 outline-none">
+           <i class="fa-solid fa-plus"></i> Додати подію
+        </button>
+        <button (click)="openEventsListModal()" class="flex-1 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-slate-200 outline-none">
+           <i class="fa-solid fa-list-ul"></i> Список подій ({{ currentMonthEvents().length }})
+        </button>
       </div>
 
-      <!-- Events List -->
-      <div>
-        <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest mb-4 px-2">Очікувані події у цьому місяці</h4>
-        <div *ngIf="currentMonthEvents().length === 0" class="text-center py-6 text-sm font-bold text-slate-400">
-          Немає запланованих подій.
+      <!-- Add Event Modal -->
+      <div *ngIf="isAddEventModalOpen()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" (click)="closeAddEventModal()">
+        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200" (click)="$event.stopPropagation()">
+           <!-- Header inside modal -->
+           <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+             <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Нова подія</h3>
+             <button (click)="closeAddEventModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+               <i class="fa-solid fa-times"></i>
+             </button>
+           </div>
+           
+           <form (ngSubmit)="addEvent()" class="p-6 space-y-4">
+              <input type="text" [(ngModel)]="newEvent.title" name="title" placeholder="Назва події" required
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none">
+              
+              <div class="grid grid-cols-2 gap-3">
+                <input type="number" [(ngModel)]="newEvent.amount" name="amount" placeholder="Сума" required
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none">
+                <input type="date" [(ngModel)]="newEvent.date" name="date" required
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-500 outline-none text-slate-600 cursor-pointer">
+              </div>
+              
+              <div class="flex gap-2">
+                <button type="button" (click)="newEvent.type = 'expense'"
+                  class="flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-colors"
+                  [ngClass]="newEvent.type === 'expense' ? 'bg-rose-500 text-white shadow-md' : 'bg-slate-50 text-slate-400 border border-slate-200'">Витрата</button>
+                <button type="button" (click)="newEvent.type = 'income'"
+                  class="flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-colors"
+                  [ngClass]="newEvent.type === 'income' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-50 text-slate-400 border border-slate-200'">Дохід</button>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" [disabled]="!newEvent.title || !newEvent.amount || !newEvent.date"
+                  class="w-full py-4 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                  Зберегти подію
+                </button>
+              </div>
+           </form>
         </div>
-        <div class="space-y-2">
-          <div *ngFor="let ev of currentMonthEvents()" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-2xl hover:border-slate-300 transition-colors">
-            <div class="flex items-center gap-4">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                 [ngClass]="ev.type === 'income' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'">
-                <i class="fa-solid" [ngClass]="ev.isSubscription ? 'fa-rotate' : (ev.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up')"></i>
-              </div>
-              <div>
-                <div class="font-bold text-sm text-slate-800">{{ ev.title }}</div>
-                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ ev.date | date:'dd MMM yyyy':'':'uk-UA' }}</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4">
-              <div class="font-bold whitespace-nowrap" [ngClass]="ev.type === 'income' ? 'text-emerald-600' : 'text-slate-800'">
-                {{ ev.type === 'income' ? '+' : '-' }}{{ ev.amount | currency:userCurrency:'symbol-narrow':'1.0-0' }}
-              </div>
-              <button *ngIf="!ev.isSubscription" (click)="deleteEvent(ev.id)" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
-                <i class="fa-solid fa-trash-can text-sm block"></i>
-              </button>
-            </div>
-          </div>
+      </div>
+
+      <!-- Events List Modal -->
+      <div *ngIf="isEventsListModalOpen()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" (click)="closeEventsListModal()">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in duration-200 flex flex-col max-h-[80vh]" (click)="$event.stopPropagation()">
+           <!-- Header inside modal -->
+           <div class="p-6 border-b border-slate-100 flex justify-between items-center shrink-0">
+             <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Список подій</h3>
+             <button (click)="closeEventsListModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
+               <i class="fa-solid fa-times"></i>
+             </button>
+           </div>
+           
+           <div class="p-6 overflow-y-auto flex-1 bg-slate-50">
+             <div *ngIf="currentMonthEvents().length === 0" class="text-center py-6 text-sm font-bold text-slate-400">
+                Немає запланованих подій.
+             </div>
+             <div class="space-y-2">
+               <!-- Event Item -->
+               <div *ngFor="let ev of currentMonthEvents()" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-2xl hover:border-slate-300 transition-colors">
+                 <div class="flex items-center gap-4">
+                   <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm"
+                      [ngClass]="ev.type === 'income' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'">
+                     <i class="fa-solid" [ngClass]="ev.isSubscription ? 'fa-rotate' : (ev.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up')"></i>
+                   </div>
+                   <div>
+                     <div class="font-bold text-sm text-slate-800">{{ ev.title }}</div>
+                     <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ ev.date | date:'dd MMM yyyy':'':'uk-UA' }}</div>
+                   </div>
+                 </div>
+                 <div class="flex items-center gap-4">
+                   <div class="font-bold whitespace-nowrap" [ngClass]="ev.type === 'income' ? 'text-emerald-600' : 'text-slate-800'">
+                     {{ ev.type === 'income' ? '+' : '-' }}{{ ev.amount | currency:userCurrency:'symbol-narrow':'1.0-0' }}
+                   </div>
+                   <button *ngIf="!ev.isSubscription" (click)="deleteEvent(ev.id)" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
+                     <i class="fa-solid fa-trash-can text-sm block"></i>
+                   </button>
+                 </div>
+               </div>
+             </div>
+           </div>
         </div>
       </div>
 
@@ -145,6 +178,37 @@ export class ExpectedCalendarComponent {
     type: 'expense',
     date: new Date().toISOString().split('T')[0]
   };
+
+  isAddEventModalOpen = signal(false);
+  isEventsListModalOpen = signal(false);
+
+  openAddEventForDate(date?: Date) {
+    const targetDate = date || new Date();
+    // Use local time for formatting
+    const offset = targetDate.getTimezoneOffset() * 60000;
+    const localDate = new Date(targetDate.getTime() - offset);
+    
+    this.newEvent.title = '';
+    this.newEvent.amount = null as any;
+    this.newEvent.type = 'expense';
+    this.newEvent.date = localDate.toISOString().split('T')[0];
+    
+    this.isAddEventModalOpen.set(true);
+  }
+
+  openAddEventModal() {
+    this.isAddEventModalOpen.set(true);
+  }
+  closeAddEventModal() {
+    this.isAddEventModalOpen.set(false);
+  }
+  
+  openEventsListModal() {
+    this.isEventsListModalOpen.set(true);
+  }
+  closeEventsListModal() {
+    this.isEventsListModalOpen.set(false);
+  }
 
   get userCurrency() {
     return this.financeData.userSettings().currency;
@@ -236,8 +300,21 @@ export class ExpectedCalendarComponent {
       e.date.getFullYear() === date.getFullYear()
     );
 
-    const totalIncome = events.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-    const totalExpense = events.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const expectedIncome = events.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const expectedExpense = events.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+
+    const trans = this.financeData.transactions().filter(t => 
+      t.date.getDate() === date.getDate() && 
+      t.date.getMonth() === date.getMonth() && 
+      t.date.getFullYear() === date.getFullYear()
+    );
+
+    const rateToUser = this.financeData.getExchangeRate('UAH', this.userCurrency);
+    const actualIncome = trans.filter(t => t.type === 'income').reduce((s, t) => s + (t.amountUah * rateToUser), 0);
+    const actualExpense = trans.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amountUah * rateToUser), 0);
+
+    const totalIncome = expectedIncome + actualIncome;
+    const totalExpense = expectedExpense + actualExpense;
 
     return {
       date,
@@ -285,6 +362,7 @@ export class ExpectedCalendarComponent {
     // reset current date to the event's date month
     const addedDate = new Date(event.date);
     this.currentDate.set(new Date(addedDate.getFullYear(), addedDate.getMonth(), 1));
+    this.closeAddEventModal();
   }
 
   deleteEvent(id: string) {

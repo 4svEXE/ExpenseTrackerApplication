@@ -6,11 +6,12 @@ import { AudioService } from '../../services/audio.service';
 import { NotificationService } from '../../services/notification.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { SupportService } from '../../services/support.service';
+import { AiConsultantComponent } from '../../components/ui/ai-consultant/ai-consultant.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AiConsultantComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
