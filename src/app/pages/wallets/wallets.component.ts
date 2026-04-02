@@ -28,7 +28,7 @@ import { ConfirmService } from '../../services/confirm.service';
         </div>
 
         <!-- Керування планами -->
-        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-8">
+        <div id="financial-plans" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-8">
             <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                 <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-black shadow-sm border border-slate-200">
                   <i class="fa-solid fa-chart-pie"></i>
@@ -166,9 +166,18 @@ import { ConfirmService } from '../../services/confirm.service';
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                 <div *ngFor="let wish of wishlist(); let i = index" 
                      class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 flex flex-col gap-3 group">
-                    <input [(ngModel)]="wish.name" (change)="saveWishlist()" placeholder="Що ви хочете?"
-                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
-                           class="bg-transparent border-none text-white font-bold placeholder:text-white/40 focus:ring-0 p-0 text-sm">
+                    <div class="flex gap-3">
+                      <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden" *ngIf="wish.link">
+                         <img [src]="'https://www.google.com/s2/favicons?domain=' + getDomainFromUrl(wish.link) + '&sz=64'" class="w-8 h-8 opacity-80" alt="icon">
+                      </div>
+                      <div class="flex-1">
+                        <input [(ngModel)]="wish.name" (change)="saveWishlist()" placeholder="Що ви хочете?"
+                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
+                               class="bg-transparent border-none text-white font-bold placeholder:text-white/40 focus:ring-0 p-0 text-sm w-full">
+                        <input [(ngModel)]="wish.link" (change)="saveWishlist()" placeholder="Вставити посилання..."
+                               class="bg-transparent border-none text-white/40 font-medium placeholder:text-white/20 focus:ring-0 p-0 text-[10px] w-full mt-1">
+                      </div>
+                    </div>
                     
                     <div class="flex items-center justify-between mt-auto">
                         <div class="flex items-center gap-2">
@@ -178,6 +187,10 @@ import { ConfirmService } from '../../services/confirm.service';
                                    class="bg-transparent border-none text-white font-black p-0 w-20 text-sm focus:ring-0">
                         </div>
                         <div class="flex gap-2">
+                            <a *ngIf="wish.link" [href]="wish.link" target="_blank"
+                               class="w-8 h-8 rounded-lg bg-white/5 text-white/60 hover:bg-white/20 transition-colors flex items-center justify-center">
+                                <i class="fa-solid fa-link text-[10px]"></i>
+                            </a>
                             <button (click)="moveWishToPlan(wish)" title="В план витрат"
                                     class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 transition-colors flex items-center justify-center">
                                 <i class="fa-solid fa-arrow-up"></i>
@@ -682,7 +695,8 @@ export class WalletsComponent implements OnInit {
     wishes.unshift({
       id: Date.now().toString(),
       name: '',
-      amount: 0
+      amount: 0,
+      link: ''
     });
     this.financeData.saveWishlist(wishes);
   }
@@ -769,5 +783,18 @@ export class WalletsComponent implements OnInit {
   movePlanToWish(plan: any) {
     this.financeData.movePlanToWish(plan);
     this.loadPlans();
+  }
+
+  getDomainFromUrl(url?: string): string {
+    if (!url) return '';
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      return domain;
+    } catch (e) {
+      if (url.includes('.')) {
+        return url.split('/')[0].replace('www.', '');
+      }
+      return '';
+    }
   }
 }

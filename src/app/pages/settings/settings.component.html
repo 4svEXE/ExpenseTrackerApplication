@@ -418,13 +418,25 @@
                            </ol>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Gemini 2.5 API Key</label>
+                        <div class="mb-6">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Gemini API Key</label>
                             <input type="password" [(ngModel)]="settings.geminiApiKey" placeholder="AIzaSy..."
                                 (blur)="saveSettings()"
                                 class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-bold text-slate-800">
-                            <p class="text-[10px] text-slate-400 font-bold mt-3 px-1">Асистент матиме доступ до ваших транзакцій для аналізу та порад. Ключ зберігається лише на вашому пристрої.</p>
                         </div>
+
+                        <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                            <div>
+                                <span class="text-sm font-bold text-slate-700">Відображати ШІ Чат</span>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Додає кнопку чату на головний екран</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" [(ngModel)]="settings.showAiChat" (change)="saveSettings()" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+
+                        <p class="text-[10px] text-slate-400 font-bold px-1 mb-6">Асистент матиме доступ до ваших транзакцій для аналізу та порад. Ключ зберігається лише на вашому пристрої.</p>
                         
                         <app-ai-consultant *ngIf="settings.geminiApiKey"></app-ai-consultant>
                     </div>

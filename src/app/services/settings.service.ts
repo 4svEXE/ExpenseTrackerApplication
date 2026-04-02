@@ -22,6 +22,7 @@ export interface UserSettings {
     coins?: number;
     avatarUrl?: string;
     geminiApiKey?: string;
+    showAiChat?: boolean;
     unlockedCards?: number[];
 }
 
@@ -53,6 +54,7 @@ export class SettingsService {
         coins: 0,
         avatarUrl: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Lucky',
         geminiApiKey: '',
+        showAiChat: true,
         unlockedCards: [1]
     });
 

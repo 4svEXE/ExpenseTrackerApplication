@@ -36,6 +36,7 @@ export interface WishItem {
   id: string;
   name: string;
   amount: number;
+  link?: string;
   category?: string;
 }
 
