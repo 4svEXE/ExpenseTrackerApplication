@@ -8,6 +8,7 @@ import { ConfirmDialogComponent } from './components/ui/confirm-dialog/confirm-d
 import { SupportModalComponent } from './components/ui/support-modal/support-modal.component';
 import { GamificationModalComponent } from './components/ui/gamification-modal/gamification-modal.component';
 import { FinanceDataService } from './services/finance-data.service';
+import { FrogFloatButtonComponent } from './components/frog/frog-float-button/frog-float-button.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -22,6 +23,7 @@ import { CommonModule } from '@angular/common';
     ConfirmDialogComponent,
     SupportModalComponent,
     GamificationModalComponent,
+    FrogFloatButtonComponent,
     CommonModule,
   ],
   templateUrl: './app.component.html',

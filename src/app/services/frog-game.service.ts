@@ -243,7 +243,7 @@ export class FrogGameService {
     }));
 
     if (leveled) {
-      this.currentPhrase.set(FROG_PHRASES.levelup[Math.floor(Math.random() * FROG_PHRASES.levelup.length)]);
+      this.currentPhrase.set(FROG_PHRASES['levelup'][Math.floor(Math.random() * FROG_PHRASES['levelup'].length)]);
       if (showAnim) this.triggerAnimation();
     }
   }
@@ -313,7 +313,7 @@ export class FrogGameService {
   updatePhrase() {
     const mood = this.frog().mood;
     const hungryCheck = !this.canFeed() ? 'general' : Date.now() - this.frog().lastFed > 8 * 60 * 60 * 1000 ? 'hungry' : 'general';
-    const pool = FROG_PHRASES[hungryCheck] || FROG_PHRASES.general;
+    const pool = FROG_PHRASES[hungryCheck] || FROG_PHRASES['general'];
     this.currentPhrase.set(pool[Math.floor(Math.random() * pool.length)]);
   }
 

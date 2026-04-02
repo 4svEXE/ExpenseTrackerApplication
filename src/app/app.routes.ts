@@ -30,6 +30,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/new-transaction/new-transaction.component').then((m) => m.NewTransactionComponent),
   },
+  {
+    path: 'frog',
+    loadComponent: () =>
+      import('./pages/frog-game/frog-game.component').then((m) => m.FrogGameComponent),
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ];
