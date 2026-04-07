@@ -18,7 +18,7 @@ interface CalendarDay {
   imports: [CommonModule, FormsModule],
   providers: [DatePipe],
   template: `
-    <div class="flex flex-col h-full">
+    <div class="card-container border-t-4 border-t-indigo-600 flex flex-col h-full bg-white rounded-3xl p-4 md:p-6 shadow-sm border border-slate-100 mt-4 md:mt-8">
       <div class="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-6">
         <h3 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-calendar-days text-indigo-500"></i> Календар очікуваних подій
@@ -37,7 +37,7 @@ interface CalendarDay {
       </div>
 
       <!-- Calendar Grid -->
-      <div class="mb-4">
+      <div class="mb-8">
         <div class="grid grid-cols-7 gap-1 mb-2">
           <div *ngFor="let day of weekDays" class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ day }}</div>
         </div>
@@ -64,18 +64,18 @@ interface CalendarDay {
           </div>
         </div>
         <div class="flex justify-between items-center mt-3 text-xs font-bold px-2">
-           <div class="text-emerald-600">Очікується: +{{ totalMonthIncome() | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
-           <div class="text-rose-600">Витрати: -{{ totalMonthExpense() | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
+           <div class="text-emerald-600">Всього очікується: +{{ totalMonthIncome() | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
+           <div class="text-rose-600">Всього витрат: -{{ totalMonthExpense() | currency:userCurrency:'symbol-narrow':'1.0-0' }}</div>
         </div>
       </div>
 
       <!-- Actions Row -->
       <div class="flex gap-3 mt-4">
         <button (click)="openAddEventForDate()" class="flex-1 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-indigo-100/50 outline-none">
-           <i class="fa-solid fa-plus"></i> Додати
+           <i class="fa-solid fa-plus"></i> Додати подію
         </button>
         <button (click)="openEventsListModal()" class="flex-1 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-slate-200 outline-none">
-           <i class="fa-solid fa-list-ul"></i> Події ({{ currentMonthEvents().length }})
+           <i class="fa-solid fa-list-ul"></i> Список подій ({{ currentMonthEvents().length }})
         </button>
       </div>
 
