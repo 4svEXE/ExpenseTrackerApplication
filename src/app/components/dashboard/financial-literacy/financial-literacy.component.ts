@@ -1,7 +1,5 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GamificationService } from '../../../services/gamification.service';
-import { FinanceDataService } from '../../../services/finance-data.service';
 
 interface FinancialCard {
   id: number;
@@ -171,33 +169,16 @@ const FINANCIAL_CARDS: FinancialCard[] = [
           <div class="card-face front absolute inset-0 rounded-2xl bg-gradient-to-br flex flex-col items-center justify-center p-6 text-center"
                [ngClass]="'bg-gradient-to-br ' + getCurrentCard().color"
                style="backface-visibility: hidden;">
-            <ng-container *ngIf="isCardUnlocked(getCurrentCard().id); else lockedStateFront">
-                <div class="text-4xl mb-4">{{ getCurrentCard().emoji }}</div>
-                <h4 class="text-xl font-black text-white leading-tight">{{ getCurrentCard().front }}</h4>
-                <p class="text-white/60 text-xs mt-2">Натисни, щоб дізнатись →</p>
-            </ng-container>
-            <ng-template #lockedStateFront>
-                <div class="text-4xl mb-4 text-white/50"><i class="fa-solid fa-lock"></i></div>
-                <h4 class="text-xl font-black text-white/50 leading-tight">Картка закрита</h4>
-            </ng-template>
+            <div class="text-4xl mb-4">{{ getCurrentCard().emoji }}</div>
+            <h4 class="text-xl font-black text-white leading-tight">{{ getCurrentCard().front }}</h4>
+            <p class="text-white/60 text-xs mt-2">Натисни, щоб дізнатись →</p>
           </div>
 
           <!-- Back -->
           <div class="card-face back absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col justify-center p-6"
                style="backface-visibility: hidden; transform: rotateY(180deg);">
-            <ng-container *ngIf="isCardUnlocked(getCurrentCard().id); else lockedStateBack">
-                <p class="text-white text-sm leading-relaxed font-medium">{{ getCurrentCard().back }}</p>
-                <p class="text-white/40 text-xs mt-3">{{ getCurrentCard().topic }}</p>
-            </ng-container>
-            <ng-template #lockedStateBack>
-                <div class="text-center h-full flex flex-col items-center justify-center">
-                    <p class="text-white text-sm font-bold mb-4">Відкрити цю картку?</p>
-                    <button (click)="buyCurrentCard($event)" class="px-6 py-3 bg-amber-400 text-black hover:bg-amber-300 rounded-xl font-black uppercase text-xs shadow-lg transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-unlock"></i> Купити (10 <i class="fa-solid fa-coins"></i>)
-                    </button>
-                    <p class="text-[10px] text-white/60 mt-4">{{ financeData.userSettings().coins || 0 }} монет доступно</p>
-                </div>
-            </ng-template>
+            <p class="text-white text-sm leading-relaxed font-medium">{{ getCurrentCard().back }}</p>
+            <p class="text-white/40 text-xs mt-3">{{ getCurrentCard().topic }}</p>
           </div>
         </div>
       </div>
@@ -239,36 +220,9 @@ const FINANCIAL_CARDS: FinancialCard[] = [
   `]
 })
 export class FinancialLiteracyComponent {
-  gamification = inject(GamificationService);
-  financeData = inject(FinanceDataService);
-
   cards = [...FINANCIAL_CARDS];
   currentIndex = signal(0);
   isFlipped = signal(false);
-
-  isCardUnlocked(id: number): boolean {
-    const unlocked = this.financeData.userSettings().unlockedCards || [1];
-    return unlocked.includes(id);
-  }
-
-  buyCurrentCard(event: Event) {
-    event.stopPropagation(); // prevent card flip
-    const cost = 10;
-    const settings = this.financeData.userSettings();
-    const coins = settings.coins || 0;
-    
-    if (coins < cost) {
-        this.gamification['toasts'].show('Недостатньо монет! Заробляйте їх виконуючи цілі.', 'error');
-        return;
-    }
-
-    const cardId = this.getCurrentCard().id;
-    this.gamification.addCoins(-cost);
-    
-    settings.unlockedCards = [...(settings.unlockedCards || [1]), cardId];
-    this.financeData.saveSettings(settings);
-    this.gamification['toasts'].show('Картку відкрито!', 'success');
-  }
 
   getCurrentCard(): FinancialCard {
     return this.cards[this.currentIndex()];

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, OnInit } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { FinanceDataService, ExpensePlan } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -8,15 +8,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="flex justify-end mb-4 md:mb-6">
-       <button (click)="toggleCollapse()" class="text-xs font-bold text-slate-500 hover:text-black flex items-center gap-2 transition-colors">
-          {{ isCollapsed() ? 'Розгорнути бюджет' : 'Згорнути бюджет' }}
-          <i class="fa-solid" [ngClass]="isCollapsed() ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-       </button>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 transition-all duration-300" 
-         [ngClass]="isCollapsed() ? 'hidden' : 'grid'">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       
       <!-- Income Plans -->
       <div class="card-container border-t-4 border-t-neutral-900 flex flex-col h-full">
@@ -35,7 +27,7 @@ import { RouterModule } from '@angular/router';
                   {{ p.factAmount | currency:userCurrency:'symbol-narrow':'1.0-0' }} / {{ p.planAmount | currency:userCurrency:'symbol-narrow':'1.0-0' }}
                 </div>
                 <div class="text-xs md:text-sm font-bold text-emerald-600 mt-0.5">
-                  {{ p.planAmount ? (p.factAmount / p.planAmount * 100) : 0 | number:'1.0-1' }}%
+                  {{ p.planAmount ? (p.factAmount / p.planAmount * 100) : 0 | number:'1.0-2' }}%
                 </div>
               </div>
             </div>
@@ -71,7 +63,7 @@ import { RouterModule } from '@angular/router';
                 </div>
                 <!-- Optional overspending visual cue -->
                 <div class="text-xs md:text-sm font-bold mt-0.5 flex items-center justify-between" [ngClass]="p.amount && p.factAmount > p.amount ? 'text-rose-600' : 'text-slate-600'">
-                  <span>{{ p.amount ? (p.factAmount / p.amount * 100) : 0 | number:'1.0-1' }}%</span>
+                  <span>{{ p.amount ? (p.factAmount / p.amount * 100) : 0 | number:'1.0-2' }}%</span>
                   <span *ngIf="p.amount && p.factAmount < p.amount" class="text-[9px] opacity-70">
                     Залишилось: {{ (p.amount - p.factAmount) | currency:userCurrency:'symbol-narrow':'1.0-0' }}
                   </span>
@@ -116,23 +108,9 @@ import { RouterModule } from '@angular/router';
     }
   `]
 })
-export class MonthPlanComponent implements OnInit {
+export class MonthPlanComponent {
   Math = Math;
   financeData = inject(FinanceDataService);
-
-  isCollapsed = signal<boolean>(false);
-
-  ngOnInit() {
-    const saved = localStorage.getItem('isMonthPlanCollapsed');
-    if (saved !== null) {
-      this.isCollapsed.set(JSON.parse(saved));
-    }
-  }
-
-  toggleCollapse() {
-    this.isCollapsed.set(!this.isCollapsed());
-    localStorage.setItem('isMonthPlanCollapsed', JSON.stringify(this.isCollapsed()));
-  }
 
   get userCurrency() {
     return this.financeData.userSettings().currency;

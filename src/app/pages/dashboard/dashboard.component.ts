@@ -13,8 +13,7 @@ import { MonthAnalyticsComponent } from '../../components/dashboard/month-analyt
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
 import { GamificationBannerComponent } from '../../components/dashboard/gamification-banner/gamification-banner.component';
-
-import { ExpectedCalendarComponent } from '../../components/dashboard/expected-calendar/expected-calendar.component';
+import { FinancialLiteracyComponent } from '../../components/dashboard/financial-literacy/financial-literacy.component';
 import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../services/finance-data.service';
 
 @Component({
@@ -31,7 +30,8 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
     MonthPlanComponent,
     MonthAnalyticsComponent,
     SubscriptionsListComponent,
-    GamificationBannerComponent
+    GamificationBannerComponent,
+    FinancialLiteracyComponent
   ],
   template: `
     <div class="dashboard-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 pt-[52px] md:pt-[72px] font-sans">
@@ -39,9 +39,6 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
         
         <!-- Header / Main Dashboard Section (A) -->
         <section class="space-y-4 md:space-y-6">
-          <!-- Gamification Events & Achievements -->
-          <app-gamification-banner></app-gamification-banner>
-
           <!-- Top Row: Assistant + Growth Chart -->
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 relative z-10">
             <div class="xl:col-span-2">
@@ -51,6 +48,12 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
               <app-growth-chart class="block h-full"></app-growth-chart>
             </div>
           </div>
+
+          <!-- Gamification Events & Achievements -->
+          <app-gamification-banner></app-gamification-banner>
+          
+          <!-- Financial Literacy Cards -->
+          <app-financial-literacy></app-financial-literacy>
 
           <!-- Middle Row: Income Visualizer + Transactions Context -->
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
@@ -63,12 +66,10 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
           </div>
 
           <!-- Subscriptions List -->
-          <div class="pt-4 md:pt-8">
-            <app-subscriptions-list
-              (subscriptionClicked)="openSubDetail($event)"
-              (addSubscriptionClicked)="openAddSubRoute()">
-            </app-subscriptions-list>
-          </div>
+          <app-subscriptions-list
+            (subscriptionClicked)="openSubDetail($event)"
+            (addSubscriptionClicked)="openAddSubRoute()">
+          </app-subscriptions-list>
         </section>
 
         <!-- Planning & Analytics Section (B) -->
@@ -86,12 +87,8 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
           <div class="pb-4">
             <app-month-analytics></app-month-analytics>
           </div>
-          <div class="mt-4 md:mt-6">
-            <app-month-plan></app-month-plan>
-          </div>
+          <app-month-plan></app-month-plan>
         </section>
-
-
 
       </div>
     </div>
