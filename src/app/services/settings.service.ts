@@ -33,7 +33,7 @@ export class SettingsService {
     private readonly SETTINGS_KEY = 'userSettings';
 
     userSettings = signal<UserSettings>({
-        name: 'Бомжулька',
+        name: 'Без імені',
         monthlyIncomeGoal: 14000,
         currency: 'UAH',
         soundEnabled: true,
