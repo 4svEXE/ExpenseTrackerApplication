@@ -27,7 +27,7 @@ interface ChatMessage {
             <h3 class="font-black text-sm md:text-base uppercase tracking-[0.1em]">AI Фінансовий Асистент</h3>
             <div class="flex items-center gap-2">
                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-               <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Gemini 1.5 Flash • Online</p>
+               <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Gemini 2.5 Flash • Online</p>
             </div>
           </div>
         </div>
@@ -249,7 +249,7 @@ ${recentTx}
       return;
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const history = this.messages().map(m => ({
       role: m.role === 'model' ? 'model' : 'user',

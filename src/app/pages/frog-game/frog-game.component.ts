@@ -139,8 +139,15 @@ const NPC_FRIENDS = [
           </div>
 
           <!-- MAIN FROG (center stage) -->
-          <div class="absolute inset-0 flex items-center justify-center" style="padding-bottom: 15%">
-            <div class="flex flex-col items-center gap-2 cursor-pointer" (click)="onFrogClick()">
+          <div class="absolute inset-0 flex flex-col items-center justify-center z-10" style="padding-bottom: 5%">
+            
+            <!-- Speech bubble above frog -->
+            <div class="mb-4 bg-white text-slate-800 rounded-3xl p-3 px-5 border border-slate-200 shadow-xl relative animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-[80%] text-center">
+              <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-slate-200"></div>
+              <p class="font-bold text-sm leading-relaxed">{{ frogGame.currentPhrase() }}</p>
+            </div>
+
+            <div class="flex flex-col items-center gap-2 cursor-pointer drop-shadow-2xl" (click)="onFrogClick()">
               <app-frog-character
                 [phase]="frog.phase"
                 [accessories]="frog.accessories.concat(frog.pondUpgrades)"
@@ -153,19 +160,13 @@ const NPC_FRIENDS = [
           </div>
 
           <!-- Mood indicator -->
-          <div class="absolute top-4 left-4 bg-black/30 backdrop-blur-sm rounded-2xl px-3 py-2">
+          <div class="absolute top-4 left-4 bg-black/30 backdrop-blur-sm rounded-2xl px-3 py-2 z-20">
             <span class="text-xs font-black text-white">{{ moodEmoji }} {{ moodLabel }}</span>
           </div>
 
           <!-- Morning fog overlay -->
           <div *ngIf="frogGame.hasUpgrade('fog') && isMorning"
-               class="absolute inset-0 bg-slate-200/20 backdrop-blur-[1px] pointer-events-none rounded-3xl"></div>
-        </div>
-
-        <!-- Speech bubble -->
-        <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-5 border border-white/20 relative">
-          <div class="absolute -top-3 left-8 w-6 h-6 bg-white/10 border-l border-t border-white/20 rotate-45 rounded-tl-sm"></div>
-          <p class="text-white font-bold text-sm leading-relaxed">{{ frogGame.currentPhrase() }}</p>
+               class="absolute inset-0 bg-slate-200/20 backdrop-blur-[1px] pointer-events-none rounded-3xl z-20"></div>
         </div>
 
         <!-- Name + Level -->
@@ -227,10 +228,6 @@ const NPC_FRIENDS = [
 
       <!-- ========== SHOP TAB ========== -->
       <div *ngIf="activeTab === 'shop'" class="relative z-10 px-4 space-y-4">
-        
-        <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-4 border border-white/20 mb-2">
-          <p class="text-slate-300 text-xs font-bold text-center">Ваш баланс: <span class="text-amber-300 font-black">🪙 {{ frogGame.getCoins() }}</span></p>
-        </div>
 
         <!-- Shop category tabs -->
         <div class="flex gap-2">

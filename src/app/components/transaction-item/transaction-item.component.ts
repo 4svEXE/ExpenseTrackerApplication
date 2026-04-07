@@ -5,6 +5,7 @@ import { TransactionService } from '../../services/transaction.service';
 import { CategoryService } from '../../services/category.service';
 import { FinanceDataService } from '../../services/finance-data.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-transaction-item',
@@ -16,6 +17,7 @@ export class TransactionItemComponent {
   @Input() item!: Transaction;
   financeData = inject(FinanceDataService);
   confirmService = inject(ConfirmService);
+  router = inject(Router);
 
   showDetails = false;
   isAnimating = false;
@@ -70,6 +72,7 @@ export class TransactionItemComponent {
     event.stopPropagation();
     this.closeDetails();
     this.transactionService.setTransaction(this.item);
+    this.router.navigate(['/new-transaction', 'categories', this.item.transactionType || 'expense']);
   }
 
   async onDelete(event: Event) {

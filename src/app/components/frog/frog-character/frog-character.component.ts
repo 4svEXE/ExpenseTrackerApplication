@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FrogPhase } from '../../../services/frog-game.service';
 
 @Component({
@@ -36,10 +37,12 @@ export class FrogCharacterComponent implements OnChanges {
   @Input() isSleepy: boolean = false;
   @Input() size: number = 120;
 
-  svgHtml: string = '';
+  svgHtml: SafeHtml = '';
+
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnChanges() {
-    this.svgHtml = this.buildSvg();
+    this.svgHtml = this.sanitizer.bypassSecurityTrustHtml(this.buildSvg());
   }
 
   private get cx() { return this.size / 2; }
