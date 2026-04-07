@@ -10,11 +10,11 @@ import { GrowthChartComponent } from '../../components/dashboard/growth-chart/gr
 import { TransactionsTableComponent } from '../../components/dashboard/transactions-table/transactions-table.component';
 import { MonthPlanComponent } from '../../components/dashboard/month-plan/month-plan.component';
 import { MonthAnalyticsComponent } from '../../components/dashboard/month-analytics/month-analytics.component';
+import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
 import { GamificationBannerComponent } from '../../components/dashboard/gamification-banner/gamification-banner.component';
+
 import { ExpectedCalendarComponent } from '../../components/dashboard/expected-calendar/expected-calendar.component';
-import { BudgetStatsComponent } from '../../components/dashboard/budget-stats/budget-stats.component';
-import { AiChatComponent } from '../../components/ui/ai-chat/ai-chat.component';
 import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../services/finance-data.service';
 
 @Component({
@@ -29,39 +29,31 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
     GrowthChartComponent,
     TransactionsTableComponent,
     MonthPlanComponent,
+    MonthAnalyticsComponent,
     SubscriptionsListComponent,
-    GamificationBannerComponent,
-    ExpectedCalendarComponent,
-    BudgetStatsComponent,
-    AiChatComponent,
-    MonthAnalyticsComponent
+    GamificationBannerComponent
   ],
   template: `
-    <div class="dashboard-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 pt-[52px] md:pt-[72px] font-sans relative">
-      <div class="max-w-[1600px] mx-auto space-y-4 md:space-y-12 pb-24">
+    <div class="dashboard-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 pt-[52px] md:pt-[72px] font-sans">
+      <div class="max-w-[1600px] mx-auto space-y-4 md:space-y-8">
         
-        <!-- Hero Row: Assistant + Growth Chart (Non-collapsible) -->
-        <section class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 relative z-10 transition-all">
-          <div class="xl:col-span-2">
-            <app-financial-assistant class="block h-full"></app-financial-assistant>
-          </div>
-          <div class="xl:col-span-1">
-            <app-growth-chart class="block h-full"></app-growth-chart>
-          </div>
-        </section>
+        <!-- Header / Main Dashboard Section (A) -->
+        <section class="space-y-4 md:space-y-6">
+          <!-- Gamification Events & Achievements -->
+          <app-gamification-banner></app-gamification-banner>
 
-        <!-- Income Visualizer + Transactions Context -->
-        <section class="space-y-4">
-          <div class="flex items-center justify-between px-2">
-            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <i class="fa-solid fa-chart-line"></i> Динаміка капіталу
-            </h4>
-            <button (click)="toggleSection('income')" class="text-slate-400 hover:text-slate-800 transition-colors w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100/50">
-               <i class="fa-solid" [ngClass]="isSectionCollapsed('income') ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-            </button>
+          <!-- Top Row: Assistant + Growth Chart -->
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 relative z-10">
+            <div class="xl:col-span-2">
+              <app-financial-assistant class="block h-full"></app-financial-assistant>
+            </div>
+            <div class="xl:col-span-1">
+              <app-growth-chart class="block h-full"></app-growth-chart>
+            </div>
           </div>
-          
-          <div [hidden]="isSectionCollapsed('income')" class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 animate-in slide-in-from-top-4 duration-300">
+
+          <!-- Middle Row: Income Visualizer + Transactions Context -->
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
             <div class="xl:col-span-1">
               <app-income-visualizer></app-income-visualizer>
             </div>
@@ -69,57 +61,9 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
               <app-transactions-table class="block h-full"></app-transactions-table>
             </div>
           </div>
-        </section>
 
-        <!-- Category Budget Visualization -->
-        <section class="space-y-4">
-          <div class="flex items-center justify-between px-2">
-            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <i class="fa-solid fa-chart-pie"></i> Розподіл витрат
-            </h4>
-            <button (click)="toggleSection('budget')" class="text-slate-400 hover:text-slate-800 transition-colors w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100/50">
-               <i class="fa-solid" [ngClass]="isSectionCollapsed('budget') ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-            </button>
-          </div>
-          
-          <div [hidden]="isSectionCollapsed('budget')" class="animate-in slide-in-from-top-4 duration-300">
-             <app-budget-stats></app-budget-stats>
-          </div>
-        </section>
-
-        <!-- Expected Calendar (Standalone) -->
-        <section class="space-y-4">
-          <div class="flex items-center justify-between px-2">
-            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <i class="fa-solid fa-calendar-day"></i> Календар планування
-            </h4>
-            <button (click)="toggleSection('calendar')" class="text-slate-400 hover:text-slate-800 transition-colors w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100/50">
-               <i class="fa-solid" [ngClass]="isSectionCollapsed('calendar') ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-            </button>
-          </div>
-          
-          <div [hidden]="isSectionCollapsed('calendar')" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 animate-in slide-in-from-top-4 duration-300">
-             <app-expected-calendar></app-expected-calendar>
-          </div>
-        </section>
-
-        <!-- Gamification Banner (Events) -->
-        <section class="animate-in fade-in duration-500">
-           <app-gamification-banner></app-gamification-banner>
-        </section>
-
-        <!-- Subscriptions List -->
-        <section class="space-y-4">
-          <div class="flex items-center justify-between px-2">
-            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <i class="fa-solid fa-retweet"></i> Рекурсивні платежі
-            </h4>
-            <button (click)="toggleSection('subscriptions')" class="text-slate-400 hover:text-slate-800 transition-colors w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100/50">
-               <i class="fa-solid" [ngClass]="isSectionCollapsed('subscriptions') ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-            </button>
-          </div>
-          
-          <div [hidden]="isSectionCollapsed('subscriptions')" class="animate-in slide-in-from-top-4 duration-300">
+          <!-- Subscriptions List -->
+          <div class="pt-4 md:pt-8">
             <app-subscriptions-list
               (subscriptionClicked)="openSubDetail($event)"
               (addSubscriptionClicked)="openAddSubRoute()">
@@ -127,40 +71,30 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
           </div>
         </section>
 
-        <!-- Planning & Analytics Section -->
-        <section class="space-y-4 md:space-y-6 pb-12 p-4 md:p-8 bg-white/40 backdrop-blur-sm rounded-[2.5rem] border border-white/60 shadow-sm">
-          <div class="flex items-center justify-between mb-4 md:mb-6">
-            <h2 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                <i class="fa-solid fa-chart-simple"></i>
+        <!-- Planning & Analytics Section (B) -->
+        <section class="space-y-4 md:space-y-6 pb-20 p-4 md:p-8 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/60 mt-4 md:mt-8">
+          <div class="flex items-center gap-3 mb-4 md:mb-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shadow-sm border border-indigo-100">
+                <i class="fa-solid fa-chart-pie"></i>
               </div>
-              Баланс та Планування
+              Планування та Аналітика
             </h2>
-            <button (click)="toggleSection('planning')" class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-800 transition-all">
-                <i class="fa-solid" [ngClass]="isSectionCollapsed('planning') ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
-            </button>
+            <div class="h-px bg-slate-100 flex-1"></div>
           </div>
           
-          <div [hidden]="isSectionCollapsed('planning')" class="space-y-8 animate-in slide-in-from-top-4 duration-300">
+          <div class="pb-4">
             <app-month-analytics></app-month-analytics>
-            <div class="h-px bg-slate-100/80"></div>
+          </div>
+          <div class="mt-4 md:mt-6">
             <app-month-plan></app-month-plan>
           </div>
         </section>
 
+
+
       </div>
     </div>
-
-    <!-- AI Chat Floating Button -->
-    <div *ngIf="financeData.userSettings().showAiChat && financeData.userSettings().geminiApiKey" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[150] group">
-       <button (click)="openAiChat()" 
-               class="w-14 h-14 md:w-16 md:h-16 rounded-[2rem] bg-indigo-600 text-white shadow-2xl shadow-indigo-200 flex items-center justify-center hover:bg-slate-900 hover:scale-110 active:scale-90 transition-all">
-          <i class="fa-solid fa-robot text-xl md:text-2xl"></i>
-       </button>
-    </div>
-
-    <!-- AI Chat Full Screen Modal -->
-    <app-ai-chat *ngIf="isAiChatOpen()" (close)="closeAiChat()"></app-ai-chat>
 
     <!-- Subscription Detail / Edit Popup -->
     @if (selectedSub()) {
@@ -276,7 +210,9 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
     }
   `,
   styles: [`
-    :host { display: block; }
+    :host {
+      display: block;
+    }
   `]
 })
 export class DashboardComponent {
@@ -291,29 +227,6 @@ export class DashboardComponent {
   editSubCurrency = signal('');
   editSubNextDate = signal('');
   editSubPeriod = signal<SubscriptionPeriod>('monthly');
-
-  isAiChatOpen = signal(false);
-  collapsedSections = signal<Record<string, boolean>>({});
-
-  toggleSection(section: string) {
-    const current = { ...this.collapsedSections() };
-    current[section] = !current[section];
-    this.collapsedSections.set(current);
-  }
-
-  isSectionCollapsed(section: string): boolean {
-    return !!this.collapsedSections()[section];
-  }
-
-  openAiChat() {
-    this.isAiChatOpen.set(true);
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeAiChat() {
-    this.isAiChatOpen.set(false);
-    document.body.style.overflow = '';
-  }
 
   get userCurrency() {
     return this.financeData.userSettings().currency;
