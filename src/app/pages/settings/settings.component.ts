@@ -43,7 +43,7 @@ export class SettingsComponent implements OnInit {
     geminiApiKey: ''
   };
 
-  activeCategory: 'menu' | 'profile' | 'notifications' | 'gamification' | 'accessibility' | 'data' = 'menu';
+  activeCategory: 'menu' | 'profile' | 'notifications' | 'gamification' | 'accessibility' | 'data' | 'integrations' = 'menu';
 
   currencies = ['UAH', 'USD', 'EUR', 'CZK'];
 
