@@ -88,6 +88,20 @@
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-black transition-colors"></i>
                 </button>
+
+                <button (click)="setCategory('integrations')"
+                    class="w-full flex items-center justify-between px-6 py-5 rounded-3xl bg-white shadow-sm border border-slate-100 hover:border-black transition-all group active:scale-95">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black text-slate-800 text-sm uppercase tracking-tight">Інтеграції</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Monobank, Google Wallet, SMS</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-black transition-colors"></i>
+                </button>
             </div>
 
             <!-- Content Area (Sub-pages) -->
@@ -108,6 +122,7 @@
                             <span *ngIf="activeCategory === 'gamification'">Гейміфікація</span>
                             <span *ngIf="activeCategory === 'accessibility'">Спеціальні можливості</span>
                             <span *ngIf="activeCategory === 'data'">Дані та інфо</span>
+                            <span *ngIf="activeCategory === 'integrations'">Інтеграції та Автоматизація</span>
                         </h3>
                     </div>
                 </div>
@@ -398,6 +413,81 @@
                     <button (click)="saveSettings()"
                         class="w-full py-5 bg-black text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all">Зберегти
                         налаштування доступності</button>
+                </div>
+
+                <!-- Integrations Section -->
+                <div *ngIf="activeCategory === 'integrations'"
+                    class="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                    
+                    <!-- Monobank -->
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 overflow-hidden relative">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-50 rounded-full blur-2xl"></div>
+                        <h3 class="text-sm font-black text-slate-800 mb-6 uppercase tracking-widest flex items-center gap-3 relative z-10">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                <i class="fa-solid fa-building-columns"></i>
+                            </div> 
+                            Monobank Sync
+                        </h3>
+                        
+                        <div class="mb-6 p-5 bg-slate-50 rounded-[2rem] border border-slate-100 relative z-10">
+                            <div class="flex items-start gap-3 mb-6">
+                                <i class="fa-solid fa-circle-info text-indigo-400 mt-1"></i>
+                                <p class="text-[11px] font-bold text-slate-600 leading-relaxed">
+                                    Це дозволяє автоматично підтягувати ваші витрати. Ми рекомендуємо використовувати API для прямої синхронізації.
+                                </p>
+                            </div>
+
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Персональний API Токен</label>
+                            <input type="password" [(ngModel)]="settings.monobankToken" placeholder="uYourPersonalToken..."
+                                class="w-full px-5 py-4 rounded-2xl bg-white border border-slate-200 focus:border-black outline-none transition-all font-bold text-slate-800 placeholder:text-slate-200">
+                            <p class="text-[9px] text-slate-400 mt-3 px-1 font-bold">Отримати токен можна на <a href="https://api.monobank.ua/" target="_blank" class="text-indigo-600 underline hover:text-indigo-800 transition-colors">api.monobank.ua</a></p>
+                        </div>
+                        
+                        <button (click)="saveSettings()"
+                            class="w-full py-4 bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-indigo-100 active:scale-95 transition-all">
+                            Зберегти конфігурацію
+                        </button>
+                    </div>
+
+                    <!-- AI Smart Paste -->
+                    <div class="bg-indigo-900 rounded-[2.5rem] p-6 md:p-8 shadow-2xl text-white relative overflow-hidden">
+                        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+                        <div class="absolute -left-10 -top-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-3xl"></div>
+                        
+                        <div class="relative z-10">
+                            <h3 class="text-sm font-black mb-4 uppercase tracking-widest flex items-center gap-2">
+                               <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Розумна вставка (Bank SMS)
+                            </h3>
+                            <p class="text-xs font-bold text-indigo-200 leading-relaxed mb-6 opacity-80">
+                                Оскільки браузери забороняють доступ до системних сповіщень банку, ми пропонуємо зручну альтернативу:
+                            </p>
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 text-[10px] font-black">1</div>
+                                    <p class="text-[11px] font-bold">Скопіюйте текст сповіщення банку</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 text-[10px] font-black">2</div>
+                                    <p class="text-[11px] font-bold">Відкрийте ШІ чат і вставте текст</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 text-[10px] font-black">3</div>
+                                    <p class="text-[11px] font-bold">ШІ автоматично визначить суму та створить транзакцію</p>
+                                </div>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 font-mono text-[10px] text-indigo-200/50 italic text-center">
+                                "Витрата: 156.00грн, Сільпо. Баланс: 5400.00грн"
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Google Wallet Info -->
+                    <div class="bg-slate-100/50 rounded-3xl p-6 md:p-8 border border-dashed border-slate-200">
+                        <h4 class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Про Google Wallet</h4>
+                        <p class="text-[11px] font-bold text-slate-500 leading-relaxed">
+                            На жаль, Google Wallet не надає стороннім додаткам доступ до історії транзакцій ваших карток. Це міра безпеки Google для захисту ваших платіжних даних. Ми використовуємо максимально безпечні та відкриті API українських банків (Monobank/Privat) як надійнішу альтернативу.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Data & About Section -->

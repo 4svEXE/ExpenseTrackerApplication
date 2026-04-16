@@ -8,6 +8,7 @@ import { FinancialAssistantComponent } from '../../components/dashboard/financia
 import { IncomeVisualizerComponent } from '../../components/dashboard/income-visualizer/income-visualizer.component';
 import { GrowthChartComponent } from '../../components/dashboard/growth-chart/growth-chart.component';
 import { TransactionsTableComponent } from '../../components/dashboard/transactions-table/transactions-table.component';
+import { RadialExpensesComponent } from '../../components/dashboard/radial-expenses/radial-expenses.component';
 import { MonthPlanComponent } from '../../components/dashboard/month-plan/month-plan.component';
 import { MonthAnalyticsComponent } from '../../components/dashboard/month-analytics/month-analytics.component';
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
@@ -27,6 +28,7 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
     IncomeVisualizerComponent,
     GrowthChartComponent,
     TransactionsTableComponent,
+    RadialExpensesComponent,
     MonthPlanComponent,
     MonthAnalyticsComponent,
     SubscriptionsListComponent,
@@ -55,10 +57,13 @@ import { FinanceDataService, Subscription, SubscriptionPeriod } from '../../serv
           <!-- Financial Literacy Cards -->
           <app-financial-literacy></app-financial-literacy>
 
-          <!-- Middle Row: Income Visualizer + Transactions Context -->
-          <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
+          <!-- Middle Row: Income Visualizer + Radial Expenses + Transactions Context -->
+          <div class="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
             <div class="xl:col-span-1">
               <app-income-visualizer></app-income-visualizer>
+            </div>
+            <div class="xl:col-span-1">
+              <app-radial-expenses></app-radial-expenses>
             </div>
             <div class="xl:col-span-2">
               <app-transactions-table class="block h-full"></app-transactions-table>

@@ -22,6 +22,7 @@ export interface UserSettings {
     coins?: number;
     avatarUrl?: string;
     geminiApiKey?: string;
+    monobankToken?: string;
     showAiChat?: boolean;
     unlockedCards?: number[];
 }

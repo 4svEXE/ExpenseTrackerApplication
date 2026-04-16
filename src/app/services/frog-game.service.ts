@@ -32,6 +32,7 @@ export interface FrogGameData {
   pondUpgrades: string[];
   lastFed: number;
   lastDailyVisit: number;
+  lastMoneyCollect: number;
   mood: FrogMood;
   totalXpEarned: number;
   inviteCode: string;
@@ -75,6 +76,7 @@ export const POND_SHOP_ITEMS: PondUpgrade[] = [
   { id: 'eyes_hearts', name: 'Очі-Серця', cost: 150, category: 'frog', icon: '🥰', description: 'Закохані очі-серця', minLevel: 15 },
   { id: 'coffee', name: 'Кавова Чашка', cost: 80, category: 'frog', icon: '☕', description: 'Жаба п\'є каву зранку', minLevel: 5 },
   { id: 'backpack', name: 'Рюкзак', cost: 160, category: 'frog', icon: '🎒', description: 'Рюкзак мандрівниці', minLevel: 18 },
+  { id: 'tree_money', name: 'Грошове Дерево', cost: 400, category: 'pond', icon: '💰', description: 'Дає монетки щогодини!', minLevel: 25 },
 ];
 
 const FROG_PHRASES: Record<string, string[]> = {
@@ -169,6 +171,14 @@ export class FrogGameService {
       const data = this.frog();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     });
+
+    // Listen for item drops from events
+    effect(() => {
+      const result = this.gamification.eventResult();
+      if (result && result.dropItemId) {
+        this.addItem(result.dropItemId);
+      }
+    });
   }
 
   private getDefaultFrog(): FrogGameData {
@@ -184,6 +194,7 @@ export class FrogGameService {
       pondUpgrades: [],
       lastFed: 0,
       lastDailyVisit: 0,
+      lastMoneyCollect: 0,
       mood: 'happy',
       totalXpEarned: 0,
       inviteCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
@@ -287,7 +298,7 @@ export class FrogGameService {
     const item = POND_SHOP_ITEMS.find(i => i.id === id);
     if (!item) return false;
 
-    const coins = this.financeData.userSettings().coins || 0;
+    const coins = this.getCoins();
     if (coins < item.cost) return false;
     if (this.frog().pondUpgrades.includes(id)) return false;
     if (this.frog().level < item.minLevel) return false;
@@ -296,6 +307,51 @@ export class FrogGameService {
     this.frog.update(f => ({ ...f, pondUpgrades: [...f.pondUpgrades, id] }));
     this.addXp(20);
     return true;
+  }
+
+  collectMoneyTree() {
+    if (!this.hasUpgrade('tree_money')) return;
+    const now = Date.now();
+    const last = this.frog().lastMoneyCollect;
+    const diff = now - last;
+    const canCollect = diff > 60 * 60 * 1000; // 1 hour
+
+    if (!canCollect) return;
+
+    this.frog.update(f => ({ ...f, lastMoneyCollect: now }));
+    this.gamification.addCoins(10);
+    this.financeData.toasts.show('Ви зібрали 10 монет з грошового дерева! 💰', 'success');
+    this.triggerAnimation();
+  }
+
+  canCollectMoneyTree(): boolean {
+    if (!this.hasUpgrade('tree_money')) return false;
+    return Date.now() - this.frog().lastMoneyCollect > 60 * 60 * 1000;
+  }
+
+  timeUntilCollect(): string {
+    if (!this.hasUpgrade('tree_money')) return '';
+    const diff = (this.frog().lastMoneyCollect + 60 * 60 * 1000) - Date.now();
+    if (diff <= 0) return '00:00';
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  addItem(id: string) {
+    if (this.frog().pondUpgrades.includes(id)) {
+      // If already has, give coins instead
+      this.gamification.addCoins(50);
+      this.financeData.toasts.show('Ви знайшли предмет, який вже маєте! +50 монет 🪙', 'success');
+      return;
+    }
+    const item = POND_SHOP_ITEMS.find(i => i.id === id);
+    if (item) {
+      this.frog.update(f => ({ ...f, pondUpgrades: [...f.pondUpgrades, id] }));
+      this.financeData.toasts.show(`🎁 Ви отримали новий предмет: ${item.icon} ${item.name}!`, 'success');
+      this.addXp(30);
+      this.triggerAnimation();
+    }
   }
 
   hasUpgrade(id: string): boolean {

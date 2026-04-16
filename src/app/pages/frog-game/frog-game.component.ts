@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FrogGameService, FrogMood, POND_SHOP_ITEMS, PondUpgrade, getXpForLevel } from '../../services/frog-game.service';
+import { FinanceDataService } from '../../services/finance-data.service';
 import { FrogCharacterComponent } from '../../components/frog/frog-character/frog-character.component';
 
 type ShopTab = 'pond' | 'frog' | 'atmosphere';
@@ -78,6 +79,23 @@ const NPC_FRIENDS = [
           <!-- Tree -->
           <div *ngIf="frogGame.hasUpgrade('tree')" class="absolute left-4 bottom-[44%]">
             <div class="text-5xl">🌳</div>
+          </div>
+
+          <!-- Money Tree -->
+          <div *ngIf="frogGame.hasUpgrade('tree_money')" 
+               class="absolute left-[30%] bottom-[46%] flex flex-col items-center cursor-pointer group transition-all"
+               (click)="frogGame.collectMoneyTree()">
+            <div class="text-5xl group-hover:scale-110 transition-transform relative drop-shadow-xl">
+              💰
+              <div *ngIf="frogGame.canCollectMoneyTree()" 
+                   class="absolute -top-2 -right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-amber-500/50 border-2 border-slate-900">
+                <span class="text-[10px] text-slate-900 font-extrabold">!</span>
+              </div>
+            </div>
+            <div *ngIf="!frogGame.canCollectMoneyTree()" 
+                 class="bg-black/50 backdrop-blur-sm rounded-full px-2 py-0.5 mt-1 border border-white/10">
+              <span class="text-[8px] text-white font-extrabold tracking-tighter">{{ frogGame.timeUntilCollect() }}</span>
+            </div>
           </div>
 
           <!-- Lanterns -->
@@ -205,28 +223,58 @@ const NPC_FRIENDS = [
           </div>
         </div>
 
-        <!-- Actions row -->
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Feed button -->
-          <button (click)="feed()" 
-                  [disabled]="!frogGame.canFeed()"
-                  class="py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2"
-                  [ngClass]="frogGame.canFeed() ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-400' : 'bg-white/10 text-slate-500 cursor-not-allowed'">
-            <span class="text-xl">🪲</span>
-            <span *ngIf="frogGame.canFeed()">Погодувати!</span>
-            <span *ngIf="!frogGame.canFeed()">{{ frogGame.hoursUntilFed() }}г залишилось</span>
-          </button>
+    <!-- Actions row -->
+    <div class="grid grid-cols-2 gap-3">
+      <!-- Feed button -->
+      <button (click)="feed()" 
+              [disabled]="!frogGame.canFeed()"
+              class="py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2"
+              [ngClass]="frogGame.canFeed() ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-400' : 'bg-white/10 text-slate-500 cursor-not-allowed'">
+        <span class="text-xl">🪲</span>
+        <span *ngIf="frogGame.canFeed()">Погодувати!</span>
+        <span *ngIf="!frogGame.canFeed()">{{ frogGame.hoursUntilFed() }}г залишилось</span>
+      </button>
 
-          <!-- More phrase -->
-          <button (click)="frogGame.updatePhrase()"
-                  class="py-4 rounded-2xl font-black text-sm uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 transition-all active:scale-95 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-comment-dots"></i>
-            Поговорити
-          </button>
+      <!-- More phrase -->
+      <button (click)="openAiChat()"
+              class="py-4 rounded-2xl font-black text-sm uppercase tracking-wider bg-white/10 text-white hover:bg-white/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-comment-dots"></i>
+        Поговорити
+      </button>
+    </div>
+
+    <!-- AI Info Popup -->
+    <div *ngIf="showAiInfoPopup()" (click)="showAiInfoPopup.set(false)"
+         class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-300">
+      <div (click)="$event.stopPropagation()" 
+           class="w-full max-w-md bg-slate-900 border border-emerald-500/30 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-emerald-500/10">
+        <div class="p-8 text-center">
+          <div class="w-20 h-20 bg-emerald-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-robot text-4xl text-emerald-400"></i>
+          </div>
+          <h2 class="text-white text-2xl font-black mb-4">ШІ Чат-Порадник</h2>
+          <p class="text-slate-300 text-sm leading-relaxed mb-8">
+            Це ваш персональний фінансовий консультант. Він абсолютно <span class="text-emerald-400 font-bold">безкоштовний</span>, 
+            але для роботи йому потрібен <span class="text-emerald-400 font-bold">Gemini API Ключ</span>. 
+            <br><br>
+            Чат аналізує ваші витрати та дає розумні поради щодо економії та планування.
+          </p>
+          <div class="space-y-3">
+            <button (click)="goToSettings()" 
+                    class="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+              Отримати ключ та Налаштувати
+            </button>
+            <button (click)="showAiInfoPopup.set(false)" 
+                    class="w-full py-4 bg-white/5 hover:bg-white/10 text-slate-400 font-black rounded-2xl transition-all active:scale-95">
+              Може пізніше
+            </button>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- ========== SHOP TAB ========== -->
+  <!-- ========== SHOP TAB ========== -->
       <div *ngIf="activeTab === 'shop'" class="relative z-10 px-4 space-y-4">
 
         <!-- Shop category tabs -->
@@ -354,6 +402,7 @@ const NPC_FRIENDS = [
 })
 export class FrogGameComponent implements OnInit, OnDestroy {
   frogGame = inject(FrogGameService);
+  financeData = inject(FinanceDataService);
   private router = inject(Router);
 
   get frog() { return this.frogGame.frog(); }
@@ -364,6 +413,7 @@ export class FrogGameComponent implements OnInit, OnDestroy {
   newName = '';
   visitingFriend: number | null = null;
   messageSent = false;
+  showAiInfoPopup = signal(false);
   private msgTimeout: any;
 
   npcFriends = NPC_FRIENDS;
@@ -478,5 +528,19 @@ export class FrogGameComponent implements OnInit, OnDestroy {
     this.messageSent = true;
     if (this.msgTimeout) clearTimeout(this.msgTimeout);
     this.msgTimeout = setTimeout(() => this.messageSent = false, 3000);
+  }
+
+  openAiChat() {
+    const apiKey = this.financeData.userSettings().geminiApiKey;
+    if (apiKey && apiKey.trim().length > 10) {
+      this.router.navigate(['/ai-chat']);
+    } else {
+      this.showAiInfoPopup.set(true);
+    }
+  }
+
+  goToSettings() {
+    this.showAiInfoPopup.set(false);
+    this.router.navigate(['/settings']);
   }
 }

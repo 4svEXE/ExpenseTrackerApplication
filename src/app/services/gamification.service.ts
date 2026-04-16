@@ -9,6 +9,7 @@ export interface GameOutcome {
     reward: number;
     probability: number;
     unlockFlashcard?: boolean;
+    dropItemId?: string;
 }
 
 export interface GameChoice {
@@ -34,7 +35,7 @@ export class GamificationService {
     private toasts = inject(ToastService);
 
     currentEvent = signal<GameEvent | null>(null);
-    eventResult = signal<{ text: string, reward: number } | null>(null);
+    eventResult = signal<{ text: string, reward: number, dropItemId?: string } | null>(null);
     nextEventTime = signal<number>(0);
 
     activeAchievement = signal<Achievement | null>(null);
@@ -151,7 +152,11 @@ export class GamificationService {
             this.unlockRandomCard();
         }
 
-        this.eventResult.set({ text: selectedOutcome.text, reward: selectedOutcome.reward });
+        this.eventResult.set({ 
+          text: selectedOutcome.text, 
+          reward: selectedOutcome.reward,
+          dropItemId: selectedOutcome.dropItemId 
+        });
         this.currentEvent.set(null);
 
         // Track choice for achievement
@@ -356,7 +361,8 @@ const FANTASY_EVENTS: GameEvent[] = [
                 text: 'Випити (3 монети)',
                 cost: 3,
                 outcomes: [
-                    { text: 'Ваші кишені наповнилися золотом! Ви відчуваєте прилив сил.', reward: 5, probability: 0.3 },
+                    { text: 'Ваші кишені наповнилися золотом! Ви відчуваєте прилив сил.', reward: 5, probability: 0.15 },
+                    { text: 'Маг був вражений вашою сміливістю і подарував вам свою стару шапку!', reward: 0, probability: 0.15, dropItemId: 'hat_wizard' },
                     { text: 'Це було звичайне молоко, але кумедно пахло.', reward: 0, probability: 0.4 },
                     { text: 'Ой... здається зілля було зіпсоване. Ви втратили трохи монет, поки бігли до кущів.', reward: -5, probability: 0.3 }
                 ]
@@ -377,7 +383,8 @@ const FANTASY_EVENTS: GameEvent[] = [
                 text: 'Спробувати забрати',
                 cost: 0,
                 outcomes: [
-                    { text: 'Ви тихо забрали злиток! Дракон навіть не ворухнувся.', reward: 5, probability: 0.2 },
+                    { text: 'Ви тихо забрали злиток! Дракон навіть не ворухнувся.', reward: 5, probability: 0.15 },
+                    { text: 'Під злитком ви знайшли диктофон мандрівника! Дракон продовжує спати.', reward: 0, probability: 0.05, dropItemId: 'backpack' },
                     { text: 'Дракон чхнув вогнем! Ви ледь встигли відскочити, але край гаманця підгорів.', reward: -5, probability: 0.8 }
                 ]
             },

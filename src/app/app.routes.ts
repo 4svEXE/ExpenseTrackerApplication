@@ -35,6 +35,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/frog-game/frog-game.component').then((m) => m.FrogGameComponent),
   },
+  {
+    path: 'ai-chat',
+    loadComponent: () =>
+      import('./components/ui/ai-chat/ai-chat.component').then((m) => m.AiChatComponent),
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ];
