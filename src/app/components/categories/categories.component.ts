@@ -125,11 +125,16 @@ export class CategoriesComponent implements OnInit {
 
       this.loadCategories();
 
-      this.transactionService.setTransaction({
-        ...this.transaction,
-        transactionType: type,
-        category: '',
-      });
+      // Only reset if it's a new transaction (no ID)
+      // If we are editing (have ID), we want to keep the current transaction state
+      const currentTx = this.transactionService.transaction();
+      if (!currentTx.id) {
+        this.transactionService.setTransaction({
+          ...currentTx,
+          transactionType: type,
+          category: '',
+        });
+      }
     });
   }
 

@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccountsListComponent } from '../../components/dashboard/accounts-list/accounts-list.component';
 import { SubscriptionsListComponent } from '../../components/dashboard/subscriptions-list/subscriptions-list.component';
-import { FinancialLiteracyComponent } from '../../components/dashboard/financial-literacy/financial-literacy.component';
 import { FinanceDataService, AccountBalance, Subscription, IncomePlan, ExpensePlan, SubscriptionPeriod } from '../../services/finance-data.service';
 import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-wallets',
   standalone: true,
-  imports: [CommonModule, FormsModule, AccountsListComponent, SubscriptionsListComponent, FinancialLiteracyComponent],
+  imports: [CommonModule, FormsModule, AccountsListComponent, SubscriptionsListComponent],
   template: `
     <div class="wallets-wrapper min-h-screen bg-slate-50/50 p-2 md:p-8 font-sans pb-24 pt-10">
       <div class="max-w-[1200px] mx-auto space-y-6 md:space-y-8 pb-10">
@@ -59,7 +58,8 @@ import { ConfirmService } from '../../services/confirm.service';
                             </div>
                             <div class="w-24">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
-                                <input type="number" [(ngModel)]="plan.planAmount" (change)="saveIncomePlans()" placeholder="0"
+                                <input type="number" [(ngModel)]="plan.planAmount" (change)="saveIncomePlans()" 
+                                    (input)="limitDecimals($event, plan, 'planAmount')" placeholder="0"
                                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                     class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
                             </div>
@@ -105,7 +105,8 @@ import { ConfirmService } from '../../services/confirm.service';
                             </div>
                             <div class="w-24">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Сума</label>
-                                <input type="number" [(ngModel)]="plan.amount" (change)="saveExpensePlans()" placeholder="0"
+                                <input type="number" [(ngModel)]="plan.amount" (change)="saveExpensePlans()" 
+                                    (input)="limitDecimals($event, plan, 'amount')" placeholder="0"
                                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                     class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold outline-none focus:border-black text-black">
                             </div>
@@ -183,6 +184,7 @@ import { ConfirmService } from '../../services/confirm.service';
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] text-white/50 font-bold uppercase">Сума:</span>
                             <input type="number" [(ngModel)]="wish.amount" (change)="saveWishlist()"
+                                   (input)="limitDecimals($event, wish, 'amount')"
                                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                    class="bg-transparent border-none text-white font-black p-0 w-20 text-sm focus:ring-0">
                         </div>
@@ -201,11 +203,6 @@ import { ConfirmService } from '../../services/confirm.service';
                             </button>
                         </div>
                     </div>
-                </div>
-
-                <div *ngIf="wishlist().length === 0" 
-                     class="col-span-full py-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                    <p class="text-white/40 text-sm font-bold">У вас ще немає мрій? Подумайте, що б ви хотіли купити! ✨</p>
                 </div>
             </div>
         </div>
@@ -229,7 +226,7 @@ import { ConfirmService } from '../../services/confirm.service';
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
                 <div *ngFor="let debt of debts(); let i = index" 
-                     [ngClass]="debt.amount < 0 ? 'bg-rose-500/10 border-rose-500/20' : 'bg-emerald-500/10 border-emerald-500/20'"
+                     [ngClass]="debt.amount < 0 ? 'bg-rose-50/10 border-rose-500/20' : 'bg-emerald-50/10 border-emerald-500/20'"
                      class="backdrop-blur-md p-4 rounded-2xl border flex flex-col gap-3 group transition-all">
                     
                     <div class="flex items-center justify-between gap-2">
@@ -280,24 +277,6 @@ import { ConfirmService } from '../../services/confirm.service';
             </div>
         </div>
 
-        <!-- Фінансова Грамотність -->
-        <app-financial-literacy class="mt-8 block"></app-financial-literacy>
-
-        <div class="p-8 bg-neutral-900 hidden rounded-3xl text-white shadow-2xl relative overflow-hidden group">
-          <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
-          <div class="relative z-10">
-            <h3 class="text-xl font-bold mb-2">Налаштування</h3>
-            <p class="text-neutral-400 text-sm mb-6">Додавайте нові рахунки або підписки для повного контролю над грошима.</p>
-            <div class="flex gap-4">
-              <button (click)="openAddAccountModal()" class="px-6 py-3 bg-white text-black rounded-xl font-bold hover:bg-neutral-200 active:scale-[0.98] transition-all dropdown-shadow">
-                Додати рахунок
-              </button>
-              <button (click)="openAddSubscriptionModal()" class="px-6 py-3 bg-neutral-800 border border-neutral-700 text-white rounded-xl font-bold hover:bg-neutral-700 active:scale-[0.98] transition-all">
-                Додати підписку
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -322,6 +301,7 @@ import { ConfirmService } from '../../services/confirm.service';
             <div>
               <label class="block text-sm font-semibold text-slate-600 mb-1">Баланс</label>
               <input [(ngModel)]="newAccount.balance" type="number" placeholder="0.00" 
+                (input)="limitDecimals($event, newAccount, 'balance')"
                 class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium text-black">
             </div>
             <div>
@@ -382,6 +362,7 @@ import { ConfirmService } from '../../services/confirm.service';
             <div>
               <label class="block text-sm font-semibold text-slate-600 mb-1">Ціна</label>
               <input [(ngModel)]="newSub.price" type="number" placeholder="0" 
+                (input)="limitDecimals($event, newSub, 'price')"
                 class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-1 focus:ring-black outline-none transition-all font-medium text-black">
             </div>
             <div>
@@ -454,6 +435,18 @@ export class WalletsComponent implements OnInit {
   Math = Math;
   financeData = inject(FinanceDataService);
   confirmService = inject(ConfirmService);
+
+  limitDecimals(event: any, obj: any, field: string) {
+    const value = event.target.value.toString();
+    if (value.includes('.')) {
+      const parts = value.split('.');
+      if (parts.length > 1 && parts[1].length > 2) {
+        const truncated = parseFloat(parts[0] + '.' + parts[1].substring(0, 2));
+        obj[field] = truncated;
+        event.target.value = parts[0] + '.' + parts[1].substring(0, 2);
+      }
+    }
+  }
 
   incomePlans: (IncomePlan & { isNew?: boolean })[] = [];
   expensePlans: (ExpensePlan & { isNew?: boolean })[] = [];
@@ -762,10 +755,20 @@ export class WalletsComponent implements OnInit {
     this.financeData.saveDebts(d);
   }
 
-  updateDebtAmount(index: number, val: number) {
+  updateDebtAmount(index: number, val: any) {
     const d = [...this.debts()];
     const isNegative = d[index].amount < 0;
-    d[index].amount = isNegative ? -Math.abs(val) : Math.abs(val);
+    let numVal = typeof val === 'string' ? parseFloat(val) : val;
+    
+    // Limit to 2 decimals
+    if (numVal.toString().includes('.')) {
+      const parts = numVal.toString().split('.');
+      if (parts[1].length > 2) {
+        numVal = parseFloat(parts[0] + '.' + parts[1].substring(0, 2));
+      }
+    }
+
+    d[index].amount = isNegative ? -Math.abs(numVal) : Math.abs(numVal);
     this.financeData.saveDebts(d);
   }
 

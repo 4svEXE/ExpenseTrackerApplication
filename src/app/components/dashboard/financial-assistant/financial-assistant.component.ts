@@ -2,11 +2,13 @@ import { Component, inject } from '@angular/core';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { signal } from '@angular/core';
+import { MonthlyStatementComponent } from '../monthly-statement/monthly-statement.component';
 
 @Component({
   selector: 'app-financial-assistant',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MonthlyStatementComponent],
   template: `
     <div class="assistant-card relative overflow-hidden text-white flex justify-between items-center">
       <!-- Background decorators -->
@@ -22,8 +24,17 @@ import { RouterModule } from '@angular/router';
           </div>
           <i class="fa-solid fa-user-circle opacity-50" *ngIf="!financeData.userSettings().avatarUrl"></i>
           Привіт, {{ userName }}!
+          
+          <button (click)="showMonthlyStatement.set(true)" 
+                  class="ml-auto w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all group active:scale-95"
+                  title="Виписка за місяць">
+            <i class="fa-solid fa-chart-pie text-white/80 group-hover:text-white transition-colors"></i>
+          </button>
         </h2>
         <p class="text-neutral-400 text-xs md:text-sm font-medium opacity-90 mb-4">{{ currentDate | date:'fullDate':'':'uk-UA' }}</p>
+
+        <!-- Monthly Statement Popup -->
+        <app-monthly-statement *ngIf="showMonthlyStatement()" (close)="showMonthlyStatement.set(false)"></app-monthly-statement>
         
         <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 mt-6">
           <div class="stats-item">
@@ -78,6 +89,7 @@ import { RouterModule } from '@angular/router';
 export class FinancialAssistantComponent {
   financeData = inject(FinanceDataService);
   currentDate = new Date();
+  showMonthlyStatement = signal(false);
 
   get userName() {
     return this.financeData.userSettings().name;

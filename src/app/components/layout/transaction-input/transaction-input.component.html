@@ -14,7 +14,7 @@
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-extrabold"
           [ngClass]="transaction.transactionType === 'income' ? 'text-emerald-500' : 'text-rose-500'">
-          {{ transaction.transactionType === 'income' ? 'Новий дохід' : 'Нова витрата' }}
+          {{ transaction.id ? 'Редагування' : (transaction.transactionType === 'income' ? 'Новий дохід' : 'Нова витрата') }}
         </h3>
         <button type="button"
           class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
@@ -68,6 +68,8 @@
           <label for="amount"
             class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Сума</label>
           <input id="amount" type="number" formControlName="amount" autocomplete="off"
+            step="0.01"
+            (input)="onAmountInput($event)"
             class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-black focus:ring-2 focus:ring-slate-100 outline-none font-black text-xl text-slate-800 transition-all"
             placeholder="0.00" />
         </div>
@@ -163,7 +165,7 @@
         <button type="submit" [disabled]="transactionForm.invalid" (click)="$event.stopPropagation(); onSubmit($event)"
           class="py-3.5 rounded-xl text-white shadow-lg transition-all flex items-center justify-center disabled:opacity-50 disabled:shadow-none font-black uppercase tracking-[0.1em] text-[11px] px-6"
           [ngClass]="transaction.transactionType === 'income' ? 'bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 disabled:bg-slate-300' : 'bg-slate-900 shadow-slate-200 hover:bg-black disabled:bg-slate-300'">
-          Додати
+          {{ transaction.id ? 'Зберегти' : 'Додати' }}
         </button>
       </div>
     </form>

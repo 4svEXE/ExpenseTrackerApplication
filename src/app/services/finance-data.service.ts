@@ -22,6 +22,12 @@ export interface Transaction {
   type: 'income' | 'expense';
   category: string;
   expenseColor?: string;
+  debtId?: string;
+  debtName?: string;
+  debtAmount?: number;
+  isSubscription?: boolean;
+  subscriptionName?: string;
+  accountId?: string;
 }
 
 export interface IncomePlan {
@@ -507,6 +513,71 @@ export class FinanceDataService {
         (t.title && t.title.toLowerCase().includes(planCat))
       );
       const fact = matched.reduce((acc, t) => acc + ((t.amountUah || 0) * rateToUser), 0);
+      return { ...plan, factAmount: fact };
+    });
+  }
+
+  getStatsForMonth(month: number, year: number) {
+    const txs = this.transactions().filter(t => 
+      t.date.getMonth() === month && 
+      t.date.getFullYear() === year
+    );
+
+    const rateToUser = this.getExchangeRate('UAH', this.userSettings().currency);
+
+    const income = txs.filter(t => t.type === 'income')
+      .reduce((s, t) => s + (t.amountUah * rateToUser), 0);
+    
+    const expenses = txs.filter(t => t.type === 'expense')
+      .reduce((s, t) => s + (t.amountUah * rateToUser), 0);
+
+    // Debts logic: income with category containing 'Борг' or having debtId
+    const debtsReceived = txs.filter(t => t.type === 'income' && (t.debtId || t.category.toLowerCase().includes('борг')))
+      .reduce((s, t) => s + (t.amountUah * rateToUser), 0);
+
+    const debtsPaid = txs.filter(t => t.type === 'expense' && (t.debtId || t.category.toLowerCase().includes('борг')))
+      .reduce((s, t) => s + (t.amountUah * rateToUser), 0);
+
+    // Planned status
+    const plans = this.getMonthlyPlansStatus(month, year);
+    const plannedTotal = plans.reduce((s, p) => s + p.amount, 0);
+    const plannedCompleted = plans.reduce((s, p) => s + p.factAmount, 0);
+
+    return {
+      income,
+      expenses,
+      net: income - expenses,
+      debtsReceived,
+      debtsPaid,
+      plannedTotal,
+      plannedCompleted,
+      plannedPending: Math.max(0, plannedTotal - plannedCompleted)
+    };
+  }
+
+  private getMonthlyPlansStatus(month: number, year: number) {
+    const now = new Date();
+    const isCurrentMonth = month === now.getMonth() && year === now.getFullYear();
+    
+    const txs = this.transactions().filter(t =>
+      t.type === 'expense' &&
+      t.date.getMonth() === month &&
+      t.date.getFullYear() === year
+    );
+
+    const rateToUser = this.getExchangeRate('UAH', this.userSettings().currency);
+
+    return this.expensePlans().map(plan => {
+      let fact = 0;
+      const planCat = (plan.category || '').toLowerCase();
+      
+      const matched = txs.filter(t =>
+        (t.category && t.category.toLowerCase() === planCat) ||
+        (t.tags && t.tags.some(tag => (tag || '').toLowerCase() === planCat)) ||
+        (t.title && t.title.toLowerCase().includes(planCat))
+      );
+      fact = matched.reduce((acc, t) => acc + ((t.amountUah || 0) * rateToUser), 0);
+      
       return { ...plan, factAmount: fact };
     });
   }

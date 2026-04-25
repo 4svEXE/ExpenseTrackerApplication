@@ -1,7 +1,9 @@
 <div class="transaction-type-container flex flex-col w-full min-h-screen bg-slate-50/50 pb-20 pt-10">
 
   <div class="px-4 py-6 max-w-lg mx-auto w-full">
-    <h2 class="text-2xl font-extrabold text-center text-slate-800 tracking-tight mb-6">Нова транзакція</h2>
+    <h2 class="text-2xl font-extrabold text-center text-slate-800 tracking-tight mb-6">
+      {{ isEditMode ? 'Редагування транзакції' : 'Нова транзакція' }}
+    </h2>
 
     <!-- Segmented Control -->
     <div class="transaction-type-header flex w-full bg-slate-200/50 p-1.5 rounded-2xl relative">

@@ -102,6 +102,20 @@
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-black transition-colors"></i>
                 </button>
+
+                <button (click)="setCategory('ai')"
+                    class="w-full flex items-center justify-between px-6 py-5 rounded-3xl bg-white shadow-sm border border-slate-100 hover:border-black transition-all group active:scale-95">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black text-slate-800 text-sm uppercase tracking-tight">ШІ Інтеграція</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Gemini, AI Чат, Консультант</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-black transition-colors"></i>
+                </button>
             </div>
 
             <!-- Content Area (Sub-pages) -->
@@ -123,6 +137,7 @@
                             <span *ngIf="activeCategory === 'accessibility'">Спеціальні можливості</span>
                             <span *ngIf="activeCategory === 'data'">Дані та інфо</span>
                             <span *ngIf="activeCategory === 'integrations'">Інтеграції та Автоматизація</span>
+                            <span *ngIf="activeCategory === 'ai'">ШІ Інтеграція (Gemini)</span>
                         </h3>
                     </div>
                 </div>
@@ -490,9 +505,8 @@
                     </div>
                 </div>
 
-                <!-- Data & About Section -->
-                <div *ngIf="activeCategory === 'data'" class="space-y-6 animate-in zoom-in duration-300">
-                    
+                <!-- AI Section -->
+                <div *ngIf="activeCategory === 'ai'" class="space-y-6 animate-in zoom-in duration-300">
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-indigo-100">
                         <h3 class="text-sm font-black text-indigo-500 mb-6 uppercase tracking-widest flex items-center gap-2">
                            <i class="fa-solid fa-robot"></i> AI Фінансовий Консультант
@@ -501,10 +515,10 @@
                         <div *ngIf="!settings.geminiApiKey" class="mb-6 p-5 bg-indigo-50 rounded-2xl border border-indigo-100 text-slate-700">
                            <h4 class="font-bold mb-2">Як отримати ключ:</h4>
                            <ol class="list-decimal text-xs space-y-2 ml-4 font-medium">
-                              <li>Перейдіть на сторінку <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 font-bold hover:underline">Google AI Studio</a>.</li>
-                              <li>Увійдіть за допомогою свого Google акаунта.</li>
-                              <li>Натисніть кнопку <strong>"Create API Key"</strong>.</li>
-                              <li>Скопіюйте згенерований ключ і вставте його в поле нижче.</li>
+                               <li>Перейдіть на сторінку <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-600 font-bold hover:underline">Google AI Studio</a>.</li>
+                               <li>Увійдіть за допомогою свого Google акаунта.</li>
+                               <li>Натисніть кнопку <strong>"Create API Key"</strong>.</li>
+                               <li>Скопіюйте згенерований ключ і вставте його в поле нижче.</li>
                            </ol>
                         </div>
 
@@ -531,6 +545,15 @@
                         <app-ai-consultant *ngIf="settings.geminiApiKey"></app-ai-consultant>
                     </div>
 
+                    <button (click)="saveSettings()"
+                        class="w-full py-5 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all">
+                        Зберегти налаштування ШІ
+                    </button>
+                </div>
+
+                <!-- Data & About Section -->
+                <div *ngIf="activeCategory === 'data'" class="space-y-6 animate-in zoom-in duration-300">
+                    
                     <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
                         <h3 class="text-sm font-black text-slate-400 mb-6 uppercase tracking-widest">Бекап та управління
                         </h3>

@@ -139,7 +139,22 @@ export class TransactionService {
     if (transaction.transactionType) {
       localStorage.setItem('lastTransactionType', transaction.transactionType);
     }
-    this.transaction.set(transaction);
+    // Create a copy to avoid side effects
+    this.transaction.set({ ...transaction });
+  }
+
+  updateTransaction(updatedTransaction: Transaction): void {
+    const allStored = this.getTransactions();
+    const index = allStored.findIndex(item => item.id === updatedTransaction.id);
+    
+    if (index !== -1) {
+      allStored[index] = updatedTransaction;
+      this.localStorageService.set(this.StorageKey, allStored);
+      this.applyFilters(allStored, this.currentViewDate());
+    } else {
+      // Fallback to add if not found (shouldn't happen with IDs)
+      this.addTransaction(updatedTransaction);
+    }
   }
 
   get currentTransaction(): Transaction {

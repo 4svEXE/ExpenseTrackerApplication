@@ -1,7 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { FinanceDataService } from '../../../services/finance-data.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { TransactionService } from '../../../services/transaction.service';
+import { Transaction } from '../../../types/transaction.interface';
 
 @Component({
   selector: 'app-transactions-table',
@@ -36,7 +38,9 @@ import { RouterModule } from '@angular/router';
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm whitespace-nowrap" *ngIf="recentTransactions.length > 0; else emptyTxs">
             <tbody class="divide-y divide-slate-50">
-              <tr *ngFor="let t of recentTransactions" class="hover:bg-slate-50/50 transition-colors">
+              <tr *ngFor="let t of recentTransactions" 
+                  (click)="onTransactionClick(t)"
+                  class="hover:bg-slate-50/50 transition-colors cursor-pointer group">
                 <td class="py-3 font-bold text-xs md:text-sm" [ngClass]="t.type === 'income' ? 'text-emerald-600' : 'text-slate-800'">
                   {{ t.type === 'income' ? '+' : '-' }}{{ (t.amountUah * financeData.getExchangeRate('UAH', userCurrency)) | currency:userCurrency:'symbol-narrow':'1.0-0' }}
                 </td>
@@ -113,8 +117,17 @@ import { RouterModule } from '@angular/router';
 })
 export class TransactionsTableComponent {
   financeData = inject(FinanceDataService);
+  transactionService = inject(TransactionService);
+  router = inject(Router);
+  
   transactions = this.financeData.transactions;
   activeTab: 'transactions' | 'debts' = 'transactions';
+
+  onTransactionClick(t: any) {
+    // We need to ensure it's a full transaction object for the service
+    this.transactionService.setTransaction(t);
+    this.router.navigate(['/new-transaction', 'categories', t.type || 'expense']);
+  }
 
   get recentTransactions() {
     return [...this.transactions()]

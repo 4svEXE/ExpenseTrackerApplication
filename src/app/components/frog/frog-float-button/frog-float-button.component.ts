@@ -175,7 +175,11 @@ export class FrogFloatButtonComponent implements OnInit, OnDestroy {
     this.routerSub = this.router.events.pipe(
       filter(e => e instanceof NavigationEnd)
     ).subscribe((e: any) => {
-      this.isOnFrogPage = e.urlAfterRedirects?.includes('/frog');
+      const url = e.urlAfterRedirects || '';
+      this.isOnFrogPage = url.includes('/frog') || 
+                          url.includes('/wallets') || 
+                          url.includes('/settings') || 
+                          url.includes('/new-transaction');
     });
 
     // Auto-show briefly on first load after 2s then retract
