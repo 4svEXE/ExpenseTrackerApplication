@@ -25,7 +25,7 @@
 
     <!-- Transactions -->
     <div class="flex flex-col gap-1">
-      @for (item of group.items; track $index) {
+      @for (item of group.items; track item.id) {
       <app-transaction-item [item]="item" />
       }
     </div>

@@ -117,7 +117,69 @@ export class FinanceDataService {
 
   userSettings = this.settingsService.userSettings;
 
-  transactions = signal<Transaction[]>([]);
+  transactions = computed(() => {
+    const txs = this.ts.allTransactions();
+    if (!txs) return [];
+    
+    const accs = this.accounts();
+    const rateToEur = this.getExchangeRate('EUR', 'UAH');
+    
+    const accMap = new Map<string, AccountBalance>();
+    for (const a of accs) {
+      accMap.set(a.id, a);
+    }
+
+    const rateToUahMap = new Map<string, number>();
+    const getRateToUah = (curr: string) => {
+      if (!rateToUahMap.has(curr)) {
+        rateToUahMap.set(curr, this.getExchangeRate(curr, 'UAH'));
+      }
+      return rateToUahMap.get(curr)!;
+    };
+
+    return txs.map((t: any, i: number) => {
+      let accName = t.account || 'Картка';
+      let txCurrency = t.currency || 'UAH';
+
+      if (t.accountId) {
+        const match = accMap.get(t.accountId);
+        if (match) {
+          accName = match.name;
+          if (!t.currency) txCurrency = match.currency;
+        }
+      }
+
+      let date: Date;
+      if (typeof t.date === 'string' && t.date.length <= 10 && t.date.includes('-')) {
+        const [y, m, d] = t.date.split('-');
+        date = new Date(+y, +m - 1, +d);
+      } else {
+        date = new Date(t.date || new Date());
+      }
+
+      let amt = Number(t.amount) || 0;
+      const amtUah = amt * getRateToUah(txCurrency);
+
+      return {
+        ...t,
+        id: (t.id || i).toString(),
+        title: (t.description || t.title || t.category || 'Транзакція').toString(),
+        date,
+        amount: amt,
+        amountUah: amtUah,
+        currency: txCurrency,
+        amountEur: amtUah / rateToEur,
+        type: (t.transactionType === 'income' || t.type === 'income') ? 'income' : 'expense',
+        category: t.category || 'Інше',
+        expenseColor: t.expenseColor || this.getThemeColor(t.category || ''),
+        tags: Array.isArray(t.tags) ? t.tags : [t.category].filter(Boolean),
+        account: accName,
+        client: t.client || '',
+        paymentType: t.paymentType || 'Звичайна'
+      } as Transaction;
+    });
+  });
+
   incomePlans = signal<IncomePlan[]>([]);
   expensePlans = signal<ExpensePlan[]>([]);
   wishlist = signal<WishItem[]>([]);
@@ -137,54 +199,6 @@ export class FinanceDataService {
 
   constructor() {
     this.loadData();
-
-    effect(() => {
-      const txs = this.ts.allTransactions();
-      const parsed = (txs || []).map((t: any, i: number) => {
-        let acc = t.account || 'Картка';
-        if (t.accountId) {
-          const match = this.accounts().find(a => a.id === t.accountId);
-          if (match) acc = match.name;
-        }
-
-        let date: Date;
-        if (typeof t.date === 'string' && t.date.includes('-') && !t.date.includes('T')) {
-          const [y, m, d] = t.date.split('-').map(Number);
-          date = new Date(y, m - 1, d);
-        } else {
-          date = new Date(t.date || new Date());
-        }
-
-        let amt = Number(t.amount) || 0;
-        let txCurrency = t.currency || 'UAH';
-        if (!t.currency && t.accountId) {
-          const match = this.accounts().find(a => a.id === t.accountId);
-          if (match) txCurrency = match.currency;
-        }
-
-        const amtUah = amt * this.getExchangeRate(txCurrency, 'UAH');
-
-        return {
-          ...t,
-          id: (t.id || i).toString(),
-          title: (t.description || t.title || t.category || 'Транзакція').toString(),
-          date,
-          amount: amt,
-          amountUah: amtUah,
-          currency: txCurrency,
-          amountEur: amtUah / this.getExchangeRate('EUR', 'UAH'),
-          type: (t.transactionType === 'income' || t.type === 'income') ? 'income' : 'expense',
-          category: t.category || 'Інше',
-          expenseColor: t.expenseColor || this.getThemeColor(t.category || ''),
-          tags: Array.isArray(t.tags) ? t.tags : [t.category].filter(Boolean),
-          account: acc,
-          client: t.client || '',
-          paymentType: t.paymentType || 'Звичайна'
-        } as Transaction;
-      });
-
-      this.transactions.set(parsed);
-    });
   }
 
   private getThemeColor(category: string): string {

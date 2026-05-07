@@ -182,11 +182,11 @@ export class FrogFloatButtonComponent implements OnInit, OnDestroy {
                           url.includes('/new-transaction');
     });
 
-    // Auto-show briefly on first load after 2s then retract
+    // Auto-show briefly on first load after 40s then retract
     setTimeout(() => {
       this.expand(false);
       this.scheduleRetract(4000);
-    }, 2000);
+    }, 40000);
   }
 
   ngOnDestroy() {

@@ -32,13 +32,31 @@ export class TransactionListComponent {
     const groups: { [key: string]: GroupedTransactions } = {};
     const userCurrency = this.financeData.userSettings().currency;
     const accounts = this.financeData.accounts();
+    
+    // Fast lookup for accounts to avoid O(N^2)
+    const accMap = new Map();
+    for (const a of accounts) {
+      accMap.set(a.id, a);
+    }
 
     transactions.forEach(t => {
       if (!t.date) return;
-      const dateKey = new Date(t.date).toISOString().split('T')[0];
+      
+      // Fast date extraction if it's already an ISO string
+      let dateKey = '';
+      let parsedDate: Date;
+      if (typeof t.date === 'string' && t.date.length >= 10 && t.date[4] === '-' && t.date[7] === '-') {
+        dateKey = t.date.substring(0, 10);
+        const [y, m, d] = dateKey.split('-');
+        parsedDate = new Date(+y, +m - 1, +d);
+      } else {
+        parsedDate = new Date(t.date);
+        dateKey = parsedDate.toISOString().split('T')[0];
+      }
+
       if (!groups[dateKey]) {
         groups[dateKey] = {
-          date: new Date(t.date),
+          date: parsedDate,
           dailyBalance: 0,
           items: []
         };
@@ -48,7 +66,7 @@ export class TransactionListComponent {
       // Determine transaction currency
       let txCurrency = 'UAH';
       if (t.accountId) {
-        const acc = accounts.find(a => a.id === t.accountId);
+        const acc = accMap.get(t.accountId);
         if (acc) txCurrency = acc.currency;
       }
 

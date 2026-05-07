@@ -29,12 +29,20 @@ export class TransactionService {
 
   setCurrentViewDate(date: Date) {
     this.currentViewDate.set(date);
-    this.applyFilters(this.getTransactions(), date);
+    this.applyFilters(this.allTransactions(), date);
   }
 
   private applyFilters(allTransactions: Transaction[], viewDate: Date) {
     this.allTransactions.set(allTransactions);
+    const viewMonth = viewDate.getMonth() + 1; // 1-12
+    const viewYear = viewDate.getFullYear();
+    const viewMonthStr = viewMonth.toString().padStart(2, '0');
+    const viewYearStr = viewYear.toString();
+    const datePrefix = `${viewYearStr}-${viewMonthStr}`;
+
     const filtered = allTransactions.filter(t => {
+      if (t.date.startsWith(datePrefix)) return true;
+      // Fallback for non-ISO or differently formatted dates
       const d = new Date(t.date);
       return d.getMonth() === viewDate.getMonth() && d.getFullYear() === viewDate.getFullYear();
     });
@@ -56,19 +64,30 @@ export class TransactionService {
   }
 
   sortByDate(transactions: Transaction[], byLatest = true): Transaction[] {
-    return [...transactions].sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-
-      if (byLatest) {
-        return dateB.getTime() - dateA.getTime();
+    const parsed = transactions.map(t => {
+      // Try fast parsing for ISO string if possible, otherwise use Date
+      let time = 0;
+      if (t.date && t.date.length >= 10 && t.date[4] === '-' && t.date[7] === '-') {
+        // Assume ISO-like format string comparison is mostly correct, but we need time for sorting
+        time = new Date(t.date).getTime();
+      } else {
+        time = new Date(t.date).getTime();
       }
-      return dateA.getTime() - dateB.getTime();
+      return { t, time };
     });
+
+    parsed.sort((a, b) => {
+      if (byLatest) {
+        return b.time - a.time;
+      }
+      return a.time - b.time;
+    });
+
+    return parsed.map(p => p.t);
   }
 
   setTransactionsByType(type: TransactionType | ''): void {
-    const transactions = this.getTransactions();
+    const transactions = this.allTransactions();
 
     if (type === '') {
       this.applyFilters(transactions, this.currentViewDate());
@@ -82,7 +101,7 @@ export class TransactionService {
   }
 
   setTransactionByCategory(category: string): void {
-    const transactions = this.getTransactions();
+    const transactions = this.allTransactions();
 
     if (category === '') {
       this.applyFilters(transactions, this.currentViewDate());
@@ -96,7 +115,7 @@ export class TransactionService {
   }
 
   getTansactionsByCategory(category: string): Transaction[] {
-    const transactions = this.getTransactions();
+    const transactions = this.allTransactions();
     return transactions.filter(
       (transaction) => transaction.category === category
     );
@@ -114,14 +133,14 @@ export class TransactionService {
     if (!newTransaction.id) {
       newTransaction.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     }
-    const allStored = this.getTransactions();
+    const allStored = this.allTransactions();
     const updated = this.sortByDate([...allStored, newTransaction]);
     this.localStorageService.set(this.StorageKey, updated);
     this.applyFilters(updated, this.currentViewDate());
   }
 
   deleteTransaction(transaction: Transaction): void {
-    const allStored = this.getTransactions();
+    const allStored = this.allTransactions();
     const updated = allStored.filter(item => {
       if (item.id && transaction.id) {
         return item.id !== transaction.id;
@@ -144,7 +163,7 @@ export class TransactionService {
   }
 
   updateTransaction(updatedTransaction: Transaction): void {
-    const allStored = this.getTransactions();
+    const allStored = [...this.allTransactions()]; // shallow copy
     const index = allStored.findIndex(item => item.id === updatedTransaction.id);
     
     if (index !== -1) {
